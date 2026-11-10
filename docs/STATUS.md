@@ -32,8 +32,8 @@ macOS 已验证：20 组 native 测试；RFC/NIST 密码学向量；Python 独�
 ipmitool 1.8.19 已独立交叉验证 Python 模拟器的套件 17、合成设备标识及关闭；不是硬件验证。
 已完成一次认证、FFI 长度及错误清理的聚焦只读审查，不等于安全审计。
 
-Linux and macOS CI both passed for reference-check commit `7620534`; see the
-[verified run](https://github.com/pangbit/moonipmi/actions/runs/42838234668).
+Linux and macOS CI both passed for source commit `82df39a`; see the
+[verified run](https://github.com/pangbit/moonipmi/actions/runs/42839388657).
 Linux 与 macOS CI 已通过该源码提交，链接见上。
 
 ## Not verified / 尚未验证
