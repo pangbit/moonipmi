@@ -1,7 +1,7 @@
 ///|
 // This example deliberately accepts only a port and always uses loopback with
 // synthetic credentials. It cannot be pointed at a real BMC by an argument.
-async fn main {
+async fn run_demo() -> Unit {
   let args = @env.args()
   guard args.length() == 2 else { fail("usage: loopback <local mock port>") }
   let port = @string.parse_int(args[1])
@@ -31,9 +31,9 @@ async fn main {
 ///|
 async fn main {
   run_demo() catch {
-    @ipmi.ProtocolError(message) => {
+    @ipmi.ProtocolError(message) as error => {
       println("FAIL: \{message}")
-      raise @ipmi.ProtocolError(message)
+      raise error
     }
     error => raise error
   }
