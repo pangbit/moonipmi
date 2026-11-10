@@ -39,6 +39,7 @@ brew install openssl@3 pkg-config
 # Debian/Ubuntu (if not already installed)
 sudo apt-get install libssl-dev pkg-config python3 build-essential
 
+moon update
 moon check --target native --deny-warn
 moon test --target native --deny-warn
 moon build --target native --deny-warn

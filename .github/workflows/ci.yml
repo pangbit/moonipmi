@@ -21,6 +21,8 @@ jobs:
         run: curl -fsSL https://cli.moonbitlang.com/install/unix.sh | bash -s -- '0.10.20+65efd5b93'
       - name: Add MoonBit to PATH
         run: echo "$HOME/.moon/bin" >> "$GITHUB_PATH"
+      - name: Initialize Mooncakes index
+        run: moon update
       - run: moon fmt --check
       - run: moon check --target native --deny-warn
       - run: moon test --target native --deny-warn
