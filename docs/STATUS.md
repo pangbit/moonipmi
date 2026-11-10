@@ -32,12 +32,12 @@ macOS 已验证：17 组 native 测试；RFC/NIST 密码学向量；Python 独�
 ## Not verified / 尚未验证
 
 No real hardware BMC, production network, platform certification, exhaustive IPMI
-conformance, external security audit or executable go-ipmi differential. Linux
-CI is a release gate, not a completed result in this milestone. The reference
+conformance, external security audit or executable go-ipmi differential. Linux and macOS CI both passed for source commit `ff71dfe`; see the
+[verified run](https://github.com/pangbit/moonipmi/actions/runs/42824737938). The reference
 implementation has been reviewed at the exact revision linked in the README.
 
 未验证真实 BMC、生产网络、平台认证、完整规范一致性、外部安全审计或 go-ipmi 可执行差分。
-Linux CI 是发布门槛，当前不能当作已完成结果。对照源码版本见 README。
+Linux 与 macOS CI 已通过源码提交 `ff71dfe`，链接见上。对照源码版本见 README。
 
 ## Release gate / 发布门槛
 

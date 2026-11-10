@@ -7,7 +7,7 @@ Protocol and session logic are written in MoonBit; a small C adapter calls
 OpenSSL 3 for HMAC-SHA256, raw AES-CBC, constant-time comparison and secure randomness.
 
 **Status: an early, tested subset, not a complete IPMI implementation.**
-macOS native tests and an independent synthetic loopback BMC exchange pass.
+Linux/macOS CI and an independent synthetic loopback BMC exchange pass.
 No real hardware BMC has been tested, and this is not a security-audited client.
 Use only on explicitly authorised systems and isolated management networks.
 
