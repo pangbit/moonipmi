@@ -40,8 +40,8 @@ jobs:
         env:
           GOTOOLCHAIN: local
         run: go -C tools/go-reference build -mod=readonly -o ../../_build/reference-bmc .
-      - name: Verify go-ipmi interoperability
+      - name: Reproduce known go-ipmi response-address rejection
         if: runner.os == 'Linux'
-        run: python3 tools/go_interop.py _build/native/debug/build/examples/loopback/loopback.exe _build/reference-bmc
+        run: python3 tools/go_interop.py _build/native/debug/build/examples/loopback/loopback.exe _build/reference-bmc --expect-address-rejection
       - run: moon info
       - run: git diff --exit-code

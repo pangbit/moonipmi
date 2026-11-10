@@ -197,3 +197,19 @@ test "failure diagnostics retain status codes without request data" {
   }
   assert_eq(message, "Get Device ID failed (completion code 193)")
 }
+
+///|
+test "a checksummed response must return to the original requester address" {
+  let packet = response_fixture(6, 0x3b, 0, 0, b"\x02").to_array()
+  // Pinned go-ipmi BMC uses 0x20 here instead of echoing our requester 0x81.
+  // Recompute the checksum: this must fail identity, not checksum validation.
+  packet[0] = 0x20
+  packet[2] = checksum(packet[0:2])
+  let error = try {
+    ignore(decode_response(Bytes::from_array(packet), 6, 0x3b, 0))
+    "unexpected success"
+  } catch {
+    ProtocolError(message) => message
+  }
+  assert_eq(error, "IPMI response address mismatch")
+}

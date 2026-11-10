@@ -1,5 +1,19 @@
 # Changelog / 更新记录
 
+## Unreleased / 未发布
+
+- Add a pinned, loopback-only go-ipmi reference BMC and a documented reproduction
+  of its response-address mismatch. Preserve strict client correlation checks;
+  full reference interoperability remains unverified.
+- Add status/completion-code diagnostics without credentials or packet contents,
+  an address-mismatch regression, and bilingual reproducible demo instructions.
+- Keep package publication manual; no release automation or version change.
+
+- 增加固定版本、仅本机的 go-ipmi 对照 BMC，复现响应地址不匹配；保留严格关联校验，
+  尚未通过完整对照互操作。
+- 增加不含凭据或报文的状态码/完成码诊断、地址回归用例与双语复现演示说明。
+- 包发布保持手动；未增加自动发布，也未改变版本。
+
 ## 0.1.0 (2026-11-10)
 
 - Initial offline IPMI LAN / RMCP+ protocol codecs and read-only command models.

@@ -120,12 +120,13 @@ pub fn decode_response(
   guard checksum(values[0:3]) == 0 && checksum(values[3:]) == 0 else {
     raise invalid("invalid IPMI checksum")
   }
-  guard data[0] == 0x81 &&
-    data[1].to_int() == (netfn + 1) << 2 &&
-    data[3] == 0x20 &&
+  guard data[1].to_int() == (netfn + 1) << 2 &&
     data[4].to_int() == sequence << 2 &&
     data[5].to_int() == command else {
     raise invalid("IPMI response does not match request")
+  }
+  guard data[0] == 0x81 && data[3] == 0x20 else {
+    raise invalid("IPMI response address mismatch")
   }
   {
     completion_code: data[6].to_int(),

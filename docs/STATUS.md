@@ -14,7 +14,7 @@ MoonBit 负责协议和会话，薄 C 适配调用 OpenSSL 3 密码学原语。
 
 ## Verified locally / 本地验证
 
-- 17 native test groups on macOS: codecs, malformed inputs, RAKP/KDF, protected
+- 19 native test groups on macOS: codecs, malformed inputs, RAKP/KDF, protected
   packet tampering/truncation/replay, all AES padding residues, deadlines and cleanup.
 - RFC 4231 HMAC-SHA256 and NIST SP 800-38A raw AES-CBC vectors.
 - Independent Python HMAC/OpenSSL-generated synthetic RAKP/KDF/packet vectors.
@@ -24,7 +24,7 @@ MoonBit 负责协议和会话，薄 C 适配调用 OpenSSL 3 密码学原语。
   workspace consumer built without custom link flags and passed the Python exchange.
 - Focused read-only review of authentication, FFI lengths and error cleanup.
 
-macOS 已验证：17 组 native 测试；RFC/NIST 密码学向量；Python 独立生成的合成会话/报文向量；
+macOS 已验证：19 组 native 测试；RFC/NIST 密码学向量；Python 独立生成的合成会话/报文向量；
 独立 Python 本地 BMC 全握手、三项读取、关闭会话；MoonBit 内置模拟器验证失败路径；
 默认检查/测试/构建、离线示例及无需自定义链接参数的独立消费方构建与交互。
 已完成一次认证、FFI 长度及错误清理的聚焦只读审查，不等于安全审计。
@@ -36,11 +36,33 @@ Linux 与 macOS CI 已通过该源码提交，链接见上。
 ## Not verified / 尚未验证
 
 No real hardware BMC, production network, platform certification, exhaustive IPMI
-conformance, external security audit or executable go-ipmi differential. The reference
-implementation has been reviewed at the exact revision linked in the README.
+conformance, external security audit or full go-ipmi interoperability. The pinned
+reference BMC has been executed, with the known rejection described below.
 
-未验证真实 BMC、生产网络、平台认证、完整规范一致性、外部安全审计或 go-ipmi 可执行差分。
-对照源码版本见 README。
+未验证真实 BMC、生产网络、平台认证、完整规范一致性、外部安全审计或完整 go-ipmi 互操作。
+已执行固定版本参考 BMC，已知拒绝原因见下。
+
+## Known reference incompatibility / 已知对照不兼容
+
+At go-ipmi commit `d4fb9c6923cb22f7e3c982590e57f1f2c3b58ce6`,
+[`BuildIPMIResponse`](https://github.com/bougou/go-ipmi/blob/d4fb9c6923cb22f7e3c982590e57f1f2c3b58ce6/pkg/protocol/ipmb.go)
+hardcodes `RemoteConsoleAddr = 0x20`; its request parser does not preserve `rqSA`.
+Our request uses `rqSA = 0x81` and requires the response to return to that address.
+The reference handshake and protected response pass authentication/decryption,
+but the first session command's response fails address correlation. No reference
+source was changed and no client checks were relaxed. This is a reproducible
+compatibility rejection, **not** a successful full exchange or a claim about all
+versions/uses of go-ipmi. The pinned test asserts this exact address error after
+checksum, netfn/LUN, command and sequence checks; unrelated failures still fail CI.
+The independent Python simulator continues to cover all three reads and close.
+See [demo instructions](DEMO.md) for both paths.
+
+上述固定版本的参考 BMC 将响应请求者地址硬编码为 `0x20`，请求解析器不保留 `rqSA`。
+本客户端使用 `0x81` 并要求响应回到同一地址。参考握手及受保护响应已通过认证/解密，
+但第一条会话命令的响应未通过地址关联检查。未修改参考源码，也未放宽客户端校验。
+这是可复现的不兼容拒绝，**不是**完整交互成功，也不代表 go-ipmi 所有版本/用法。
+对照测试在校验和、netfn/LUN、命令和序号检查之后，只接受这一具体地址错误；其他失败仍令 CI 失败。
+三项读取与关闭继续由独立 Python 模拟器验证，两条复现路径见演示说明。
 
 ## Release gate / 发布门槛
 

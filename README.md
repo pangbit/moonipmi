@@ -84,7 +84,8 @@ See the runnable checkout examples for a credential-free local demonstration.
 
 ## Design, evidence and references
 
-See [scope/evidence](docs/STATUS.md), [security](SECURITY.md), and
+See the [reproducible demo](docs/DEMO.md), [scope/evidence](docs/STATUS.md),
+[security](SECURITY.md), and
 [contributing](CONTRIBUTING.md). Run `moon info` / `moon doc` for API documentation.
 
 The protocol source is the **IPMI v2.0 specification**, especially §13 RMCP+,
@@ -92,7 +93,10 @@ The protocol source is the **IPMI v2.0 specification**, especially §13 RMCP+,
 The comparison implementation is [bougou/go-ipmi](https://github.com/bougou/go-ipmi),
 Apache-2.0, reviewed at
 [`d4fb9c6`](https://github.com/bougou/go-ipmi/tree/d4fb9c6923cb22f7e3c982590e57f1f2c3b58ce6).
-It is a reference, not a runtime dependency or endorsement. A go-ipmi executable
-comparison has **not** been completed. See [NOTICE](NOTICE).
+It is a reference, not a runtime dependency or endorsement. The pinned reference
+BMC was executed: authentication succeeds, but it hardcodes the first response's
+requester address to `0x20` instead of echoing our `0x81`. The client rejects that
+mismatch without weakening validation. **Full go-ipmi interoperability has not
+passed.** See [evidence and limitations](docs/STATUS.md) and [NOTICE](NOTICE).
 
 Apache-2.0. Personally maintained; APIs may change before the first stable release.

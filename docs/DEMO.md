@@ -49,24 +49,34 @@ non-loopback address or select a hardware HAL.
 go -C tools/go-reference build -mod=readonly -o ../../_build/reference-bmc .
 python3 tools/go_interop.py \
   _build/native/debug/build/examples/loopback/loopback.exe \
-  _build/reference-bmc
+  _build/reference-bmc --expect-address-rejection
 ```
 
 The reference is pinned in `tools/go-reference/go.mod` and `go.sum` to commit
-`d4fb9c6923cb22f7e3c982590e57f1f2c3b58ce6`. A successful run prints the normal
-client PASS line and a second line confirming go-ipmi loopback interoperability.
+`d4fb9c6923cb22f7e3c982590e57f1f2c3b58ce6`. This revision hardcodes a response
+requester address that differs from our request. The explicit flag verifies that
+the client rejects this exact mismatch after successful authentication. It does
+**not** turn any error into a pass. Omitting the flag attempts the full exchange
+and currently fails. Expected output:
 
-参考版本由 go.mod 与 go.sum 固定到上述提交。成功后先输出客户端 PASS 行，
-再输出 go-ipmi 本地互操作通过。
+```text
+PASS: pinned go-ipmi response-address mismatch rejected after authenticated handshake
+LIMIT: full go-ipmi interoperability is NOT verified; no checks were relaxed
+```
+
+参考版本由 go.mod 与 go.sum 固定到上述提交。该版本硬编码的响应请求者地址与请求不一致。
+显式开关只验证认证后拒绝这一具体地址不匹配，**不会**将任意错误算作通过。
+省略开关会尝试完整交互，目前失败。预期输出如上；原因详见 [STATUS](STATUS.md)。
 
 ## What this proves / 证明范围
 
-The demonstrations cover RAKP authentication, encrypted/integrity-protected
+The default demonstration covers RAKP authentication, encrypted/integrity-protected
 request/response framing, three read-only results, and graceful close between
-independent implementations. Unit tests cover rejection and timeout cases.
+independent implementations. The go-ipmi check demonstrates the known rejection,
+not full interoperability. Unit tests cover rejection and timeout cases.
 Neither demonstration proves real-BMC compatibility, full IPMI coverage, a
 security audit, or compliance with a competition's submission rules.
 
-演示验证独立实现之间的 RAKP 认证、加密/完整性保护报文、三项只读结果与正常关闭。
-拒绝畸形输入和超时由单元测试覆盖。演示不代表真实 BMC 兼容、完整 IPMI、安全审计，
+默认演示验证独立实现之间的 RAKP 认证、加密/完整性保护报文、三项只读结果与正常关闭。
+go-ipmi 对照证明已知拒绝行为，不是完整互通。拒绝畸形输入和超时由单元测试覆盖。演示不代表真实 BMC 兼容、完整 IPMI、安全审计，
 也不代表已满足赛事申报规则。
