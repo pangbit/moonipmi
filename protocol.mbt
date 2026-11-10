@@ -135,10 +135,16 @@ pub fn decode_response(
 }
 
 ///|
+/// Device metadata and advertised capabilities, not independently probed support.
+/// `additional_device_support` bits 7..0: chassis, bridge, IPMB event generator,
+/// IPMB event receiver, FRU inventory, SEL, SDR repository, sensor. Device SDRs
+/// (`provides_device_sdrs`) are distinct from an SDR repository (bit 1).
 #derive(Eq, @debug.Debug)
 pub struct DeviceId {
   device_id : Int32
   device_revision : Int32
+  provides_device_sdrs : Bool
+  additional_device_support : Int32
   firmware_major : Int32
   firmware_minor_bcd : Int32
   firmware_available : Bool
@@ -170,6 +176,8 @@ pub fn Response::device_id(self : Response) -> DeviceId raise ProtocolError {
   {
     device_id: d[0].to_int(),
     device_revision: d[1].to_int() & 15,
+    provides_device_sdrs: (d[1].to_int() & 128) != 0,
+    additional_device_support: d[5].to_int(),
     firmware_major: d[2].to_int() & 127,
     firmware_minor_bcd: d[3].to_int(),
     firmware_available: (d[2].to_int() & 128) == 0,

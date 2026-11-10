@@ -21,7 +21,18 @@ def response(request, data=b"", completion=0):
     return first + bytes([-sum(first) % 256]) + second + bytes([-sum(second) % 256])
 
 
-def serve(server, stop, trace):
+# Profiles describe test data, never client identity. Every client sees identical bytes.
+PROFILES = {
+    "device-extended": {"device": bytes.fromhex("1283812302ff570100341201234567")},
+    "chassis-faults": {"chassis": bytes.fromhex("4a0b0f")},
+    "sensor-unavailable": {"sensor": bytes.fromhex("eee002")},
+    "sensor-disabled": {"sensor": bytes.fromhex("ee8002")},
+    "sensor-events-disabled": {"sensor": bytes.fromhex("2a4001")},
+}
+
+
+def serve(server, stop, trace, profile="default"):
+    values = PROFILES.get(profile, {})
     peer = None
     count = 0
 
@@ -97,14 +108,14 @@ def serve(server, stop, trace):
             reply = b"\x02"
         elif (netfn, cmd) == (6, 1):
             assert not data
-            reply = DEVICE
+            reply = values.get("device", DEVICE)
         elif (netfn, cmd) == (0, 1):
             assert not data
-            reply = CHASSIS
+            reply = values.get("chassis", CHASSIS)
         elif (netfn, cmd) == (4, 0x2d):
             assert len(data) == 1
             if data == b"\x2a":
-                reply = SENSOR
+                reply = values.get("sensor", SENSOR)
             else:
                 completion = 0xcb  # Requested sensor is not present.
         elif (netfn, cmd) == (6, 0x3c):

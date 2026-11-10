@@ -13,6 +13,11 @@
   to loopback, suite 17, synthetic Device ID and close.
 - Add a common-fixture comparison of moonipmi/go-ipmi/ipmitool: three reads and
   two errors, plus a direct address-tolerance probe. No client policy was relaxed.
+- Expose Device SDR/additional-support metadata, common chassis fault helpers,
+  and an optional usable raw sensor reading that excludes unavailable/disabled
+  scanning without confusing event-message disabling with reading failure.
+- Extend the same-target comparison to 30 cases with representative status
+  boundaries; use non-reserved sensor `0xfe` for the absent-sensor test.
 - Keep package publication manual; no release automation or version change.
 
 - 增加固定版本、仅本机的 go-ipmi 对照 BMC，复现响应地址不匹配；保留严格关联校验，
@@ -21,6 +26,9 @@
 - 拒绝 IPv4-mapped IPv6 对端，避免绕过 IPv4 multicast/未指定/广播限制；改用普通 IPv4 地址。
 - 用独立 ipmitool 客户端交叉检查 Python 模拟器，仅限本机、套件 17、合成设备标识和关闭。
 - 增加 moonipmi/go-ipmi/ipmitool 同目标三读/两错误对照及地址宽容探针，未放宽客户端策略。
+- 补充 Device SDR/额外设备能力、常用机箱故障入口及可选传感器原始值；排除不可用和停扫，
+  不把关闭事件消息误判为读数失败。
+- 同目标对照扩展至 30 项代表性状态；不存在传感器用非保留编号 `0xfe`。
 - 包发布保持手动；未增加自动发布，也未改变版本。
 
 ## 0.1.0 (2026-11-10)

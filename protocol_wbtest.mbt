@@ -213,3 +213,84 @@ test "a checksummed response must return to the original requester address" {
   }
   assert_eq(error, "IPMI response address mismatch")
 }
+
+///|
+test "Device ID exposes capability bits and preserves auxiliary firmware bytes" {
+  let base : Response = {
+    completion_code: 0,
+    data: b"\x12\x03\x01\x23\x02\x01\x57\x01\x00\x34\x12",
+  }
+  let d = base.device_id()
+  assert_eq(d.provides_device_sdrs, false)
+  assert_eq(d.additional_device_support, 1)
+  // Device SDRs and an SDR repository are independent advertised capabilities.
+  let repository : Response = {
+    completion_code: 0,
+    data: b"\x12\x03\x01\x23\x02\x02\x57\x01\x00\x34\x12",
+  }
+  assert_eq(repository.device_id().provides_device_sdrs, false)
+  assert_eq(repository.device_id().additional_device_support, 2)
+  let extended : Response = {
+    completion_code: 0,
+    data: b"\x12\x83\x81\x23\x02\xff\x57\x01\x00\x34\x12\x01\x23\x45\x67",
+  }
+  let d = extended.device_id()
+  assert_eq(d.provides_device_sdrs, true)
+  assert_eq(d.device_revision, 3)
+  assert_eq(d.additional_device_support, 255)
+  assert_eq(d.firmware_available, false)
+  assert_eq(d.auxiliary_firmware, Some(b"\x01\x23\x45\x67"))
+}
+
+///|
+test "chassis fault flags and optional front-panel byte remain distinct" {
+  for bit in [1, 2, 4, 8] {
+    let r : Response = {
+      completion_code: 0,
+      data: Bytes::from_array([0x4a, 0x0b, byte(bit)]),
+    }
+    let c = r.chassis_status()
+    assert_eq(c.power_on, false)
+    assert_eq(c.power_overload, true)
+    assert_eq(c.power_fault, true)
+    assert_eq(c.restore_policy, 2)
+    assert_eq(c.last_power_event, 11)
+    assert_eq(c.intrusion_active(), bit == 1)
+    assert_eq(c.front_panel_lockout(), bit == 2)
+    assert_eq(c.drive_fault(), bit == 4)
+    assert_eq(c.cooling_fan_fault(), bit == 8)
+    assert_eq(c.front_panel_buttons, None)
+  }
+  let present : Response = { completion_code: 0, data: b"\x01\x00\x00\x00", }
+  assert_eq(present.chassis_status().front_panel_buttons, Some(0))
+  for size in [0, 2, 5] {
+    let r : Response = { completion_code: 0, data: Bytes::make(size, 0), }
+    rejected(() => ignore(r.chassis_status()))
+  }
+}
+
+///|
+test "sensor usable raw reading rejects unavailable and disabled scanning, not disabled events" {
+  for
+    (flags, expected) in [
+      (0xc0, Some(0)),
+      (0xe0, None),
+      (0x80, None),
+      (0x40, Some(0)),
+    ] {
+    let r : Response = {
+      completion_code: 0,
+      data: Bytes::from_array([0, byte(flags)]),
+    }
+    let s = r.sensor_reading()
+    assert_eq(s.usable_raw_reading(), expected)
+    assert_eq(s.reading_available, (flags & 0x20) == 0)
+    assert_eq(s.status_bits, b"")
+  }
+  let r : Response = { completion_code: 0, data: b"\x2a\xc0\x01\x02", }
+  assert_eq(r.sensor_reading().status_bits, b"\x01\x02")
+  for size in [0, 1, 5] {
+    let r : Response = { completion_code: 0, data: Bytes::make(size, 0), }
+    rejected(() => ignore(r.sensor_reading()))
+  }
+}

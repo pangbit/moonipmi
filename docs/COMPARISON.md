@@ -13,19 +13,19 @@ BMC is involved and no hardware-control commands are implemented.
 
 | Case / 用例 | moonipmi | go-ipmi client / 客户端 | ipmitool |
 |---|---|---|---|
-| Device ID: 9 normalized fields / 设备标识9项归一化字段 | Matched / 一致 | Matched / 一致 | Matched / 一致 |
-| Chassis Status: 6 fields / 机箱状态6项字段 | Matched / 一致 | Matched / 一致 | Matched / 一致 |
-| Raw Sensor Reading: 5 fields / 传感器原始值5项字段 | Matched / 一致 | Matched / 一致 | Matched / 一致 |
+| Device ID: 12 fields, basic/extended / 设备标识12字段、基本/扩展 | Matched / 一致 | Matched / 一致 | Matched / 一致 |
+| Chassis Status: 10 fields, on/off + faults / 机箱10字段、通断电与故障 | Matched / 一致 | Matched / 一致 | Matched / 一致 |
+| Raw Sensor Reading: 4 status profiles / 原始读数4种状态 | Matched / 一致 | Matched / 一致 | Matched / 一致 |
 | Wrong synthetic password / 错误合成密码 | Rejected before activation / 激活前失败 | Same / 相同 | Same / 相同 |
 | Absent sensor: completion `0xcb` / 不存在的传感器 | Nonzero exit and code exposed / 非零退出并显示完成码 | Same / 相同 | Same / 相同 |
 
-The 15-case comparison passed locally on macOS with ipmitool **1.8.19**, Go **1.24.0**,
+The 30-case comparison passed locally on macOS with ipmitool **1.8.19**, Go **1.24.0**,
 and go-ipmi pinned to [`d4fb9c6`](https://github.com/bougou/go-ipmi/tree/d4fb9c6923cb22f7e3c982590e57f1f2c3b58ce6).
 The runner requires ipmitool 1.8.19 and records its version; a different version
 requires explicit baseline review. Linux CI runs the same matrix. Native
 unit tests and the original complete MoonBit/Python exchange remain separate.
 
-上述 15 项已在 macOS 本地通过，版本如上；运行器要求并记录 ipmitool 1.8.19，其他版本需先审阅基线。
+上述 30 项已在 macOS 本地通过，版本如上；运行器要求并记录 ipmitool 1.8.19，其他版本需先审阅基线。
 Linux CI 执行相同矩阵。
 原生单元测试及原来的 MoonBit/Python 完整交互继续保留。
 
@@ -39,6 +39,41 @@ positive cases, and specific failure phases/codes, not just subprocess exit code
 只比较功能交集。固件次版本从 MoonBit 的原始 BCD 归一化为十进制；传感器启用/禁用标志
 按语义统一，不把原始读数转换成物理单位。不比较文字格式、厂商名称数据库、随机数或会话编号。
 运行器核对模拟器实际收到的认证命令、成功场景的关闭，以及错误阶段/完成码，不仅检查进程退出码。
+
+### Status and metadata coverage / 状态与元数据
+
+- Device ID: Device SDR support, the full Additional Device Support bitmask,
+  firmware available/unavailable, and absent/present four-byte auxiliary firmware.
+  These are advertised capabilities, not proof that extra commands work.
+- Chassis: power on and power off with overload/power faults, plus intrusion,
+  front-panel lockout, drive and cooling/fan faults. Unit tests also distinguish
+  missing front-panel metadata from an explicit zero; historical power-event and
+  remaining identify/button fields stay raw, not fully semantically compared.
+- Sensor: normal, unavailable, scanning disabled, and event messages disabled.
+  `usable_raw_reading()` is `None` for the middle two, but remains available when
+  only event messages are disabled. Existing raw fields retain their meaning.
+  The runner compares five raw/flag fields and a derived usable-value field.
+- The absent sensor is `0xfe`; earlier tests used `0xff`, a reserved sensor number.
+  The fixture still returns completion `0xcb`, but now models an ordinary missing sensor.
+
+设备对照覆盖 Device SDR、完整额外能力位图、固件可用/不可用、四字节辅助固件缺失/存在；
+这些是设备自报能力，不表示已验证其他命令。机箱覆盖通断电、过载/电源故障及四个常用杂项故障。
+单元测试区分前面板字段缺失与零值；历史电源事件、识别灯及按钮字段仍保留原始位，未声称全面语义对齐。
+传感器覆盖正常、不可用、停扫及关闭事件消息；新增可选原始值入口拒绝不可用/停扫，关闭事件消息仍可读。
+五项原始值/标志之外另检查一个推导的可用值。不存在的传感器改用 `0xfe`，不再用保留编号 `0xff`。
+
+The sensor baseline invokes **`ipmitool raw 0x04 0x2d`**, not `sensor list/get`.
+Its usable-value normalization is derived from the response flags; it does not
+claim an execution of ipmitool's SDR-based presentation. The rule is checked
+against IPMI §16.5 and [ipmitool 1.8.19's actual sensor-reading logic](https://github.com/ipmitool/ipmitool/blob/19d78782d795d0cf4ceefe655f616210c9143e62/lib/ipmi_sdr.c#L1643-L1664):
+scanning and availability gate the reading; SDR metadata separately determines
+whether it is an analog value. No physical units or numeric sensor type are inferred.
+Device/chassis semantics also use [Get Device ID](https://github.com/ipmitool/ipmitool/blob/19d78782d795d0cf4ceefe655f616210c9143e62/lib/ipmi_mc.c#L394-L475)
+and [Chassis Status](https://github.com/ipmitool/ipmitool/blob/19d78782d795d0cf4ceefe655f616210c9143e62/lib/ipmi_chassis.c#L411-L464).
+
+传感器实际基线命令是 `ipmitool raw`，不是依赖 SDR 的 `sensor list/get`。
+归一化的可用值由响应标志推导，并以规范 §16.5 与固定版本源码核对，不冒称已实测完整传感器展示功能。
+是否为数值型及物理单位仍需 SDR；设备和机箱的对应源码链接如上。
 
 ### Observed differences / 已观察的差异
 
@@ -76,11 +111,11 @@ python3 tools/compare_clients.py \
 ```
 
 The JSON contains only synthetic command/results and non-secret protocol metadata;
-it records which clients actually ran. Omitting `--go-client` runs ten cases for
+it records which clients actually ran. Omitting `--go-client` runs twenty cases for
 MoonBit/ipmitool, not the full three-client matrix. No package is published.
 
 JSON 只记录合成命令/结果和非秘密协议元数据，并列明实际运行的客户端。
-省略 `--go-client` 时只运行 MoonBit/ipmitool 的十项，不能视为完整三客户端矩阵。不发布包。
+省略 `--go-client` 时只运行 MoonBit/ipmitool 的二十项，不能视为完整三客户端矩阵。不发布包。
 
 ## Address mismatch: format versus tolerance / 地址不匹配：格式与宽容策略
 

@@ -14,7 +14,7 @@ MoonBit 负责协议和会话，薄 C 适配调用 OpenSSL 3 密码学原语。
 
 ## Verified locally / 本地验证
 
-- 20 native test groups on macOS: codecs, malformed inputs, RAKP/KDF, protected
+- 23 native test groups on macOS: codecs, malformed inputs, RAKP/KDF, protected
   packet tampering/truncation/replay, all AES padding residues, deadlines and cleanup.
 - RFC 4231 HMAC-SHA256 and NIST SP 800-38A raw AES-CBC vectors.
 - Independent Python HMAC/OpenSSL-generated synthetic RAKP/KDF/packet vectors.
@@ -26,15 +26,18 @@ MoonBit 负责协议和会话，薄 C 适配调用 OpenSSL 3 密码学原语。
   synthetic Device ID and graceful close. This validates the fixture, not real hardware.
 - Focused read-only review of authentication, FFI lengths and error cleanup.
 
-macOS 已验证：20 组 native 测试；RFC/NIST 密码学向量；Python 独立生成的合成会话/报文向量；
+macOS 已验证：23 组 native 测试；RFC/NIST 密码学向量；Python 独立生成的合成会话/报文向量；
 独立 Python 本地 BMC 全握手、三项读取、关闭会话；MoonBit 内置模拟器验证失败路径；
 默认检查/测试/构建、离线示例及无需自定义链接参数的独立消费方构建与交互。
 ipmitool 1.8.19 已独立交叉验证 Python 模拟器的套件 17、合成设备标识及关闭；不是硬件验证。
 已完成一次认证、FFI 长度及错误清理的聚焦只读审查，不等于安全审计。
 
-Linux and macOS CI both passed for source commit `82df39a`; see the
-[verified run](https://github.com/pangbit/moonipmi/actions/runs/42839388657).
-Linux 与 macOS CI 已通过该源码提交，链接见上。
+The earlier 20-test / 15-case baseline passed Linux/macOS CI at `93e0b79`:
+[verified run](https://github.com/pangbit/moonipmi/actions/runs/42852603493).
+The expanded 23-test / 30-case work is verified locally; check the current commit's
+CI before treating the new coverage as Linux-verified.
+此前 20 组测试、15 项对照基线在该提交通过双平台 CI。扩展后的 23 组/30 项已在本地验证，
+新增覆盖的 Linux 结果应以当前提交 CI 为准。
 
 ## Not verified / 尚未验证
 
@@ -69,13 +72,13 @@ See [demo instructions](DEMO.md) for both paths.
 
 ## Common-target client comparison / 同目标客户端对照
 
-The three clients (moonipmi, pinned go-ipmi, ipmitool 1.8.19) passed 15 cases on
-one independent Python fixture: three read-only results and two error classes.
+The three clients (moonipmi, pinned go-ipmi, ipmitool 1.8.19) passed 30 cases on
+one independent Python fixture: three read-only results, representative status boundaries and two error classes.
 See [comparison scope, normalized fields, differences and reproduction](COMPARISON.md).
 The same unmodified go-ipmi BMC also reproduced ipmitool's permissive response-address
 handling. This does not change moonipmi's strict policy or prove hardware compatibility.
 
-三客户端在同一独立 Python 模拟器上通过 15 项：三项只读结果和两类错误。
+三客户端在同一独立 Python 模拟器上通过 30 项：三项只读结果、代表性状态边界和两类错误。
 范围、归一化字段、差异及复现见对照说明；同一未修改 go-ipmi BMC 上也复现了 ipmitool
 宽容响应地址的行为。未改变 moonipmi 严格策略，也不表示硬件兼容已验证。
 

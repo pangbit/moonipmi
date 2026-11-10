@@ -61,6 +61,28 @@ pub extend ChassisStatus with Eq::{equal, not_equal}
 pub extend ChassisStatus with @debug.Debug::{to_repr}
 
 ///|
+/// Chassis cover intrusion detected (Misc. Chassis State bit 0).
+pub fn ChassisStatus::intrusion_active(self : ChassisStatus) -> Bool {
+  (self.misc_status & 1) != 0
+}
+
+///|
+/// Front-panel power-off and reset controls are locked out (bit 1).
+pub fn ChassisStatus::front_panel_lockout(self : ChassisStatus) -> Bool {
+  (self.misc_status & 2) != 0
+}
+
+///|
+pub fn ChassisStatus::drive_fault(self : ChassisStatus) -> Bool {
+  (self.misc_status & 4) != 0
+}
+
+///|
+pub fn ChassisStatus::cooling_fan_fault(self : ChassisStatus) -> Bool {
+  (self.misc_status & 8) != 0
+}
+
+///|
 pub fn Response::chassis_status(
   self : Response,
 ) -> ChassisStatus raise ProtocolError {
@@ -93,6 +115,8 @@ pub fn Response::chassis_status(
 
 ///|
 /// Raw reading only. Converting it to physical units requires an SDR record.
+/// `reading_available` reflects bit 5 only; use `usable_raw_reading()` to also
+/// exclude disabled scanning. Event-message disabling does not invalidate a read.
 #derive(Eq, @debug.Debug)
 pub struct SensorReading {
   raw_reading : Int32
@@ -128,5 +152,17 @@ pub fn Response::sensor_reading(
     scanning_enabled: (flags & 0x40) != 0,
     events_enabled: (flags & 0x80) != 0,
     status_bits: slice(d, 2, d.length()),
+  }
+}
+
+///|
+/// Return the raw byte only when available and scanning is enabled (IPMI §16.5).
+/// This is not an analog-value or physical-unit conversion: SDR metadata is still
+/// needed to interpret the raw byte and status bits. Never substitutes zero.
+pub fn SensorReading::usable_raw_reading(self : SensorReading) -> Int32? {
+  if self.reading_available && self.scanning_enabled {
+    Some(self.raw_reading)
+  } else {
+    None
   }
 }

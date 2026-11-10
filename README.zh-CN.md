@@ -63,6 +63,15 @@ let device = client.read(GetDeviceId).device_id()
 client.close()
 ```
 
+当前检出版本的只读元数据：
+
+`DeviceId` 补充 `provides_device_sdrs` 与 `additional_device_support` 位图；后者 bit7..0
+依次表示机箱、桥、IPMB 事件生成/接收、FRU、SEL、SDR 仓库、传感器能力。
+Device SDR 与 SDR 仓库是不同能力，这些只是设备自报信息，不证明其他命令已可用。
+机箱提供入侵、前面板锁定、驱动器与风扇故障便捷入口，历史事件和可选面板信息仍保留原始值。
+传感器优先使用 `reading.usable_raw_reading()`：不可用或停扫时返回 `None`，不把无效值替换为零；
+仅关闭事件消息不影响读数。类型、状态含义和物理单位仍需要 SDR。这些新增入口尚未发布到 Mooncakes。
+
 失败完成码保留在 `Response.completion_code`，类型化成功结果解析器会拒绝失败响应。
 网络、报文、认证或重放错误会关闭客户端，避免不确定状态下重发。
 `abort()` 可重复调用且不发送报文；BMC 端会话可能保留到其超时。
@@ -84,7 +93,7 @@ client.close()
 将请求者地址硬编码为 `0x20`，未回显请求中的 `0x81`，客户端严格拒绝该不匹配。
 [ipmitool](https://github.com/ipmitool/ipmitool) 独立交叉验证了 Python 模拟器；两者都不是运行时依赖。
 **尚未与该 go-ipmi BMC 完整互通**，没有为通过对照而放宽校验。另已通过三客户端
-（moonipmi/go-ipmi/ipmitool）对同一合成目标的三项读取与两类错误对照。
+（moonipmi/go-ipmi/ipmitool）对同一合成目标的三项读取、代表性状态边界与两类错误对照。
 详见[证据与限制](docs/STATUS.md)和 [NOTICE](NOTICE)。
 
 Apache-2.0。个人维护；首次稳定发布前 API 可能变化。

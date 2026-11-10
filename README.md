@@ -76,6 +76,15 @@ let device = client.read(GetDeviceId).device_id()
 client.close()
 ```
 
+In the current checkout, `DeviceId` also exposes `provides_device_sdrs` and the
+`additional_device_support` bitmask (bits 7..0: chassis, bridge, IPMB event generator,
+event receiver, FRU, SEL, SDR repository, sensor). Chassis helpers name the common
+intrusion/lockout/drive/cooling flags; raw historical events and optional panel
+metadata remain available. For a sensor, use `reading.usable_raw_reading()` instead
+of assuming its raw byte is meaningful: unavailable or disabled-scanning results
+return `None`, not zero. Disabling event messages alone does not invalidate the
+read. SDR metadata is still required to interpret a sensor type, states or units.
+
 A completion-code failure is returned as `Response.completion_code`; typed
 successful-result decoders reject it. Network, framing, authentication or replay
 failures close the client, preventing uncertain retransmissions. `abort()` is
@@ -104,6 +113,6 @@ requester address to `0x20` instead of echoing our `0x81`. The client rejects th
 mismatch without weakening validation. [ipmitool](https://github.com/ipmitool/ipmitool)
 independently cross-checks our Python fixture; neither is a runtime dependency.
 **Full interoperability with that go-ipmi BMC has not passed.** Separately, the
-moonipmi/go-ipmi/ipmitool clients pass the same synthetic three-read/two-error matrix. See [evidence and limitations](docs/STATUS.md) and [NOTICE](NOTICE).
+moonipmi/go-ipmi/ipmitool clients pass the same synthetic three-read matrix with status boundaries and two error classes. See [evidence and limitations](docs/STATUS.md) and [NOTICE](NOTICE).
 
 Apache-2.0. Personally maintained; APIs may change before the first stable release.
