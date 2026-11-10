@@ -13,3 +13,5 @@ _build/
 tools/go-reference/
 tools/go_interop.py
 tools/ipmitool_check.py
+tools/compare_clients.py
+tools/shared_bmc.py

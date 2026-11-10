@@ -39,10 +39,10 @@ Linux 与 macOS CI 已通过该源码提交，链接见上。
 ## Not verified / 尚未验证
 
 No real hardware BMC, production network, platform certification, exhaustive IPMI
-conformance, external security audit or full go-ipmi interoperability. The pinned
+conformance, external security audit or full interoperability with the pinned go-ipmi BMC. The pinned
 reference BMC has been executed, with the known rejection described below.
 
-未验证真实 BMC、生产网络、平台认证、完整规范一致性、外部安全审计或完整 go-ipmi 互操作。
+未验证真实 BMC、生产网络、平台认证、完整规范一致性、外部安全审计或与固定 go-ipmi BMC 的完整互操作。
 已执行固定版本参考 BMC，已知拒绝原因见下。
 
 ## Known reference incompatibility / 已知对照不兼容
@@ -66,6 +66,18 @@ See [demo instructions](DEMO.md) for both paths.
 这是可复现的不兼容拒绝，**不是**完整交互成功，也不代表 go-ipmi 所有版本/用法。
 对照测试在校验和、netfn/LUN、命令和序号检查之后，只接受这一具体地址错误；其他失败仍令 CI 失败。
 三项读取与关闭继续由独立 Python 模拟器验证，两条复现路径见演示说明。
+
+## Common-target client comparison / 同目标客户端对照
+
+The three clients (moonipmi, pinned go-ipmi, ipmitool 1.8.19) passed 15 cases on
+one independent Python fixture: three read-only results and two error classes.
+See [comparison scope, normalized fields, differences and reproduction](COMPARISON.md).
+The same unmodified go-ipmi BMC also reproduced ipmitool's permissive response-address
+handling. This does not change moonipmi's strict policy or prove hardware compatibility.
+
+三客户端在同一独立 Python 模拟器上通过 15 项：三项只读结果和两类错误。
+范围、归一化字段、差异及复现见对照说明；同一未修改 go-ipmi BMC 上也复现了 ipmitool
+宽容响应地址的行为。未改变 moonipmi 严格策略，也不表示硬件兼容已验证。
 
 ## Release gate / 发布门槛
 

@@ -88,7 +88,8 @@ See the runnable checkout examples for a credential-free local demonstration.
 
 ## Design, evidence and references
 
-See the [reproducible demo](docs/DEMO.md), [scope/evidence](docs/STATUS.md),
+See the [reproducible demo](docs/DEMO.md), [client comparison](docs/COMPARISON.md),
+[scope/evidence](docs/STATUS.md),
 [security](SECURITY.md), and
 [contributing](CONTRIBUTING.md). Run `moon info` / `moon doc` for API documentation.
 
@@ -102,7 +103,7 @@ BMC was executed: authentication succeeds, but it hardcodes the first response's
 requester address to `0x20` instead of echoing our `0x81`. The client rejects that
 mismatch without weakening validation. [ipmitool](https://github.com/ipmitool/ipmitool)
 independently cross-checks our Python fixture; neither is a runtime dependency.
-**Full go-ipmi interoperability has not
-passed.** See [evidence and limitations](docs/STATUS.md) and [NOTICE](NOTICE).
+**Full interoperability with that go-ipmi BMC has not passed.** Separately, the
+moonipmi/go-ipmi/ipmitool clients pass the same synthetic three-read/two-error matrix. See [evidence and limitations](docs/STATUS.md) and [NOTICE](NOTICE).
 
 Apache-2.0. Personally maintained; APIs may change before the first stable release.

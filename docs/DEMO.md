@@ -108,3 +108,12 @@ security audit, or compliance with a competition's submission rules.
 默认演示验证独立实现之间的 RAKP 认证、加密/完整性保护报文、三项只读结果与正常关闭。
 go-ipmi 对照证明已知拒绝行为，不是完整互通。拒绝畸形输入和超时由单元测试覆盖。演示不代表真实 BMC 兼容、完整 IPMI、安全审计，
 也不代表已满足赛事申报规则。
+
+## Same-target client comparison / 同目标客户端对照
+
+See [COMPARISON.md](COMPARISON.md) for the bounded three-client matrix and the
+separate reproduction of ipmitool's permissive response-address handling.
+This extends validation tooling, not the library's supported command set.
+
+三客户端的小范围同目标矩阵，以及独立的 ipmitool 地址宽容行为复现，见上述对照文档。
+这是验证工具扩展，不扩大库的命令范围。

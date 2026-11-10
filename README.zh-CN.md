@@ -73,7 +73,7 @@ client.close()
 
 ## 设计、证据与对照
 
-参见[可复现演示](docs/DEMO.md)、[范围/证据](docs/STATUS.md)、[安全说明](SECURITY.md)、[贡献指南](CONTRIBUTING.md)。
+参见[可复现演示](docs/DEMO.md)、[客户端对照](docs/COMPARISON.md)、[范围/证据](docs/STATUS.md)、[安全说明](SECURITY.md)、[贡献指南](CONTRIBUTING.md)。
 `moon info` / `moon doc` 可生成 API 描述与文档。
 
 协议依据是 **IPMI v2.0 规范**，重点包括第 13 节 RMCP+、20.1 Get Device ID、
@@ -83,7 +83,8 @@ client.close()
 它是参考，不是运行时依赖或背书。已运行固定版本的参考 BMC：认证成功，但首个响应
 将请求者地址硬编码为 `0x20`，未回显请求中的 `0x81`，客户端严格拒绝该不匹配。
 [ipmitool](https://github.com/ipmitool/ipmitool) 独立交叉验证了 Python 模拟器；两者都不是运行时依赖。
-**尚未通过完整 go-ipmi 互操作**，没有为通过对照而放宽校验。
+**尚未与该 go-ipmi BMC 完整互通**，没有为通过对照而放宽校验。另已通过三客户端
+（moonipmi/go-ipmi/ipmitool）对同一合成目标的三项读取与两类错误对照。
 详见[证据与限制](docs/STATUS.md)和 [NOTICE](NOTICE)。
 
 Apache-2.0。个人维护；首次稳定发布前 API 可能变化。
