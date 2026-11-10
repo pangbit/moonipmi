@@ -79,7 +79,8 @@ A completion-code failure is returned as `Response.completion_code`; typed
 successful-result decoders reject it. Network, framing, authentication or replay
 failures close the client, preventing uncertain retransmissions. `abort()` is
 idempotent and sends nothing; after it, the BMC session may remain until timeout.
-The module has not yet been published. See the runnable checkout examples.
+Install the experimental release with `moon add pangbit/moonipmi@0.1.0`.
+See the runnable checkout examples for a credential-free local demonstration.
 
 ## Design, evidence and references
 

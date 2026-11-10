@@ -29,24 +29,29 @@ macOS 已验证：17 组 native 测试；RFC/NIST 密码学向量；Python 独�
 默认检查/测试/构建、离线示例及无需自定义链接参数的独立消费方构建与交互。
 已完成一次认证、FFI 长度及错误清理的聚焦只读审查，不等于安全审计。
 
+Linux and macOS CI both passed for source commit `ff71dfe`; see the
+[verified run](https://github.com/pangbit/moonipmi/actions/runs/42824737938).
+Linux 与 macOS CI 已通过该源码提交，链接见上。
+
 ## Not verified / 尚未验证
 
 No real hardware BMC, production network, platform certification, exhaustive IPMI
-conformance, external security audit or executable go-ipmi differential. Linux and macOS CI both passed for source commit `ff71dfe`; see the
-[verified run](https://github.com/pangbit/moonipmi/actions/runs/42824737938). The reference
+conformance, external security audit or executable go-ipmi differential. The reference
 implementation has been reviewed at the exact revision linked in the README.
 
 未验证真实 BMC、生产网络、平台认证、完整规范一致性、外部安全审计或 go-ipmi 可执行差分。
-Linux 与 macOS CI 已通过源码提交 `ff71dfe`，链接见上。对照源码版本见 README。
+对照源码版本见 README。
 
 ## Release gate / 发布门槛
 
 Pass the Linux/macOS CI, inspect package contents and privacy/secret checks,
-confirm native downstream-consumer support and publication/event requirements.
+confirm native downstream-consumer support and registry requirements.
+Hackathon acceptance is separate and is not claimed by this package release.
 Describe the release as an experimental read-only subset. Hardware access, if
 needed later, requires a separately authorised target and account.
 
-发布前需要 Linux/macOS CI、打包内容与敏感信息检查、原生消费方兼容性验证，以及包仓库/活动规则确认。
+发布前需要 Linux/macOS CI、打包内容与敏感信息检查、原生消费方兼容性验证，以及包仓库要求确认。
+本次包发布不表示赛事资格已通过或已完成活动报名。
 发布描述应准确写明实验性只读子集。后续真实硬件验证必须另有明确授权的目标与账号。
 
 ## Explicit exclusions / 明确不含
