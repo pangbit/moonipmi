@@ -24,7 +24,7 @@ def main():
                 raise RuntimeError("invalid loopback simulator port")
             client = subprocess.run([sys.argv[1], str(port)], capture_output=True, text=True, timeout=10)
             if client.returncode:
-                raise RuntimeError(client.stderr)
+                raise RuntimeError(client.stdout + client.stderr)
             if server.poll() is not None:
                 raise RuntimeError("go-ipmi simulator exited before cleanup")
             print(client.stdout.strip())

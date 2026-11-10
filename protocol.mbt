@@ -158,7 +158,9 @@ pub extend DeviceId with @debug.Debug::{to_repr}
 /// Decode Get Device ID (Application netfn 06h, command 01h).
 pub fn Response::device_id(self : Response) -> DeviceId raise ProtocolError {
   guard self.completion_code == 0 else {
-    raise invalid("Get Device ID returned a failure completion code")
+    raise invalid(
+      "Get Device ID failed (completion code \{self.completion_code})",
+    )
   }
   let d = self.data
   guard d.length() == 11 || d.length() == 15 else {
@@ -288,7 +290,9 @@ pub fn decode_open_session(
   guard data[0].to_int() == tag && u32(data, 4) == console_id else {
     raise invalid("Open Session response identity mismatch")
   }
-  guard data[1] == 0 else { raise invalid("BMC rejected Open Session") }
+  guard data[1] == 0 else {
+    raise invalid("BMC rejected Open Session (status \{data[1].to_int()})")
+  }
   guard data.length() == 36 &&
     data[2] == 2 &&
     data[3] == 0 &&

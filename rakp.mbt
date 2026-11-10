@@ -48,7 +48,9 @@ pub fn decode_rakp2(
     data[3] == 0 else {
     raise invalid("RAKP2 response identity mismatch")
   }
-  guard data[1] == 0 else { raise invalid("BMC rejected RAKP1") }
+  guard data[1] == 0 else {
+    raise invalid("BMC rejected RAKP1 (status \{data[1].to_int()})")
+  }
   guard data.length() == 72 else {
     raise invalid("suite 17 RAKP2 must contain 72 bytes")
   }
@@ -97,7 +99,9 @@ pub fn decode_rakp4(
     data[3] == 0 else {
     raise invalid("RAKP4 response identity mismatch")
   }
-  guard data[1] == 0 else { raise invalid("BMC rejected RAKP3") }
+  guard data[1] == 0 else {
+    raise invalid("BMC rejected RAKP3 (status \{data[1].to_int()})")
+  }
   guard data.length() == 24 else {
     raise invalid("suite 17 RAKP4 must contain 24 bytes")
   }

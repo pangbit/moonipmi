@@ -27,3 +27,14 @@ async fn main {
     "PASS: authenticated suite 17, three read-only commands, graceful close",
   )
 }
+
+///|
+async fn main {
+  run_demo() catch {
+    @ipmi.ProtocolError(message) => {
+      println("FAIL: \{message}")
+      raise @ipmi.ProtocolError(message)
+    }
+    error => raise error
+  }
+}

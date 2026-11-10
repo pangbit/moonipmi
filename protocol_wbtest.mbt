@@ -176,3 +176,24 @@ test "RAKP2 and RAKP4 framing do not authenticate a session" {
   rejected(() => ignore(rakp3_request(4, 1U, Bytes::make(20, 0))))
   assert_eq(rakp3_request(4, 1U, Bytes::make(32, 0)).length(), 40)
 }
+
+///|
+test "failure diagnostics retain status codes without request data" {
+  let changed = open_fixture().to_array()
+  changed[1] = 13
+  let message = try {
+    ignore(decode_open_session(Bytes::from_array(changed), 7, 0x11223344U))
+    "unexpected success"
+  } catch {
+    ProtocolError(message) => message
+  }
+  assert_eq(message, "BMC rejected Open Session (status 13)")
+  let failed : Response = { completion_code: 193, data: b"", }
+  let message = try {
+    ignore(failed.device_id())
+    "unexpected success"
+  } catch {
+    ProtocolError(message) => message
+  }
+  assert_eq(message, "Get Device ID failed (completion code 193)")
+}

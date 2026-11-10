@@ -129,7 +129,7 @@ def main():
             serve(server)
             out, err = client.communicate(timeout=5)
             if client.returncode:
-                raise RuntimeError(err)
+                raise RuntimeError(out + err)
             print(out.strip())
             print("PASS: independent Python emulator verified RAKP, packet integrity and all five commands")
         finally:

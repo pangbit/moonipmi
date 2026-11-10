@@ -65,7 +65,9 @@ pub fn Response::chassis_status(
   self : Response,
 ) -> ChassisStatus raise ProtocolError {
   guard self.completion_code == 0 else {
-    raise invalid("Get Chassis Status returned a failure completion code")
+    raise invalid(
+      "Get Chassis Status failed (completion code \{self.completion_code})",
+    )
   }
   let d = self.data
   guard d.length() == 3 || d.length() == 4 else {
@@ -111,7 +113,9 @@ pub fn Response::sensor_reading(
   self : Response,
 ) -> SensorReading raise ProtocolError {
   guard self.completion_code == 0 else {
-    raise invalid("Get Sensor Reading returned a failure completion code")
+    raise invalid(
+      "Get Sensor Reading failed (completion code \{self.completion_code})",
+    )
   }
   let d = self.data
   guard d.length() >= 2 && d.length() <= 4 else {
