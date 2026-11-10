@@ -7,11 +7,14 @@
   full reference interoperability remains unverified.
 - Add status/completion-code diagnostics without credentials or packet contents,
   an address-mismatch regression, and bilingual reproducible demo instructions.
+- Reject IPv4-mapped IPv6 destinations so they cannot bypass IPv4 multicast/
+  unspecified/broadcast checks; use plain IPv4 addresses instead.
 - Keep package publication manual; no release automation or version change.
 
 - 增加固定版本、仅本机的 go-ipmi 对照 BMC，复现响应地址不匹配；保留严格关联校验，
   尚未通过完整对照互操作。
 - 增加不含凭据或报文的状态码/完成码诊断、地址回归用例与双语复现演示说明。
+- 拒绝 IPv4-mapped IPv6 对端，避免绕过 IPv4 multicast/未指定/广播限制；改用普通 IPv4 地址。
 - 包发布保持手动；未增加自动发布，也未改变版本。
 
 ## 0.1.0 (2026-11-10)

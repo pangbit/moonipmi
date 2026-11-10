@@ -19,6 +19,7 @@ Use only on explicitly authorised systems and isolated management networks.
   checksums, lengths, padding and monotonically increasing receive sequences.
 - A single connected UDP peer, one request in flight, per-exchange deadlines,
   no automatic retry, explicit close and immediate local abort.
+  Use plain IPv4 rather than IPv4-mapped IPv6; mapped forms are rejected.
 - Three typed read-only commands: Get Device ID, Get Chassis Status, Get Sensor Reading.
 
 No hardware-control writes, generic network command API, OEM/SOL, SEL/FRU/SDR

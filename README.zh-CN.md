@@ -15,6 +15,7 @@
 - User 权限，校验 RAKP2 与 RAKP4；禁止匿名认证和降级。
 - **先认证报文再解密**，严格校验会话/请求关联、校验和、长度、padding 及递增接收序号。
 - 连接单一 UDP 对端，同一会话只允许一个在途请求；每次交换有超时，不自动重试；支持关闭与本地立即中止。
+  IPv4 对端使用普通 IPv4 地址，不接受 IPv4-mapped IPv6 表示。
 - 三项类型化只读命令：Get Device ID、Get Chassis Status、Get Sensor Reading。
 
 不包含硬件控制写操作、通用网络命令入口、OEM/SOL、SEL/FRU/SDR 仓库遍历、IPMI 1.5、

@@ -52,10 +52,13 @@ fn validate_destination(addr : @socket.Addr) -> Unit raise ProtocolError {
   }
   if addr.is_ipv6() {
     let text = addr.to_string()
-    guard !text.has_prefix("[::]:") &&
-      !text.has_prefix("[::%") &&
-      !text.has_prefix("[::ffff:0:0]") &&
-      !text.has_prefix("[::ffff:ffff:ffff]") else {
+    // The socket dependency classifies mapped addresses as IPv6, so its
+    // multicast predicate does not inspect the embedded IPv4 destination.
+    // Keep one representation per IPv4 peer rather than duplicating a parser.
+    guard !text.has_prefix("[::ffff:") else {
+      raise invalid("use a plain IPv4 address instead of IPv4-mapped IPv6")
+    }
+    guard !text.has_prefix("[::]:") && !text.has_prefix("[::%") else {
       raise invalid(
         "unspecified or limited-broadcast destination is not allowed",
       )

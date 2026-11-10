@@ -224,3 +224,18 @@ test "invalid non-peer destinations are rejected before socket creation" {
   validate_destination(@socket.Addr::parse("127.0.0.1:623"))
   validate_destination(@socket.Addr::parse("[::1]:623"))
 }
+
+///|
+test "mapped IPv4 cannot bypass non-peer destination checks" {
+  for
+    address in [
+      "[::ffff:0.0.0.0]:623", "[::ffff:255.255.255.255]:623", "[::ffff:224.0.0.1]:623",
+      "[0:0:0:0:0:ffff:efff:ffff]:623", "[::ffff:127.0.0.1]:623",
+    ] {
+    let addr = @socket.Addr::parse(address)
+    rejected(() => validate_destination(addr))
+  }
+  // Callers can use ordinary IPv4 unicast; no packet is sent by this test.
+  validate_destination(@socket.Addr::parse("127.0.0.1:623"))
+  validate_destination(@socket.Addr::parse("[2001:db8::1]:623"))
+}

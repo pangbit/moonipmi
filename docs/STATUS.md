@@ -14,7 +14,7 @@ MoonBit 负责协议和会话，薄 C 适配调用 OpenSSL 3 密码学原语。
 
 ## Verified locally / 本地验证
 
-- 19 native test groups on macOS: codecs, malformed inputs, RAKP/KDF, protected
+- 20 native test groups on macOS: codecs, malformed inputs, RAKP/KDF, protected
   packet tampering/truncation/replay, all AES padding residues, deadlines and cleanup.
 - RFC 4231 HMAC-SHA256 and NIST SP 800-38A raw AES-CBC vectors.
 - Independent Python HMAC/OpenSSL-generated synthetic RAKP/KDF/packet vectors.
@@ -24,13 +24,13 @@ MoonBit 负责协议和会话，薄 C 适配调用 OpenSSL 3 密码学原语。
   workspace consumer built without custom link flags and passed the Python exchange.
 - Focused read-only review of authentication, FFI lengths and error cleanup.
 
-macOS 已验证：19 组 native 测试；RFC/NIST 密码学向量；Python 独立生成的合成会话/报文向量；
+macOS 已验证：20 组 native 测试；RFC/NIST 密码学向量；Python 独立生成的合成会话/报文向量；
 独立 Python 本地 BMC 全握手、三项读取、关闭会话；MoonBit 内置模拟器验证失败路径；
 默认检查/测试/构建、离线示例及无需自定义链接参数的独立消费方构建与交互。
 已完成一次认证、FFI 长度及错误清理的聚焦只读审查，不等于安全审计。
 
-Linux and macOS CI both passed for source commit `ff71dfe`; see the
-[verified run](https://github.com/pangbit/moonipmi/actions/runs/42824737938).
+Linux and macOS CI both passed for reference-check commit `7620534`; see the
+[verified run](https://github.com/pangbit/moonipmi/actions/runs/42838234668).
 Linux 与 macOS CI 已通过该源码提交，链接见上。
 
 ## Not verified / 尚未验证
