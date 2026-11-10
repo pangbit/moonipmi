@@ -80,6 +80,7 @@ client.close()
 [`d4fb9c6`](https://github.com/bougou/go-ipmi/tree/d4fb9c6923cb22f7e3c982590e57f1f2c3b58ce6)。
 它是参考，不是运行时依赖或背书。已运行固定版本的参考 BMC：认证成功，但首个响应
 将请求者地址硬编码为 `0x20`，未回显请求中的 `0x81`，客户端严格拒绝该不匹配。
+[ipmitool](https://github.com/ipmitool/ipmitool) 独立交叉验证了 Python 模拟器；两者都不是运行时依赖。
 **尚未通过完整 go-ipmi 互操作**，没有为通过对照而放宽校验。
 详见[证据与限制](docs/STATUS.md)和 [NOTICE](NOTICE)。
 

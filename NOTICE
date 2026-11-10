@@ -18,3 +18,9 @@ Runtime dependencies / 运行时依赖:
   moonbitlang/async, Apache License 2.0: https://github.com/moonbitlang/async
   OpenSSL is linked as an installed system library, not vendored.
   OpenSSL 通过已安装的系统库链接，本仓库不内置其源码。
+
+Optional validation tool / 可选验证工具:
+  ipmitool: https://github.com/ipmitool/ipmitool
+  Invoked as an independently installed client to cross-check the synthetic BMC.
+  No ipmitool source files are distributed here; it is not a runtime dependency.
+  使用独立安装的客户端交叉检查合成 BMC，不分发其源码，也不是运行时依赖。

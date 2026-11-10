@@ -33,6 +33,34 @@ sockets are closed after the demonstration, including on a failed check.
 五条命令分别是设置会话权限、读取设备标识、读取机箱状态、读取传感器原始值、关闭会话。
 中间三条是只读数据访问，首尾只管理模拟会话。成功或失败后都会关闭进程和 socket。
 
+## Independent fixture cross-check / 独立交叉检查模拟器
+
+With ipmitool installed (`brew install ipmitool` or the distribution package), run:
+
+```sh
+ipmitool -V
+python3 tools/ipmitool_check.py
+```
+
+This launches the third-party ipmitool client against our Python fixture, using
+only loopback and fixed synthetic credentials. It verifies suite 17, the synthetic
+Device ID and graceful close. Expected output:
+
+```text
+PASS: ipmitool verified the Python fixture (suite 17, Device ID, graceful close)
+```
+
+This is an independent check of the fixture's protocol/crypto behaviour, **not**
+a claim that moonipmi connected to a real BMC or that all ipmitool commands work.
+The fixture answers only the required capability discovery and read-only exchange;
+it rejects unsupported automatic discovery commands and implements no hardware writes.
+ipmitool is optional validation tooling, not a runtime dependency.
+
+安装 ipmitool 后运行上述命令。第三方客户端只连接本机 Python 模拟器，使用固定合成凭据，
+验证套件 17、合成设备标识和关闭。此检查交叉验证模拟器的协议/密码学行为，**不代表**
+moonipmi 已连接真实 BMC 或支持 ipmitool 所有命令。模拟器仅应答必要能力查询与只读交互，
+拒绝不支持的自动发现命令，不实现硬件写操作。ipmitool 仅为可选验证工具，不是运行时依赖。
+
 ## Pinned go-ipmi reference / 固定版本 go-ipmi 对照
 
 This optional check additionally requires Go 1.24 or later and network access

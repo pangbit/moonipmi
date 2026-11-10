@@ -22,11 +22,14 @@ MoonBit 负责协议和会话，薄 C 适配调用 OpenSSL 3 密码学原语。
   and graceful close. The in-process MoonBit mock additionally covers failure paths.
 - Default native check/test/build, offline example, and a separate downstream
   workspace consumer built without custom link flags and passed the Python exchange.
+- ipmitool 1.8.19 independently cross-checked the Python fixture: suite 17,
+  synthetic Device ID and graceful close. This validates the fixture, not real hardware.
 - Focused read-only review of authentication, FFI lengths and error cleanup.
 
 macOS 已验证：20 组 native 测试；RFC/NIST 密码学向量；Python 独立生成的合成会话/报文向量；
 独立 Python 本地 BMC 全握手、三项读取、关闭会话；MoonBit 内置模拟器验证失败路径；
 默认检查/测试/构建、离线示例及无需自定义链接参数的独立消费方构建与交互。
+ipmitool 1.8.19 已独立交叉验证 Python 模拟器的套件 17、合成设备标识及关闭；不是硬件验证。
 已完成一次认证、FFI 长度及错误清理的聚焦只读审查，不等于安全审计。
 
 Linux and macOS CI both passed for reference-check commit `7620534`; see the

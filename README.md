@@ -97,7 +97,9 @@ Apache-2.0, reviewed at
 It is a reference, not a runtime dependency or endorsement. The pinned reference
 BMC was executed: authentication succeeds, but it hardcodes the first response's
 requester address to `0x20` instead of echoing our `0x81`. The client rejects that
-mismatch without weakening validation. **Full go-ipmi interoperability has not
+mismatch without weakening validation. [ipmitool](https://github.com/ipmitool/ipmitool)
+independently cross-checks our Python fixture; neither is a runtime dependency.
+**Full go-ipmi interoperability has not
 passed.** See [evidence and limitations](docs/STATUS.md) and [NOTICE](NOTICE).
 
 Apache-2.0. Personally maintained; APIs may change before the first stable release.
