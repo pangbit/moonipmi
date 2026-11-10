@@ -1,0 +1,7 @@
+options(
+  "native-stub": [ "crypto.c" ],
+  link: { "native": { "stub-cc-flags": "${build.OPENSSL_CFLAGS}" } },
+  supported_targets: "native",
+)
+
+pkgtype(kind: "library")

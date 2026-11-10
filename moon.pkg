@@ -1,3 +1,12 @@
 import {
   "moonbitlang/core/debug",
+  "moonbitlang/async",
+  "moonbitlang/async/socket",
+  "pangbit/moonipmi/native_crypto" @crypto,
 }
+
+options(
+  supported_targets: "native",
+)
+
+pkgtype(kind: "library")

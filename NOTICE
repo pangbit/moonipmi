@@ -12,3 +12,9 @@ repository. go-ipmi is not a runtime dependency; no affiliation is implied.
 
 协议对照参考为 Apache-2.0 许可的 bougou/go-ipmi。
 本仓库不分发其源文件，也不将其作为运行时依赖；不表示关联或背书。
+
+Runtime dependencies / 运行时依赖:
+  OpenSSL 3 libcrypto, Apache License 2.0: https://www.openssl.org/
+  moonbitlang/async, Apache License 2.0: https://github.com/moonbitlang/async
+  OpenSSL is linked as an installed system library, not vendored.
+  OpenSSL 通过已安装的系统库链接，本仓库不内置其源码。

@@ -6,13 +6,15 @@ before adding it. Submit a focused issue or pull request with the intended
 behaviour, a specification/reference link and synthetic reproduction data.
 No contributor agreement is required; contributions use Apache-2.0.
 
-Before a pull request:
+Install the native dependencies listed in README.md. Before a pull request:
 
 ```sh
 moon fmt
 moon check --target native --deny-warn
 moon test --target native --deny-warn
+moon build --target native --deny-warn
 moon run examples/offline --target native
+python3 tools/interop.py _build/native/debug/build/examples/loopback/loopback.exe
 moon info
 ```
 

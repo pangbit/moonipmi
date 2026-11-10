@@ -5,11 +5,18 @@ permissions:
 jobs:
   native:
     strategy:
+      fail-fast: false
       matrix:
         os: [ubuntu-24.04, macos-15]
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v5
+      - name: Install OpenSSL development dependencies (Linux)
+        if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y libssl-dev pkg-config
+      - name: Install OpenSSL development dependencies (macOS)
+        if: runner.os == 'macOS'
+        run: brew install openssl@3 pkg-config
       - name: Install pinned MoonBit
         run: curl -fsSL https://cli.moonbitlang.com/install/unix.sh | bash -s -- '0.10.20+65efd5b93'
       - name: Add MoonBit to PATH
@@ -17,6 +24,8 @@ jobs:
       - run: moon fmt --check
       - run: moon check --target native --deny-warn
       - run: moon test --target native --deny-warn
+      - run: moon build --target native --deny-warn
       - run: moon run examples/offline --target native
+      - run: python3 tools/interop.py _build/native/debug/build/examples/loopback/loopback.exe
       - run: moon info
       - run: git diff --exit-code

@@ -2,59 +2,79 @@
 
 [English](README.md)
 
-面向 MoonBit native 应用的实验性 IPMI 2.0 / RMCP+ 库。
+面向 MoonBit native 应用的实验性 IPMI 2.0 / RMCP+ 只读客户端。
+协议与会话逻辑使用 MoonBit；薄 C 适配层调用 OpenSSL 3 提供 HMAC-SHA256、
+原始 AES-CBC、常量时间比较和安全随机数。
 
-**当前仅完成协议基础，不是可用的认证 LAN 客户端。** 尚无网络传输、密码学校验和认证会话。
-成功解析 Open Session 或 RAKP 报文**不代表** BMC 已通过认证。不要使用本阶段代码发送凭据，
-也不要用于生产管理网络。项目不宣称完整实现 IPMI，也不逐项移植 go-ipmi 的全部命令。
+**当前是经过测试的早期子集，不是完整 IPMI 实现。** 已通过 macOS native 测试和独立合成本地 BMC
+交互；未测试真实硬件 BMC，未经过安全审计。仅用于明确授权的系统和隔离管理网络。
 
-## 已实现
+## 范围
 
-- IPMI LAN 请求编码、两段校验和，以及严格的响应关联。
-- 只读命令编解码：Get Device ID、Get Chassis Status、Get Sensor Reading。
-- 有界长度与严格头部校验的 RMCP+ 握手封装。
-- 密码套件 17 对应的 Open Session 与 RAKP 1–4 报文布局。
-- 拒绝套件降级、畸形输入和身份不匹配的响应。
-- 使用纯合成数据的确定性测试和离线示例。
+- **仅套件 17**：RAKP-HMAC-SHA256 / HMAC-SHA256-128 / AES-CBC-128。
+- User 权限，校验 RAKP2 与 RAKP4；禁止匿名认证和降级。
+- **先认证报文再解密**，严格校验会话/请求关联、校验和、长度、padding 及递增接收序号。
+- 连接单一 UDP 对端，同一会话只允许一个在途请求；每次交换有超时，不自动重试；支持关闭与本地立即中止。
+- 三项类型化只读命令：Get Device ID、Get Chassis Status、Get Sensor Reading。
 
-建议中的首版客户端采用 User 权限与套件 17：RAKP-HMAC-SHA256 / HMAC-SHA256-128 /
-AES-CBC-128。原生加密后端、UDP 传输、认证会话状态、防重放、超时和本地互操作测试仍未完成。
-初始范围不包含降级回退、电源控制、用户管理、OEM 命令、SOL、SEL、FRU 或 SDR 仓库遍历。
-传感器只提供原始读取值；转换成物理单位还需要对应的 SDR 元数据。
+不包含硬件控制写操作、通用网络命令入口、OEM/SOL、SEL/FRU/SDR 仓库遍历、IPMI 1.5、
+密码套件协商、Kg 覆盖或自动重连。Set Session Privilege 与 Close Session 仅管理会话，不修改硬件配置。
+传感器原始值转换成物理单位还需要 SDR 元数据。用户名/密码长度分别为 1..16 / 1..20 字节。
 
-## 运行离线示例
+## 构建与测试
 
-使用近期 MoonBit native 工具链。当前阶段已在 `moon 0.1.20261104` 上验证，
-不需要额外运行时系统库。
+需要近期 MoonBit native 工具链、C 编译器、**OpenSSL 3 开发文件**、`pkg-config` 和 Python 3。
+本机已在 `moon 0.1.20261104`（`moonc v0.10.20+65efd5b93`）及 OpenSSL 3.6.3 上验证。
 
 ```sh
+# macOS
+brew install openssl@3 pkg-config
+# Debian/Ubuntu（尚未安装时）
+sudo apt-get install libssl-dev pkg-config python3 build-essential
+
 moon check --target native --deny-warn
 moon test --target native --deny-warn
+moon build --target native --deny-warn
 moon run examples/offline --target native
+python3 tools/interop.py _build/native/debug/build/examples/loopback/loopback.exe
 ```
+
+最后一条命令只在**本机 loopback** 启动合成 BMC，运行客户端示例，校验握手、三项读取和关闭会话，
+不会访问真实 BMC。`tools/vectors.py` 用 Python HMAC 与 OpenSSL CLI 独立重新生成合成 RAKP/KDF/报文向量。
+
+### 原生依赖配置
+
+`build.py` 使用 MoonBit 官方文档中的**实验性原生 prebuild 配置**，通过 `pkg-config` 查找 OpenSSL，
+并向消费方传递 `libcrypto` 链接设置。它仅查询已安装依赖，不下载、不安装，也不记录环境变量。
+在 Homebrew macOS 上可自动定位 `openssl@3`。消费方需要安装相同依赖，**无需**在清单写入本机路径或配置
+自定义编译器包装器。此工具链 API 可能变化，CI 固定已测试工具链。默认构建和独立消费方模块均已验证。
+仅支持 native，不能称为完全不依赖 C 的库。
+
+## 使用
+
+将 `pangbit/moonipmi` 以 `ipmi` 别名导入。在 async 函数中，由应用提供明确授权的对端地址与凭据：
 
 ```moonbit
-let request = @ipmi.ReadCommand::GetDeviceId.encode(0)
-// request 只是 Bytes，不会发送网络报文。
+let client = @ipmi.Client::connect(addr, username, password, timeout_ms=2000)
+defer client.abort()
+let device = client.read(GetDeviceId).device_id()
+client.close()
 ```
 
-在包清单中将 `pangbit/moonipmi` 以别名 `ipmi` 导入。本模块尚未发布，以上示例从源码目录运行。
-`encode_request` 是底层编码器，不是获得授权即可发送任意命令的网络接口。
+失败完成码保留在 `Response.completion_code`，类型化成功结果解析器会拒绝失败响应。
+网络、报文、认证或重放错误会关闭客户端，避免不确定状态下重发。
+`abort()` 可重复调用且不发送报文；BMC 端会话可能保留到其超时。
+本模块尚未发布，请从源码目录运行示例。
 
-## 设计与验证
+## 设计、证据与对照
 
-协议校验与 I/O、密码学分离。索引前先校验长度，逐一关联响应，并保留完成码，
-避免把失败响应当作成功结果。优先维护小型、类型明确的只读接口，不引入未经审查的通用 BMC 控制 API。
+参见[范围/证据](docs/STATUS.md)、[安全说明](SECURITY.md)、[贡献指南](CONTRIBUTING.md)。
+`moon info` / `moon doc` 可生成 API 描述与文档。
 
-参见[范围与证据](docs/STATUS.md)、[安全说明](SECURITY.md)、[贡献指南](CONTRIBUTING.md)。
-`moon info` 生成公共 API 描述，`moon doc` 生成 API 文档。
-
-## 对照与许可
-
-协议依据为 **IPMI v2.0 规范**，重点包括第 13 节 RMCP+ 会话建立，以及 Get Device ID、
-Get Chassis Status、Get Sensor Reading 命令定义。对照项目是
-[bougou/go-ipmi](https://github.com/bougou/go-ipmi)，Apache-2.0，已查阅版本
+协议依据是 **IPMI v2.0 规范**，重点包括第 13 节 RMCP+、20.1 Get Device ID、
+28.2 Get Chassis Status、35.14 Get Sensor Reading。对照项目是
+[bougou/go-ipmi](https://github.com/bougou/go-ipmi)，Apache-2.0，查阅版本
 [`d4fb9c6`](https://github.com/bougou/go-ipmi/tree/d4fb9c6923cb22f7e3c982590e57f1f2c3b58ce6)。
-它只是参考，不是运行时依赖，也不代表其认可本项目。详见 [NOTICE](NOTICE)。
+它是参考，不是运行时依赖或背书。**尚未完成** go-ipmi 可执行程序差分。详见 [NOTICE](NOTICE)。
 
-Apache-2.0。个人维护项目；首次稳定发布前 API 可能变化。
+Apache-2.0。个人维护；首次稳定发布前 API 可能变化。

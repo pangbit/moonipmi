@@ -13,3 +13,11 @@ keywords = [ "ipmi", "rmcp", "bmc", "network" ]
 preferred_target = "native"
 
 description = "Experimental IPMI 2.0 RMCP+ protocol and read-only client for MoonBit native"
+
+import {
+  "moonbitlang/async@0.22.1",
+}
+
+options(
+  "--moonbit-unstable-prebuild": "build.py",
+)

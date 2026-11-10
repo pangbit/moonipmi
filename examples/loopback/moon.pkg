@@ -1,0 +1,13 @@
+import {
+  "pangbit/moonipmi" @ipmi,
+  "moonbitlang/async/socket",
+  "moonbitlang/async",
+  "moonbitlang/core/env",
+  "moonbitlang/core/string",
+}
+
+pkgtype(kind: "executable")
+
+options(
+  supported_targets: "native",
+)
