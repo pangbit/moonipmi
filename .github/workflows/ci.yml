@@ -29,5 +29,19 @@ jobs:
       - run: moon build --target native --deny-warn
       - run: moon run examples/offline --target native
       - run: python3 tools/interop.py _build/native/debug/build/examples/loopback/loopback.exe
+      - name: Set up Go for the reference interoperability check
+        if: runner.os == 'Linux'
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.24.0'
+          cache-dependency-path: tools/go-reference/go.sum
+      - name: Build pinned go-ipmi loopback simulator
+        if: runner.os == 'Linux'
+        env:
+          GOTOOLCHAIN: local
+        run: go -C tools/go-reference build -mod=readonly -o ../../_build/reference-bmc .
+      - name: Verify go-ipmi interoperability
+        if: runner.os == 'Linux'
+        run: python3 tools/go_interop.py _build/native/debug/build/examples/loopback/loopback.exe _build/reference-bmc
       - run: moon info
       - run: git diff --exit-code

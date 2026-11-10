@@ -7,3 +7,7 @@ _build/
 *.key
 *.pcap
 *.pcapng
+
+__pycache__/
+
+*.pyc

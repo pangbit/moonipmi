@@ -5,3 +5,10 @@ _build/
 .env*
 *.pcap
 *.pcapng
+
+**/__pycache__/
+
+**/*.pyc
+
+tools/go-reference/
+tools/go_interop.py

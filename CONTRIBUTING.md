@@ -31,3 +31,13 @@ Issue 或 PR 请给出目标行为、规范/参考链接和合成复现数据。
 提交前运行上面的格式化、检查、测试、示例和接口生成命令。可见行为变化时同步更新中英 README。
 验证改动涉及的边界，不堆叠无关昂贵测试。不要提交构建产物、本机路径、抓包、凭据或内部工作记录。
 提交信息使用英文，保留无关改动。安全问题走私密渠道，见 SECURITY.md。
+
+## Releases / 发布
+
+Mooncakes publication is a manual maintainer action after reviewing the release
+contents and validation results. CI never publishes packages. Keep existing
+release versions and tags intact; prepare a new version for any later release.
+Do not add an automatic publish step to a workflow or validation script.
+
+Mooncakes 发布由维护者审阅内容与验证结果后手动执行，CI 不发布包。
+保留既有发布版本与标签，后续发布准备新版本。不要在工作流或验证脚本中加入自动发布步骤。
