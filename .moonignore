@@ -1,0 +1,7 @@
+.git/
+.github/
+_build/
+.mooncakes/
+.env*
+*.pcap
+*.pcapng

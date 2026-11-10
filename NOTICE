@@ -1,0 +1,14 @@
+moonipmi
+Copyright 2026 moonipmi contributors
+
+Protocol comparison reference:
+  bougou/go-ipmi (Apache License 2.0)
+  https://github.com/bougou/go-ipmi
+  Reviewed commit: d4fb9c6923cb22f7e3c982590e57f1f2c3b58ce6
+
+The RMCP+ packet layouts target the IPMI 2.0 specification and were reviewed
+against this reference implementation. No go-ipmi source files are distributed in this
+repository. go-ipmi is not a runtime dependency; no affiliation is implied.
+
+协议对照参考为 Apache-2.0 许可的 bougou/go-ipmi。
+本仓库不分发其源文件，也不将其作为运行时依赖；不表示关联或背书。

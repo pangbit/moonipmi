@@ -1,0 +1,131 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "pangbit/moonipmi"
+
+import {
+  "moonbitlang/core/debug",
+}
+
+// Values
+pub fn decode_handshake(Bytes) -> HandshakePacket raise ProtocolError
+
+pub fn decode_open_session(Bytes, Int32, UInt32) -> OpenSession raise ProtocolError
+
+pub fn decode_rakp2(Bytes, Int32, UInt32) -> RakpChallenge raise ProtocolError
+
+pub fn decode_rakp4(Bytes, Int32, UInt32) -> Bytes raise ProtocolError
+
+pub fn decode_response(Bytes, Int32, Int32, Int32) -> Response raise ProtocolError
+
+pub fn encode_handshake(Int32, Bytes) -> Bytes raise ProtocolError
+
+pub fn encode_request(Int32, Int32, Int32, Bytes) -> Bytes raise ProtocolError
+
+pub fn open_session_request(Int32, UInt32) -> Bytes raise ProtocolError
+
+pub fn rakp1_request(Int32, UInt32, Bytes, Bytes) -> Bytes raise ProtocolError
+
+pub fn rakp3_request(Int32, UInt32, Bytes) -> Bytes raise ProtocolError
+
+// Errors
+#derive(@debug.Debug)
+pub suberror ProtocolError {
+  ProtocolError(String)
+}
+pub fn ProtocolError::to_repr(Self) -> @debug.Repr
+
+// Types and methods
+#derive(Eq, @debug.Debug)
+pub struct ChassisStatus {
+  power_on : Bool
+  power_overload : Bool
+  power_interlock : Bool
+  power_fault : Bool
+  power_control_fault : Bool
+  restore_policy : Int32
+  last_power_event : Int32
+  misc_status : Int32
+  front_panel_buttons : Int32?
+}
+pub fn ChassisStatus::equal(Self, Self) -> Bool
+pub fn ChassisStatus::not_equal(Self, Self) -> Bool
+pub fn ChassisStatus::to_repr(Self) -> @debug.Repr
+
+#derive(Eq, @debug.Debug)
+pub struct DeviceId {
+  device_id : Int32
+  device_revision : Int32
+  firmware_major : Int32
+  firmware_minor_bcd : Int32
+  firmware_available : Bool
+  ipmi_major : Int32
+  ipmi_minor : Int32
+  manufacturer_id : UInt32
+  product_id : Int32
+  auxiliary_firmware : Bytes?
+}
+pub fn DeviceId::equal(Self, Self) -> Bool
+pub fn DeviceId::not_equal(Self, Self) -> Bool
+pub fn DeviceId::to_repr(Self) -> @debug.Repr
+
+#derive(Eq, @debug.Debug)
+pub struct HandshakePacket {
+  payload_type : Int32
+  payload : Bytes
+}
+pub fn HandshakePacket::equal(Self, Self) -> Bool
+pub fn HandshakePacket::not_equal(Self, Self) -> Bool
+pub fn HandshakePacket::to_repr(Self) -> @debug.Repr
+
+#derive(Eq, @debug.Debug)
+pub struct OpenSession {
+  bmc_id : UInt32
+}
+pub fn OpenSession::equal(Self, Self) -> Bool
+pub fn OpenSession::not_equal(Self, Self) -> Bool
+pub fn OpenSession::to_repr(Self) -> @debug.Repr
+
+pub struct RakpChallenge {
+  bmc_random : Bytes
+  bmc_guid : Bytes
+  authentication_code : Bytes
+}
+
+#derive(Eq, @debug.Debug)
+pub(all) enum ReadCommand {
+  GetDeviceId
+  GetChassisStatus
+  GetSensorReading(Byte)
+}
+pub fn ReadCommand::decode(Self, Bytes, Int32) -> Response raise ProtocolError
+pub fn ReadCommand::encode(Self, Int32) -> Bytes raise ProtocolError
+pub fn ReadCommand::equal(Self, Self) -> Bool
+pub fn ReadCommand::not_equal(Self, Self) -> Bool
+pub fn ReadCommand::to_repr(Self) -> @debug.Repr
+
+#derive(Eq, @debug.Debug)
+pub struct Response {
+  completion_code : Int32
+  data : Bytes
+}
+pub fn Response::chassis_status(Self) -> ChassisStatus raise ProtocolError
+pub fn Response::device_id(Self) -> DeviceId raise ProtocolError
+pub fn Response::equal(Self, Self) -> Bool
+pub fn Response::not_equal(Self, Self) -> Bool
+pub fn Response::sensor_reading(Self) -> SensorReading raise ProtocolError
+pub fn Response::to_repr(Self) -> @debug.Repr
+
+#derive(Eq, @debug.Debug)
+pub struct SensorReading {
+  raw_reading : Int32
+  reading_available : Bool
+  scanning_enabled : Bool
+  events_enabled : Bool
+  status_bits : Bytes
+}
+pub fn SensorReading::equal(Self, Self) -> Bool
+pub fn SensorReading::not_equal(Self, Self) -> Bool
+pub fn SensorReading::to_repr(Self) -> @debug.Repr
+
+// Type aliases
+
+// Traits
