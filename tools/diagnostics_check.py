@@ -3,6 +3,7 @@
 import argparse
 import json
 import socket
+import struct
 import subprocess
 import threading
 import time
@@ -168,9 +169,18 @@ def main():
         "   1 | 11/14/23 | 22:13:20 UTC | Temperature #0x30 | Upper Critical going high | Asserted\n"
         "   3 | Unspecified | Unspecified | Physical Security #0x3a | General Chassis intrusion | Deasserted\n"
         "   5 |  Pre-Init  |0000000000| OEM record c0 | 000157 | 010203040506\n")
-    for record in fixture.SEL_RECORDS:
+    assert len(records) == len(fixture.SEL_RECORDS)
+    for decoded, record in zip(records, fixture.SEL_RECORDS):
+        if "raw" in decoded:
+            moon_record = bytes(decoded["raw"])
+        else:
+            moon_record = struct.pack("<HBIHBBBBBBB", decoded["id"], decoded["type"], decoded["timestamp"],
+                decoded["generator_id"], decoded["revision"], decoded["sensor_type"], decoded["sensor_number"],
+                decoded["event_type"] | (0x80 if decoded["deassertion"] else 0), *decoded["event_data"])
+        assert moon_record == record, "every typed field must preserve the independent fixture's bytes"
         response = bytes.fromhex(success(f"raw 0x0a 0x43 0 0 {record[0]} 0 0 255").stdout)
-        compare(f"C14.get.raw.{record[0]}", response[2:], record, "complete record bytes via reference raw; typed fields checked against independent fixture")
+        compare(f"C14.get.raw.{record[0]}", response[2:], moon_record,
+                "complete reference raw record versus bytes reconstructed from all moonipmi fields; independent fixture also checked")
     assert parsed(success("sel", moon=True, fault="sel-empty")) == []
     faults = {
         "fru-limit": "FRU inventory exceeds byte limit", "fru-zero": "FRU returned count",
