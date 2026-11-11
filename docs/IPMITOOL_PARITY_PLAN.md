@@ -95,7 +95,7 @@ Mooncakes 发布是独立的用户手动决定，不属于这些阶段的自动�
 
 | 验证环境 | 要解决的问题 | 当前状态 |
 |---|---|---|
-| Ubuntu 24.04/macOS 15 native | 重建参考 profile 与 MoonBit；覆盖 CLI、lan/lanplus、加密库与 readline 差异 | 已有子集 CI，完整 profile 未冻结；macOS 不能代表本地 Linux 驱动 |
+| Ubuntu 24.04/macOS 15 native | 重建参考 profile 与 MoonBit；覆盖 CLI、lan/lanplus、加密库与 readline 差异 | 首个四接口 profile 已加入两个 CI 平台；更广 profile 未冻结；macOS 不能验证本地 Linux 驱动 |
 | Linux/FreeBSD 主机 + OpenIPMI/FreeIPMI/IMB | ioctl/驱动 ABI、设备选择、权限、内核异步事件 | 缺少相应完整构建和设备证据；即使模拟通过仍未完成实机验收 |
 | Solaris 9/10 对应系统 | `lipmi`/`bmc` 的头文件、驱动与 ABI；默认选项可能受构建限制 | 工具链/OS/设备均待提供，不能标记“不需要” |
 | Cygwin、AIX 及其他上游 configure 分支 | 明确上游实际可构建组合与 MoonBit native 移植可行性 | 未验证；不把 Cygwin 等同于 Windows 原生支持；阻塞全集承诺 |

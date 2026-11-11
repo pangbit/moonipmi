@@ -28,7 +28,22 @@ validation or publication is claimed.
 本地 macOS 已通过 41 组原生测试和聚焦 ipmitool 1.8.19 对照/边界检查；确切提交的 CI
 是独立证据，不宣称实机验证或已发布。
 
-## Verified evidence / 已验证证据
+## Full-parity work / 完整对齐工作
+
+P1 now identifies an unpatched reference build and per-platform CI artifacts,
+records 71 reference leaf states (70 observations, one build blocker), and checks
+24 diagnostic projections across 62 executions. Known restart text and SEL version
+encoding gaps are corrected. See [reference evidence and remaining decisions](IPMITOOL_REFERENCE.md)
+and the [full acceptance matrix](IPMITOOL_PARITY_MATRIX.en.md). No family has passed
+full parity; there is no compatible CLI or real-BMC evidence. Authentication and
+packet-validation differences remain recorded, without relaxing the current policy.
+
+P1 已固定首个无补丁参考构建及各平台 CI 产物，记录 71 个参考叶项状态（70 已观察、1 构建阻塞），
+并验证 62 次执行中的 24 项诊断映射，修正已知重启描述和 SEL 版本编码缺口。
+详见 [P1 证据与待决定事项](IPMITOOL_REFERENCE.md)和[完整矩阵](IPMITOOL_PARITY_MATRIX.md)。
+没有功能族通过完整一致验收，尚无兼容 CLI 或实机证据，认证及报文校验差异保留，未放宽策略。
+
+## Earlier verified evidence / 早期已验证证据
 
 - 24 native test groups on macOS: codecs, malformed inputs, RAKP/KDF, protected
   packet tampering/truncation/replay, all AES padding residues, deadlines and cleanup.
@@ -63,15 +78,15 @@ for that exact revision, not a claim about untested future commits.
 
 ## SDR subset / SDR 子集
 
-The current source passed 32 native test groups on local macOS, 33 output comparisons
+The original SDR stage passed 32 native test groups on local macOS, 33 output comparisons
 across moonipmi and actual ipmitool 1.8.19 `sdr list all`/`sensor list`, and nine
 repository boundary scenarios. Linux CI includes the same SDR comparison; macOS
-CI covers native tests/build but does not install ipmitool. See [scope and reproduction](SDR.md).
+CI now builds the pinned reference and runs diagnostic comparisons, while the SDR comparison remains Linux-only in CI. See [scope and reproduction](SDR.md).
 These local results do not substitute for CI on a specific commit.
 
-当前源码在本地 macOS 通过 32 组 native 测试、moonipmi 与实际 ipmitool 1.8.19
+原 SDR 阶段在本地 macOS 通过 32 组 native 测试、moonipmi 与实际 ipmitool 1.8.19
 `sdr list all`/`sensor list` 的 33 项输出对照及九项仓库边界场景。Linux CI 加入相同 SDR 对照，
-macOS CI 运行原生测试/构建但不安装 ipmitool。范围及复现见 [SDR 文档](SDR.md)。
+macOS CI 现已构建固定参考并运行诊断对照，SDR 对照在 CI 中仍仅由 Linux 执行。范围及复现见 [SDR 文档](SDR.md)。
 本地结果不替代确切提交的 CI 证据。
 
 ## Not verified / 尚未验证
