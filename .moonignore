@@ -27,3 +27,4 @@ tools/reference_profile.py
 tools/reference_cases.py
 tools/management_check.py
 tools/identity_check.py
+tools/channel_check.py

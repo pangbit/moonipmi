@@ -44,7 +44,7 @@ not add a compatible CLI, controls or real-device evidence.
 ## GUID and System Info reads / GUID 与系统信息读取
 
 The next batch implements `device_guid` and `system_info` for six named strings.
-Local native tests total 50 groups; 180 actual-client executions record 94 leaves:
+That batch passed 50 native test groups; 180 actual-client executions record 94 leaves:
 62 output projections, 5 rejection projections, 8 moon-only boundaries and 19
 retained differences. See [identity API semantics and evidence](IDENTITY.md).
 GUID time display and System Info length/text/validation/error-exit behavior
@@ -55,6 +55,21 @@ CLI policy remains open. No full-family parity or real-device evidence is claime
 94 个叶项：62 项输出映射、5 项拒绝映射、8 项本库边界及 19 项保留差异。
 详见[身份信息 API 与证据](IDENTITY.md)。GUID 时间显示和系统信息长度/文本/校验/错误退出
 仍有差异；认证默认值及通电计数精度不变，CLI 规则待统一裁决，不宣称完整功能族或实机一致。
+
+## Channel reads / 通道读取
+
+Current source adds `channel_info`, `channel_access` for volatile/nonvolatile
+policy and `channel_cipher_suites` for IPMI/SOL advertisements. Local native
+checks total 55 groups. [178 executions / 108 leaves](CHANNEL.md) record 61
+output, 2 raw, 9 rejection, 10 moon-only boundaries and 26 divergent outcomes.
+Reference list truncation, unknown-label aliasing and partial outputs remain
+open in the [decision register](PARITY_DECISIONS.md). No authentication, privilege,
+cipher selection, SOL activation or real-device controls were added or changed.
+
+当前新增通道信息、活动/持久通道策略和 IPMI/SOL 套件声明读取；本地原生测试共 55 组。
+[178 次执行、108 个叶项](CHANNEL.md)包含 61 项输出映射、2 项 raw、9 项拒绝、10 项本库边界
+和 26 项差异。参考列表截断、未知标签别名与部分输出继续列入[裁决汇总](PARITY_DECISIONS.md)。
+未新增或改变认证、权限、套件选择、SOL 激活或真实设备控制。
 
 ## Full-parity work / 完整对齐工作
 

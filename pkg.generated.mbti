@@ -7,6 +7,8 @@ import {
 }
 
 // Values
+pub fn decode_channel_cipher_suites(Bytes) -> Array[ChannelCipherSuite] raise ProtocolError
+
 pub fn decode_fru_inventory(Bytes) -> FruInventory raise ProtocolError
 
 pub fn decode_handshake(Bytes) -> HandshakePacket raise ProtocolError
@@ -44,6 +46,77 @@ pub fn ProtocolError::to_repr(Self) -> @debug.Repr
 
 // Types and methods
 #derive(Eq, @debug.Debug)
+pub struct ChannelAccess {
+  access_mode : Int32
+  alerting_enabled : Bool
+  per_message_auth_enabled : Bool
+  user_level_auth_enabled : Bool
+  privilege_limit : Int32
+  raw : Bytes
+}
+pub fn ChannelAccess::equal(Self, Self) -> Bool
+pub fn ChannelAccess::not_equal(Self, Self) -> Bool
+pub fn ChannelAccess::to_repr(Self) -> @debug.Repr
+
+#derive(Eq, @debug.Debug)
+pub struct ChannelCipherPage {
+  channel : Int32
+  raw_channel : Int32
+  data : Bytes
+}
+pub fn ChannelCipherPage::equal(Self, Self) -> Bool
+pub fn ChannelCipherPage::not_equal(Self, Self) -> Bool
+pub fn ChannelCipherPage::to_repr(Self) -> @debug.Repr
+
+#derive(Eq, @debug.Debug)
+pub struct ChannelCipherSuite {
+  suite_id : Int32
+  iana : Int32?
+  authentication : Int32
+  integrity : Int32
+  confidentiality : Int32
+  raw : Bytes
+}
+pub fn ChannelCipherSuite::equal(Self, Self) -> Bool
+pub fn ChannelCipherSuite::not_equal(Self, Self) -> Bool
+pub fn ChannelCipherSuite::to_repr(Self) -> @debug.Repr
+
+#derive(Eq, @debug.Debug)
+pub struct ChannelCipherSuites {
+  suites : Array[ChannelCipherSuite]
+  pages : Array[ChannelCipherPage]
+  raw : Bytes
+  terminated : Bool
+}
+pub fn ChannelCipherSuites::equal(Self, Self) -> Bool
+pub fn ChannelCipherSuites::not_equal(Self, Self) -> Bool
+pub fn ChannelCipherSuites::to_repr(Self) -> @debug.Repr
+
+#derive(Eq, @debug.Debug)
+pub struct ChannelInfo {
+  channel : Int32
+  medium : Int32
+  protocol : Int32
+  session_support : Int32
+  active_sessions : Int32
+  vendor_id : Int32
+  auxiliary : Bytes
+  raw : Bytes
+}
+pub fn ChannelInfo::equal(Self, Self) -> Bool
+pub fn ChannelInfo::not_equal(Self, Self) -> Bool
+pub fn ChannelInfo::to_repr(Self) -> @debug.Repr
+
+#derive(Eq, @debug.Debug)
+pub(all) enum ChannelSettings {
+  Volatile
+  NonVolatile
+}
+pub fn ChannelSettings::equal(Self, Self) -> Bool
+pub fn ChannelSettings::not_equal(Self, Self) -> Bool
+pub fn ChannelSettings::to_repr(Self) -> @debug.Repr
+
+#derive(Eq, @debug.Debug)
 pub struct ChassisCapabilities {
   flags : Int32
   fru_address : Int32
@@ -76,10 +149,22 @@ pub fn ChassisStatus::intrusion_active(Self) -> Bool
 pub fn ChassisStatus::not_equal(Self, Self) -> Bool
 pub fn ChassisStatus::to_repr(Self) -> @debug.Repr
 
+#derive(Eq, @debug.Debug)
+pub(all) enum CipherPayload {
+  Ipmi
+  Sol
+}
+pub fn CipherPayload::equal(Self, Self) -> Bool
+pub fn CipherPayload::not_equal(Self, Self) -> Bool
+pub fn CipherPayload::to_repr(Self) -> @debug.Repr
+
 pub struct Client {
   // private fields
 }
 pub fn Client::abort(Self) -> Unit
+pub async fn Client::channel_access(Self, ChannelSettings, channel? : Int32) -> ChannelAccess
+pub async fn Client::channel_cipher_suites(Self, CipherPayload, channel? : Int32, max_bytes? : Int32, timeout_ms? : Int32) -> ChannelCipherSuites
+pub async fn Client::channel_info(Self, channel? : Int32) -> ChannelInfo
 pub async fn Client::chassis_capabilities(Self) -> ChassisCapabilities
 pub async fn Client::close(Self) -> Unit
 pub async fn Client::connect(@socket.Addr, Bytes, Bytes, timeout_ms? : Int32) -> Self
@@ -260,6 +345,9 @@ pub struct Response {
   completion_code : Int32
   data : Bytes
 }
+pub fn Response::channel_access(Self) -> ChannelAccess raise ProtocolError
+pub fn Response::channel_cipher_page(Self) -> ChannelCipherPage raise ProtocolError
+pub fn Response::channel_info(Self) -> ChannelInfo raise ProtocolError
 pub fn Response::chassis_capabilities(Self) -> ChassisCapabilities raise ProtocolError
 pub fn Response::chassis_status(Self) -> ChassisStatus raise ProtocolError
 pub fn Response::device_guid(Self) -> DeviceGuid raise ProtocolError

@@ -55,7 +55,7 @@
 | C17 `tsol` [源码][tsol] | Tyan IPMI 1.5 SOL；IP/port、ro/rw、rows/cols、altterm | N | 目标/端口、只读与输入、终端大小/转义、启动/停止、丢包和退出恢复 | W/T/V、Tyan fixture；P5/P7 |
 | C18 `isol` [源码][isol] | Intel IPMI 1.5 SOL info/set/activate | N | 配置字段、legacy session、终端数据、逃逸字符/关闭、接口不支持时的参考结果 | R/W/T/V；P3/P5 |
 | C19 `user` [源码][user] | summary/list、test、set name/password/priv、enable/disable | N | ID/channel 边界、16/20 字节密码、禁用/权限矩阵、密码测试与设置区别、部分失败后状态 | R/W、合成用户；P3/P4 |
-| C20 `channel` [源码][channel] | authcap/info/getaccess/setaccess/getciphers ipmi/sol | N：内部固定会话流程不等于公开命令实现 | 每个 channel、访问位/持久性、分页密码套件、权限拒绝和非法 payload；设置后实际权限 | R/W；P3/P4 |
+| C20 `channel` [源码][channel] | authcap/info/getaccess/setaccess/getciphers ipmi/sol | P/D：已有信息/通道策略/套件列表 API，数量/未知标签/部分输出有差异；authcap、逐用户权限、控制及 CLI 缺失 | 每个 channel、访问位/持久性、分页密码套件、权限拒绝和非法 payload；设置后实际权限 | R/W；P3/P4 |
 | C21 `session` [源码][session] | info active/all/id/handle | N：本库 session 类型是内部协议状态，不是此命令 | 活跃/缺失/多个 session、地址字段、ID/handle 选择、短响应与限制 | R；P3 |
 | C22 `dcmi` [源码][dcmi] | discover/oob_discover、sensors、asset_tag/set_asset_tag、get/set_mc_id_string、get_temp_reading、get/set_conf_param、thermalpolicy get/set；power reading/get_limit/set_limit/activate/deactivate | N | 能力页/温度实体、字符串分块、功率限制动作/采样、DHCP 配置、Ping/Pong；每个表驱动参数独立建例 | R/W/V、DCMI peer；P3/P6 |
 | C23 `nm` [源码][dcmi] | discover/capability/control；policy add/get/remove/limiting；statistics、power range、suspend、reset、alert、threshold | N | domain/policy ID、trigger、volatile/cores_off、统计模式、阈值和暂停数组、告警目标/删除/重置；按实际版本能力 | R/W/V、Intel NM；P3/P6 |
@@ -128,8 +128,8 @@
 | X01 | 已认证报文相关性与校验 | D：[既有 24 项对照](COMPARISON.md)已显示 responder/netfn/LUN/checksum 差异；扩展到其他接口/全部边界 | P1/P2；K03 |
 | X02 | RAKP/HMAC/AES、会话 ID/序号/重放/padding | P/U：已有正负测试不是完整差分；逐种算法/身份字段/随机关联/错误阶段与参考对照 | P2；K01/K03 |
 | X03 | deadline/retry/backoff/取消/close/abort、并发和会话复用 | D：无重试及本地 abort 与参考关闭/等待不同；故障注入每个 exchange/多块操作、资源回收及总用时 | P2/P5；K04 |
-| X04 | 完成码、失败退出、部分结果、缺失能力 | P/D：参考系统信息完成码错误仍零退出；现有 typed 错误不等于 CLI 错误；逐命令比输出/退出/继续或中止，未知/OEM 完成码也覆盖 | P2–P6 |
-| X05 | 文本、数字、时间、二进制导出 | P/D：GUID 时间及系统信息文本/长度有差异，通电分钟精确 API 与参考 float 显示有差异；扩展到编码、厂商名、单位/精度、排序、空记录与 locale/DST，保留差异不跳过 | P3；K08/K10 |
+| X04 | 完成码、失败退出、部分结果、缺失能力 | P/D：系统信息错误零退出、通道信息部分文本和套件列表前缀有差异；typed 错误不等于 CLI 错误；逐命令比输出/退出/继续或中止，未知/OEM 完成码也覆盖 | P2–P6 |
+| X05 | 文本、数字、时间、二进制导出 | P/D：套件数量/未知标签、GUID 时间及系统信息文本/长度有差异，通电分钟精确 API 与参考 float 显示有差异；扩展到编码、厂商名、单位/精度、排序、空记录与 locale/DST，保留差异不跳过 | P3；K08/K10 |
 | X06 | OEM 自动识别与 profiles [源码][oem] | N：supermicro/intelwv2/intelplus/icts/ibm/i82571spt/kontron/quanta；厂商/产品 ID 分支和 IBM 数据文件、PICMG/VITA 自动发现 | V；P2/P6 |
 | X07 | 配套文件/脚本与安装 [目录][contrib] | N：enterprise-numbers、OEM maps、manpages、ipmievd 服务、bmclanconf、bmc-snmp-proxy、exchange-bmc-os-info、collect/log/RRD/web 示例的调用契约；安装路径/权限/外部依赖 | F/R/W、shell/SNMP/RRD 隔离环境；P3–P7 |
 | X08 | 加密/驱动/运行依赖与构建变体 [配置][configure] | P/U：native/OpenSSL 3 不能代表 upstream 的 libcrypto/internal MD5、readline、FreeIPMI、libsystemd 组合；冻结支持/失败 profile | P1/P2/P7；K09 |
@@ -150,6 +150,10 @@
 ## 已实现的 GUID 与系统信息读取
 
 [另外两个客户端 API](IDENTITY.md)覆盖 GUID 模式及六项命名字符串。本地 180 次执行形成 94 个叶项：62 项输出映射、5 项拒绝映射、8 项本库边界及 19 项明确差异。报告保留 GUID uint32/SEL 时间显示、系统信息 char 符号性/编码/零字节/填充、坏块接受、完成码错误零退出及部分输出差异。C08 和 X04/X05/X11 仍为部分实现/有差异，K08/K10 待裁决；现有 POH 精度及认证默认值不变。
+
+## 已实现的通道读取
+
+[通道信息、活动/持久访问策略及套件列表 API](CHANNEL.md)新增 178 次执行、108 个叶项：61 项输出映射、2 项 raw、9 项拒绝、10 项本库边界及 26 项保留差异。参考记录数限制、共享未知标签、解析前缀及通道信息部分输出仍有差异。逐用户 `channel getaccess` 和 `authcap` 仍缺失，读取套件声明不等于实现协商或 SOL。详见[统一裁决汇总](PARITY_DECISIONS.md)，不宣称 C20 或完整功能族通过。
 
 ## 后续叶用例示例 / Reviewable test records
 

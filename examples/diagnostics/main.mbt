@@ -275,6 +275,10 @@ async fn run_case() -> Unit {
           ),
         }
         println(output.stringify())
+      } else if parts[0] == "channel-info" ||
+        parts[0] == "channel-access" ||
+        parts[0] == "ciphers" {
+        run_channel_case(client, parts)
       } else {
         fail("unknown read-only scenario")
       }
