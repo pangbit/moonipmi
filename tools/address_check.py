@@ -7,14 +7,13 @@ or cryptographic material are written to the report.
 """
 import argparse
 import json
-import os
-import shutil
 import socket
 import subprocess
 import threading
 
 from compare_clients import EXPECTED, ipmitool_command, normalize_ipmitool
 import shared_bmc
+import reference_profile
 
 CASES = (None, "requester-20", "requester-00", "requester-ff", "responder", "netfn",
          "requester-lun", "responder-lun", "sequence", "command", "checksum", "mac")
@@ -56,7 +55,7 @@ def probe(name, executable, fault):
             command[command.index("-R") + 1] = "1"
         try:
             result = subprocess.run(command, capture_output=True, text=True, timeout=8,
-                                    env={**os.environ, "LC_ALL": "C"})
+                                    env=reference_profile.environment())
         finally:
             stop.set()
             thread.join(timeout=2)
@@ -76,13 +75,10 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--moon-client", required=True)
     parser.add_argument("--output", help="optional synthetic JSON report path")
+    reference_profile.add_arguments(parser)
     args = parser.parse_args()
-    ipmitool = shutil.which("ipmitool")
-    if not ipmitool:
-        raise SystemExit("ipmitool 1.8.19 is required")
-    version = subprocess.check_output([ipmitool, "-V"], text=True).strip()
-    if version != "ipmitool version 1.8.19":
-        raise SystemExit("review the baseline before using another ipmitool version")
+    ipmitool, reference = reference_profile.resolve(args)
+    version = reference["version"]
     rows = []
     for name, executable in (("moonipmi", args.moon_client), ("ipmitool", ipmitool)):
         for fault in CASES:
@@ -102,12 +98,14 @@ def main():
                          else json.loads(result.stdout))
                 assert value == EXPECTED["device"], f"{name}/{fault}: wrong Device ID"
                 assert trace["closed"], "successful client did not close"
-            row = {"client": name, "case": fault or "normal", "outcome": "rejected" if rejected else "accepted"}
+            row = {"id": "X01.response." + (fault or "normal"), "client": name, "case": fault or "normal",
+                   "outcome": "rejected" if rejected else "accepted", "argv": result.args,
+                   "exit_code": result.returncode, "stdout": result.stdout, "stderr": result.stderr, "trace": trace}
             rows.append(row)
             print(f"PASS: {name}/{row['case']}: {row['outcome']}")
     if args.output:
         with open(args.output, "w") as output:
-            json.dump({"ipmitool_version": version, "scope": "synthetic loopback, not hardware", "cases": rows}, output, indent=2)
+            json.dump({"implementation": reference_profile.implementation(args.moon_client), "reference": reference, "ipmitool_version": version, "scope": "synthetic loopback, not hardware", "cases": rows}, output, indent=2)
             output.write("\n")
     print(f"PASS: {len(rows)} response-policy comparisons; no hardware contacted")
 

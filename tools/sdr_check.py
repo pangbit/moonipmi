@@ -3,14 +3,13 @@
 import argparse
 import csv
 import json
-import os
-import shutil
 import socket
 import subprocess
 import threading
 
 import sdr_fixture
 import shared_bmc
+import reference_profile
 
 
 def execute(executable, mode, fault=None):
@@ -40,7 +39,7 @@ def execute(executable, mode, fault=None):
         ]
         try:
             result = subprocess.run(args, capture_output=True, text=True, timeout=20,
-                                    env={**os.environ, "LC_ALL": "C"})
+                                    env=reference_profile.environment())
         finally:
             stop.set()
             thread.join(timeout=2)
@@ -134,11 +133,10 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--moon-client", required=True)
     parser.add_argument("--output")
+    reference_profile.add_arguments(parser)
     args = parser.parse_args()
-    executable = shutil.which("ipmitool")
-    assert executable, "ipmitool is required"
-    version = subprocess.check_output([executable, "-V"], text=True).strip()
-    assert version == "ipmitool version 1.8.19", "review another version before changing the baseline"
+    executable, reference = reference_profile.resolve(args)
+    version = reference["version"]
     rows = []
     for mode, client in [("moonipmi", args.moon_client), ("sdr list all", executable), ("sensor list", executable)]:
         result, trace, repository = execute(client, mode)
@@ -163,7 +161,7 @@ def main():
     assert not any(c["netfn"] == 0x0a and c["command"] != 0x20 for c in trace["commands"]), "empty repository must not be rebuilt or reserved"
     print("PASS: moonipmi/empty: empty inventory, no rebuild or reservation")
     report = {"scope": "synthetic suite-17 loopback; not real BMC validation",
-              "ipmitool_version": version, "readings": rows, "faults": faults, "empty_repository": "passed"}
+              "implementation": reference_profile.implementation(args.moon_client), "reference": reference, "ipmitool_version": version, "readings": rows, "faults": faults, "empty_repository": "passed"}
     if args.output:
         with open(args.output, "w") as output:
             json.dump(report, output, indent=2)

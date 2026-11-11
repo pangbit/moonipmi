@@ -44,7 +44,7 @@ pub extend SelInfo with @debug.Debug::{to_repr}
 ///|
 pub fn Response::sel_info(self : Response) -> SelInfo raise ProtocolError {
   let d = command_data(self, "Get SEL Info")
-  guard d.length() == 14 && d[0] == 0x51 else {
+  guard d.length() == 14 && (d[0] == 0x51 || d[0] == 0x02) else {
     raise invalid("invalid or unsupported SEL Info")
   }
   {

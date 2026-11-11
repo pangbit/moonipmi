@@ -2,7 +2,7 @@
 
 [简体中文](IPMITOOL_PARITY_MATRIX.md)
 
-Status: **awaiting review; no row has passed full-parity acceptance.** See the [plan](IPMITOOL_PARITY_PLAN.en.md) for the pinned reference, stages, K01–K10 conflicts and completion rules.
+Status: **P1 in progress; no row has passed full-parity acceptance.** See the [plan](IPMITOOL_PARITY_PLAN.en.md) for the pinned reference, stages, K01–K10 conflicts and completion rules.
 The [machine-readable inventory](ipmitool-parity-inventory.json) contains all 38 registered commands and 12 interfaces. C39 is generic `help`; D rows cover the separate `ipmievd` executable.
 Every registered entry has a row, including aliases, OEM commands and conditional features.
 
@@ -13,7 +13,7 @@ Every registered entry has a row, including aliases, OEM commands and conditiona
 - `R` = device read; `W` = device/configuration/event mutation; `F` = file; `T` = terminal; `L` = local driver/service; `V` = vendor/extension hardware. Reads can still log, reserve or consume resources. W does not imply execution authorization. Determine minimum privileges from target policy/reference cases and test all denial paths.
 - Every row-specific criterion includes G0–G7. Each subcommand/parameter group inside a cell needs separate leaf IDs; one representative case cannot pass the group.
 - Use stable leaf IDs such as `C12.print.word.short-count`, with build/interface/privilege/fixture dimensions. Existing evidence only fills the leaves it actually covered.
-- **This task executes none of these commands against devices and does not begin W-class development.** P2–P7 are proposed future stages.
+- **P1 executes reference/help and existing read-only leaves only against synthetic loopback peers. W-class development and real-device actions remain prohibited.** P2–P7 remain proposed stages.
 
 ## Common acceptance dimensions
 
@@ -138,6 +138,10 @@ Compare CLI/environment/file/default/repeated-option precedence. Requiring a lib
 | X12 | Platform/device-capability/role combinations | U: two-platform subset CI only; substantiate each T row/resource requirement with model/firmware/channel/role records; missing resources cannot pass | P7 |
 | X13 | Manual/help/source disagreements and unstable behavior | U: cipher defaults, HPM download, GUID spelling, undescribed subcommands; retain actual P1 reference outputs and decide each case | P1; K10 |
 
+## Executed P1 leaf seeds
+
+See [reference profiles and leaf evidence](IPMITOOL_REFERENCE.md): 71 reference states (70 observed, one build-blocked) and 24 diagnostic projections across 62 executions. Scripts emit stable per-leaf IDs, stdout/stderr/exit and traces. These are partial G1/semantic seeds; every family status above remains unchanged. Additional subcommands, parameters, privileges, builds and failures still need expansion.
+
 ## Example leaf records for review
 
 These are future test designs, not results from this task. Every record also needs G0–G7 evidence.
@@ -154,7 +158,7 @@ These are future test designs, not results from this task. Every record also nee
 | C34.upgrade.interrupted | Lawful synthetic HPM image; disconnect during upload/activation | Accepted components/state/retry/query/failure/rollback; later real hardware must be recoverable and separately authorized | NOT_IMPLEMENTED; development prohibited now |
 
 Actual reports must add both commits, profile, date, evidence paths, differences and reviewer fields.
-This is a submitted plan, not a record of future tests passing. The [completion rules](IPMITOOL_PARITY_PLAN.en.md) govern the overall conclusion.
+Unexecuted examples are designs, not passing results; actual P1 evidence is separately linked above. The [completion rules](IPMITOOL_PARITY_PLAN.en.md) govern the overall conclusion.
 
 [raw]: https://github.com/ipmitool/ipmitool/blob/19d78782d795d0cf4ceefe655f616210c9143e62/lib/ipmi_raw.c
 [lanp]: https://github.com/ipmitool/ipmitool/blob/19d78782d795d0cf4ceefe655f616210c9143e62/lib/ipmi_lanp.c

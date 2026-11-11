@@ -2,9 +2,9 @@
 
 [简体中文](IPMITOOL_PARITY_PLAN.md)
 
-Status: **proposal awaiting review, not an implementation-complete claim or permission to execute later stages.**
+Status: **P1 reference/case work is authorized and in progress; no complete-parity claim or authorization for state-changing stages.**
 
-This work inventories scope and prepares a plan and acceptance matrix. It does not operate real devices, develop state-changing controls, relax authentication/packet checks, or publish to Mooncakes.
+This plan tracks the full scope. Authorized work now includes reference-build identification, leaf cases, differential validation and unambiguous read-only corrections. It does not operate real devices, develop state-changing controls, relax authentication/packet checks, or publish to Mooncakes.
 The requested goal includes every reference feature and observable behavior. Current moonipmi is a read-only subset with substantial omissions and known differences; it is not a complete ipmitool replacement.
 
 ## 1. Fixed reference and scope
@@ -22,7 +22,7 @@ The requested goal includes every reference feature and observable behavior. Cur
 The tag object and resolved commit were checked through read-only GitHub access. See the [source inventory](ipmitool-parity-inventory.json) and [acceptance matrix](IPMITOOL_PARITY_MATRIX.en.md).
 The 38 entries include alias `bmc`, shortcut `power`, undescribed `echo`, and `shell` under `HAVE_READLINE`. Generic `help` is handled outside that table; neither the registration table alone nor an example help listing is sufficient.
 
-**Pinning source does not freeze a reference executable.** No complete new upstream build or all-interface compilation has been verified in this task.
+**Pinning source does not freeze every reference build.** The first unpatched local reference executable and CI recipe are now identified in [P1 evidence](IPMITOOL_REFERENCE.md); full dependency/platform and all-interface builds remain incomplete.
 P1 must record source/patch and binary hashes, OS/architecture, compiler, configure arguments, `config.h`, OpenSSL/FreeIPMI/readline/libsystemd versions, default/enabled interfaces, `ENABLE_ALL_OPTIONS`, `HAVE_CRYPTO_SHA256`, and `ENABLE_FILE_SECURITY`.
 Distribution patches, IANA enterprise data, OEM description files and environment variables affect behavior. Existing reports of `ipmitool -V = 1.8.19` are not substitutes for these records.
 
@@ -58,23 +58,23 @@ Finite tests cannot prove equivalence for every unknown device or input. Final s
 | Native/OpenSSL 3; suite 17 RMCP+; User privilege; authentication/integrity/replay checks; single-flight UDP | Native tests, independent synthetic Python handshake/exchanges, existing Linux/macOS CI | Other authentication, transports, privileges, defaults and retries |
 | Device ID, Chassis Status, raw Sensor Reading | 30-case three-client common-Python-fixture matrix; [comparison](COMPARISON.md) | All commands or full CLI-output parity |
 | SDR repository and partial Full/Compact interpretation | 33 output comparisons and nine repository boundaries; [SDR](SDR.md) | Nonlinear/dynamic factors, Device SDR, shared/bridged records, reading configured thresholds and other omitted fields |
-| Chassis capabilities/restart cause, basic FRU, SEL | 41 native test groups in total; separately 30 mixed diagnostic executions/boundary cases, not 30 direct client comparisons; [diagnostics](DIAGNOSTICS.md) | Some chassis/SEL text only has limited assertions. No complete semantics, CLI, writes or hardware validation; counts cannot be added into a coverage percentage |
+| Chassis capabilities/restart cause, basic FRU, SEL | 41 native test groups in total; separately 30 mixed diagnostic executions/boundary cases, not 30 direct client comparisons; [diagnostics](DIAGNOSTICS.md) | Historical text assertions were limited; [P1](IPMITOOL_REFERENCE.md) adds 24 field/description/raw projections across 62 executions. Still no complete semantics, CLI, writes or hardware validation; counts are not a coverage percentage |
 | Requester-address tolerance | 24 packet-policy comparisons | Responder, netfn/LUN and IPMI-checksum acceptance still differs |
 
 Implementation commit `81a7728` passed [exact-commit CI](https://github.com/pangbit/moonipmi/actions/runs/42971333879) on Ubuntu 24.04 and macOS 15.
 Both run native checks/tests/build and loopback exchange. ipmitool/Go/SDR/diagnostic/address comparisons run in Linux CI; local macOS comparison evidence is separate.
 The pinned go-ipmi BMC lacks Get Sensor Reading and did not pass the complete three-read exchange. It is not the full-feature reference.
-There is no real-BMC validation, comprehensive platform certification or external security audit. This task did not rerun those historical tests.
+There is no real-BMC validation, comprehensive platform certification or external security audit. P1 reran the listed local subset checks with a hash-bound reference; exact-commit CI evidence is kept separately.
 
 ## 4. Proposed stages
 
-**Only P0 is delivered now. P1 and later await plan review; state-changing development additionally requires lifting the current restriction.**
+**P0 is delivered and P1 work is authorized and in progress. Security/major compatibility choices await review; state-changing development remains prohibited.**
 P2/P3 must not use raw access, diagnostics or reservation operations to introduce arbitrary write support.
 
 | Stage | Deliverables and dependencies | Exit gate |
 |---|---|---|
 | P0: inventory and contract | This plan, pinned source, inventory, matrix, resource/conflict register and review decisions | Map 38/38 registered entries and 12/12 interfaces; no full-parity passes claimed; documentation only |
-| P1: reference builds and differential harness | After review, pin reference/dependencies; independent fixtures and argv/output/trace/state records; expand all groups into leaves | Run the actual reference for every leaf; reconcile help, dispatcher branches and configuration tables; explain every unknown/skip; no production evidence gathering |
+| P1: reference builds and differential harness | In progress: first profile, 71 reference leaf states and 24 diagnostic projections; complete reference/dependency profiles; independent fixtures and argv/output/trace/state records; expand all groups into leaves | Run the actual reference for every leaf; reconcile help, dispatcher branches and configuration tables; explain every unknown/skip; no production evidence gathering |
 | P2: CLI, sessions and transports | P1 and K01–K10 decisions; CLI/configuration/identity/errors, transport abstraction, bridging, authentication/retry; simulate local drivers first | Differential O/T/X cases; unresolved safety choices stay blocked; reproduce reference failure for unsupported combinations instead of inventing success |
 | P3: complete reads and offline processing | Required P2 transports; complete SDR/sensor/FRU/SEL, MC/channel/user/session, network configuration reads, DCMI/NM/OEM reads and file parsing | Every read leaf includes malformed/boundary/missing-capability/permission cases; retained raw bytes are not interpreted support; compare files and text too |
 | P4: standard state-changing controls | **Currently prohibited**; separate approval, then P1–P3; power/boot/reset, accounts/channels/LAN, thresholds, SDR/FRU/SEL writes, events/PEF/firewall | Resettable simulators first; compare each effect, failure point, duplicate, disconnect and uncertain outcome. Real devices need separate authorization; do not assume rollback is possible |
@@ -89,7 +89,7 @@ Mooncakes publication remains a separate manual maintainer decision, never an au
 
 | Environment | Required investigation | Current state |
 |---|---|---|
-| Ubuntu 24.04/macOS 15 native | Reproducible reference/MoonBit builds, CLI, LAN transports, crypto/readline differences | Subset CI exists; full profiles are unfrozen; macOS cannot validate Linux local drivers |
+| Ubuntu 24.04/macOS 15 native | Reproducible reference/MoonBit builds, CLI, LAN transports, crypto/readline differences | First four-interface profile recipe added to both CI platforms; broader profiles remain unfrozen; macOS cannot validate Linux local drivers |
 | Linux/FreeBSD plus applicable OpenIPMI/FreeIPMI/IMB | Driver/ioctl ABI, device selection, permissions, kernel event delivery | Full builds/device evidence missing; simulation cannot close hardware acceptance |
 | Relevant Solaris 9/10 environments | lipmi/bmc headers/drivers/ABI and potentially restricted default option sets | Toolchain, OS and devices unavailable; retain blockers |
 | Cygwin, AIX and other configure branches | Determine actual upstream buildability and MoonBit native portability | Unverified; Cygwin is not native Windows support; blocks a global claim |
@@ -139,9 +139,9 @@ Full completion requires:
 - Specific model/firmware/privilege/interface evidence for hardware claims; one BMC cannot establish all-BMC compatibility and simulation is not hardware validation.
 - Focused review of authentication, FFI/drivers, files, long sessions and firmware paths. Such review does not automatically constitute an external audit or authorize release.
 
-Review must settle the 1.8.19/full-build-union baseline; CLI/library/ipmievd/companion-script deliverables; K01–K10; available resources; and whether only P1 is authorized next.
+Review must settle the 1.8.19/full-build-union baseline; CLI/library/ipmievd/companion-script deliverables; K01–K10; available resources; and the remaining P1 work/later-stage boundaries. P1 is already authorized; see the [progress and recommendations](IPMITOOL_REFERENCE.md).
 The existing restrictions on state-changing development, real-device operations and release remain in force.
-**Recommendation:** authorize only P1 next, obtain detailed synthetic reference evidence, then resolve K01–K10. Do not reduce acceptance scope by removing legacy interfaces, weak authentication or OEM features.
+**Recommendation:** continue P1 synthetic reference evidence; keep unresolved K01–K10 implementation changes blocked. Do not reduce acceptance scope by removing legacy interfaces, weak authentication or OEM features.
 Full equivalence requires actually addressing those capabilities and differences. Do not directly reproduce memory errors, real-secret exposure or uncontrolled effects; retain blockers and submit concrete reproducible evidence for review rather than silently changing the goal.
 
 ## 8. Pinned primary sources

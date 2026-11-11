@@ -20,7 +20,7 @@ async fn run_case() -> Unit {
   let args = @env.args()
   guard args.length() == 3 else {
     fail(
-      "usage: diagnostics <local mock port> <chassis|fru|sel|fru-timeout|sel-timeout>",
+      "usage: diagnostics <local mock port> <chassis|fru|sel|sel-info|fru-timeout|sel-timeout>",
     )
   }
   let port = @string.parse_int(args[1])
@@ -45,8 +45,17 @@ async fn run_case() -> Unit {
         "system_management_address": c.system_management_address,
         "bridge_address": optional_int(c.bridge_address),
         "power_on": status.power_on,
+        "power_overload": status.power_overload,
+        "power_interlock": status.power_interlock,
+        "power_fault": status.power_fault,
+        "power_control_fault": status.power_control_fault,
+        "restore_policy": status.restore_policy,
+        "last_power_event": status.last_power_event,
+        "misc_status": status.misc_status,
+        "front_panel_buttons": optional_int(status.front_panel_buttons),
         "restart_cause": cause.cause,
         "restart_channel": cause.channel,
+        "restart_description": optional_text(cause.description()),
       }
       println(output.stringify())
     }
@@ -79,6 +88,18 @@ async fn run_case() -> Unit {
           println(output.stringify())
         }
       }
+    }
+    "sel-info" => {
+      let info = client.sel_info()
+      let output : Json = {
+        "version": info.version,
+        "entries": info.entries,
+        "free_space": info.free_space,
+        "last_addition": info.last_addition.to_double(),
+        "last_erase": info.last_erase.to_double(),
+        "operations": info.operations,
+      }
+      println(output.stringify())
     }
     "sel" | "sel-timeout" => {
       let records = client.sel_records(

@@ -18,11 +18,11 @@ let restart = client.restart_cause()
 Capabilities retain the flags and FRU/SDR/SEL/system-management addresses plus the
 optional bridge address. Addresses are metadata, never destinations to follow.
 Restart cause/channel are numeric; `restart.description()` names known causes and
-returns `None` for reserved values. Each request has the client's exchange deadline.
+returns `None` for reserved values. Known descriptions match ipmitool 1.8.19. Each request has the client's exchange deadline.
 No power, reset, boot, identify or front-panel controls are exposed.
 
 能力结果保留标志、FRU/SDR/SEL/系统管理地址及可选桥接地址；地址仅作元数据，不自动访问。
-重启原因和通道保留数值，`restart.description()` 返回已知原因，保留值返回 `None`。
+重启原因和通道保留数值，`restart.description()` 返回与 ipmitool 1.8.19 一致的已知描述，保留值返回 `None`。
 每次请求沿用客户端交换超时。不提供电源、复位、启动、指示灯或前面板控制。
 
 ## Basic FRU inventory / 基础 FRU 清单
@@ -88,6 +88,8 @@ for record in records {
 }
 ```
 
+SEL info accepts the reference-recognized version bytes `0x51` and `0x02`; other versions are rejected.
+
 Defaults are 256 records and a 10-second overall deadline; allowed limits are
 1..4096 records (16 bytes each) and 1..60000 ms. Repository count is checked before
 entries are read. Whole-record reads use reservation zero and do not reserve,
@@ -107,6 +109,8 @@ including OEM types and unknown types, retains its complete 16 bytes.
 (relative/pre-initialisation), and Unix seconds. No timezone or fabricated date.
 FRU identifiers and SEL event data can be private; do not log raw results by default.
 
+SEL 信息接受参考已识别的版本字节 `0x51`/`0x02`，其他版本拒绝。
+
 默认最多 256 条、整体 10 秒；范围为 1..4096 条（每条 16 字节）与 1..60000 毫秒。
 读取前先检查记录数。完整记录使用零预留 ID，不执行预留、清除、删除、添加、修复或改时间。
 空仓库返回空数组。检查记录身份、重复 ID、长度、数量，以及结束时的信息计数/添加/删除时间。
@@ -124,6 +128,7 @@ OEM 和未知记录仍完整保留 16 字节。`sel_time` 区分未指定 `0xfff
 moon test --target native --deny-warn
 moon build --target native --deny-warn
 python3 tools/diagnostics_check.py \
+  --reference-profile _build/ipmitool-reference/profile.json \
   --moon-client _build/native/debug/build/examples/diagnostics/diagnostics.exe \
   --output _build/diagnostics-comparison.json
 ```
@@ -135,13 +140,14 @@ chassis, board/product FRU and three SEL records. Actual ipmitool 1.8.19 runs
 also exercises short FRU progress, malformed count/checksum, size/record limits,
 SEL cycles/identity/count/change/completion failures, empty SEL and slow-drip
 whole-operation timeouts. It asserts no partial output and the client command
-allowlist. Linux CI runs this comparison; macOS CI runs the native tests/build.
+allowlist. The current CI recipe runs the pinned reference build and diagnostics on both Linux and macOS.
+Build the profile first using [P1 instructions](IPMITOOL_REFERENCE.md); that page distinguishes 24 differential projections from 62 total executions.
 No real BMC, hardware compatibility certification or security audit is implied.
 
 本机模拟器使用公开合成凭据、固定机箱/主板/产品 FRU 和三条 SEL。实际 ipmitool 1.8.19
 运行上述只读命令，包括字节/字 FRU 对照。另验证有效短读、坏计数/校验和、总量限额、
 SEL 循环/身份/数量/变化/完成码、空仓库与慢速分批响应下的整体超时，并断言无部分输出和命令白名单。
-Linux CI 执行此对照，macOS CI 执行原生测试与构建。不代表真实 BMC 兼容认证或安全审计。
+当前 CI 流程在 Linux/macOS 均构建固定参考并执行诊断对照。先按 [P1 说明](IPMITOOL_REFERENCE.md)构建 profile；其中区分 24 项差分映射与 62 次总执行。不代表真实 BMC 兼容认证或安全审计。
 
 References: IPMI v2.0 §§28 (chassis), 31 (SEL), 34 (FRU) and the IPMI FRU
 Information Storage Definition; [ipmitool 1.8.19 source](https://github.com/ipmitool/ipmitool/tree/IPMITOOL_1_8_19/lib).

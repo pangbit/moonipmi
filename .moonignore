@@ -22,3 +22,6 @@ tools/sdr_fixture.py
 
 tools/diagnostics_check.py
 tools/diagnostics_fixture.py
+tools/reference_build.py
+tools/reference_profile.py
+tools/reference_cases.py

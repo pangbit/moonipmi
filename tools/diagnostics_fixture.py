@@ -35,6 +35,12 @@ SEL_RECORDS = [
     struct.pack("<HBI", 5, 0xc0, 0) + bytes.fromhex("570100010203040506"),
 ]
 CAPABILITIES = bytes.fromhex("0f2020202000")
+CHASSIS_VARIANTS = {
+    "chassis-basic": bytes.fromhex("01000000"),
+    "chassis-faults": bytes.fromhex("5e1f0f"),
+    "chassis-buttons": bytes.fromhex("3f1005a5"),
+    "chassis-reserved-policy": bytes.fromhex("600000"),
+}
 
 
 class Diagnostics:
@@ -54,8 +60,13 @@ class Diagnostics:
         if (netfn, command) == (0, 0):
             assert not data
             return CAPABILITIES, 0
+        if (netfn, command) == (0, 1) and self.fault in CHASSIS_VARIANTS:
+            assert not data
+            return CHASSIS_VARIANTS[self.fault], 0
         if (netfn, command) == (0, 7):
             assert not data
+            if self.fault and self.fault.startswith("restart-"):
+                return bytes([int(self.fault.split("-")[1]), 1]), 0
             return b"\x04\x01", 0
         if (netfn, command) == (0x0a, 0x10):
             assert data == b"\x00"
@@ -82,7 +93,8 @@ class Diagnostics:
             self.info_reads += 1
             count = 0 if self.fault == "sel-empty" else 9 if self.fault == "sel-limit" else len(SEL_RECORDS)
             added = 1700000000 + (self.fault == "sel-changed" and self.info_reads > 1)
-            return struct.pack("<BHHIIB", 0x51, count, 0xffff, added, 0xffffffff, 2), 0
+            version = 0x02 if self.fault == "sel-version-2" else 0x51
+            return struct.pack("<BHHIIB", version, count, 0xffff, added, 0xffffffff, 2), 0
         if (netfn, command) == (0x0a, 0x42):
             assert not data
             return b"\x34\x12", 0

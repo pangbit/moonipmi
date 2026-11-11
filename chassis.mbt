@@ -67,10 +67,10 @@ pub fn Response::restart_cause(
 pub fn RestartCause::description(self : RestartCause) -> String? {
   match self.cause {
     0 => Some("unknown")
-    1 => Some("chassis control command")
+    1 => Some("chassis power control command")
     2 => Some("reset via pushbutton")
     3 => Some("power-up via pushbutton")
-    4 => Some("watchdog expiration")
+    4 => Some("watchdog expired")
     5 => Some("OEM")
     6 => Some("power-up due to always-restore power policy")
     7 => Some("power-up due to restore-previous power policy")

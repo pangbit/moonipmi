@@ -244,17 +244,17 @@ FRU/SEL 限制总量和整体时长，失败不返回部分结果。不支持的
 硬件控制、FRU 写入、SEL 修改、FRU 自动发现、其他密码套件、IPMI 1.5 会话、OEM 命令/SOL
 及桥接仍不在范围内。
 
-The separate diagnostic checker passed 30 focused synthetic-loopback comparisons
-and boundary cases locally on macOS with ipmitool 1.8.19, including byte/word FRU
-reads, SEL records, malformed responses, total limits and overall timeouts. Linux
-CI runs this checker; macOS CI runs native tests/build and skips the ipmitool
-comparison. This evidence does not extend the original three-client matrix or
-the pinned go-ipmi BMC comparison to FRU/SEL. It does not establish real-BMC
-compatibility, full IPMI coverage or a security audit. These APIs remain unreleased;
-Mooncakes 0.1.0 is unchanged.
+The original diagnostic checker had 30 mixed executions/boundary cases. The
+[P1 reference work](IPMITOOL_REFERENCE.md) replaces weak text assertions with
+24 field/description/raw projections across 62 executions, using an unpatched,
+hash-bound reference; moon-only negative cases are counted separately. The current
+CI recipe builds the fixed reference and runs diagnostics on Linux and macOS.
+This does not extend the original three-client matrix or the pinned go-ipmi BMC
+comparison to FRU/SEL, establish full CLI/wire equivalence, real-BMC compatibility
+or a security audit. These APIs remain unreleased; Mooncakes 0.1.0 is unchanged.
 
-独立诊断检查已在 macOS 本地使用 ipmitool 1.8.19 通过 30 项合成本机对照及边界用例，
-包括字节/字 FRU 读取、SEL 记录、畸形响应、总量限制与整体超时。Linux CI 执行此检查；
-macOS CI 执行原生测试/构建，跳过 ipmitool 对照。这些证据不表示原三客户端矩阵或固定
-go-ipmi BMC 对照已扩展到 FRU/SEL，也不证明真实 BMC 兼容、完整 IPMI 覆盖或完成安全审计。
-这些 API 仍未发布，Mooncakes 0.1.0 不变。
+原诊断脚本包含 30 次混合执行/边界检查。[P1 参考工作](IPMITOOL_REFERENCE.md)使用无补丁、
+绑定哈希的参考程序，将弱文本断言改为 62 次执行中的 24 项字段/描述/raw 映射；仅 moonipmi
+的负面场景单独计数。当前 CI 流程在 Linux/macOS 均构建固定参考并执行诊断。
+这不表示原三客户端矩阵或 go-ipmi BMC 对照扩展到 FRU/SEL，也不证明完整 CLI/报文一致、
+真实 BMC 兼容或安全审计。API 仍未发布，Mooncakes 0.1.0 不变。

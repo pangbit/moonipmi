@@ -11,7 +11,7 @@ test "chassis capability optional bridge and restart cause are typed" {
   let cause = Response::{ completion_code: 0, data: b"\x04\x01", }.restart_cause()
   assert_eq(cause.cause, 4)
   assert_eq(cause.channel, 1)
-  assert_eq(cause.description(), Some("watchdog expiration"))
+  assert_eq(cause.description(), Some("watchdog expired"))
   assert_eq(RestartCause::{ cause: 15, channel: 0, }.description(), None)
   for size in [0, 4, 7] {
     rejected(() => {
@@ -88,6 +88,20 @@ test "SEL info validates version length and completion code" {
   assert_eq(info.entries, 3)
   assert_eq(info.last_addition, 0xffffffffU)
   assert_eq(info.operations, 0x82)
+  let v2 = Response::{
+    completion_code: 0,
+    data: b"\x02\x03\x00\xff\xff\xff\xff\xff\xff\x00\x00\x00\x00\x82",
+  }.sel_info()
+  assert_eq(v2.version, 2)
+  assert_eq(v2.entries, info.entries)
+  rejected(() => {
+    ignore(
+      Response::{
+        completion_code: 0,
+        data: b"\x50\x03\x00\xff\xff\xff\xff\xff\xff\x00\x00\x00\x00\x82",
+      }.sel_info(),
+    )
+  })
   for size in [0, 13, 15] {
     rejected(() => {
       ignore(

@@ -2,14 +2,13 @@
 """Compare explicitly supplied clients against the same synthetic loopback BMC."""
 import argparse
 import json
-import os
 import re
-import shutil
 import socket
 import subprocess
 import threading
 
 import shared_bmc
+import reference_profile
 
 CASES = ("device", "device-extended", "chassis", "chassis-faults", "sensor", "sensor-unavailable",
          "sensor-disabled", "sensor-events-disabled", "bad-password", "completion")
@@ -107,7 +106,7 @@ def run_case(name, executable, case):
         args = ipmitool_command(executable, port, case) if name == "ipmitool" else [executable, str(port), case]
         try:
             result = subprocess.run(args, capture_output=True, text=True, timeout=8,
-                                    env={**os.environ, "LC_ALL": "C"})
+                                    env=reference_profile.environment())
         finally:
             stop.set()
             thread.join(timeout=2)
@@ -143,13 +142,10 @@ def main():
     parser.add_argument("--moon-client", required=True)
     parser.add_argument("--go-client")
     parser.add_argument("--output", help="optional synthetic JSON report path")
+    reference_profile.add_arguments(parser)
     args = parser.parse_args()
-    ipmitool = shutil.which("ipmitool")
-    if not ipmitool:
-        raise SystemExit("ipmitool is required")
-    ipmitool_version = subprocess.check_output([ipmitool, "-V"], text=True).strip()
-    if ipmitool_version != "ipmitool version 1.8.19":
-        raise SystemExit("this comparison pins ipmitool 1.8.19; review another version before changing the baseline")
+    ipmitool, reference = reference_profile.resolve(args)
+    ipmitool_version = reference["version"]
     clients = [("moonipmi", args.moon_client), ("ipmitool", ipmitool)]
     if args.go_client:
         clients.append(("go-ipmi", args.go_client))
@@ -161,7 +157,7 @@ def main():
             print(f"PASS: {name}/{case}: {row['classification']}")
     report = {"scope": "synthetic loopback, suite 17, three reads, representative status boundaries and two error cases; not hardware validation",
               "go_ipmi_revision": "d4fb9c6923cb22f7e3c982590e57f1f2c3b58ce6" if args.go_client else None,
-              "ipmitool_version": ipmitool_version, "cases": rows}
+              "implementation": reference_profile.implementation(args.moon_client), "reference": reference, "ipmitool_version": ipmitool_version, "cases": rows}
     if args.output:
         with open(args.output, "w") as output:
             json.dump(report, output, indent=2)
