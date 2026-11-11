@@ -121,6 +121,17 @@ def detail_projection(records):
     return output
 
 
+def check_deadline(model, result, elapsed):
+    # A scheduled timeout can fire before the first reply is processed. Do not
+    # require the runner to finish that exchange within the remaining budget.
+    expected = [(0x44, 1), (0x46, 1)]
+    assert 1 <= len(model.requests) <= 2, (model.requests, elapsed)
+    assert model.requests == expected[:len(model.requests)], model.requests
+    assert result.returncode > 0 and b"operation did not complete" in result.stdout + result.stderr
+    assert not result.stdout.startswith((b"[", b"{"))
+    assert 0.15 <= elapsed < 2, elapsed
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--moon-client", required=True)
@@ -286,9 +297,10 @@ def main():
         model = Users(**kwargs)
         moon, mid = run(model, True, **options)
         assert moon.returncode > 0 and message in moon.stdout + moon.stderr and not moon.stdout.startswith((b"[", b"{"))
-        assert len(model.requests) == count
         if "deadline" in name:
-            assert executions[mid]["elapsed_seconds"] < 2
+            check_deadline(model, moon, executions[mid]["elapsed_seconds"])
+        else:
+            assert len(model.requests) == count, (name, model.requests, count)
         record("C19.users." + name, "PASS_MOON_BOUNDARY_ONLY", [mid])
 
     assert len({row["id"] for row in leaves}) == len(leaves)

@@ -159,6 +159,9 @@ Both CI platforms run it. Reports retain binary/profile identities, exact reques
 and responses, argv, stdout/stderr **hex bytes**, readable escaped views, exits and
 elapsed times. The shared runner's optional binary capture leaves existing text
 checks unchanged. Allowed commands are user reads plus session/discovery housekeeping.
+The 200 ms deadline cases accept the valid one- or two-request prefix, since CI
+scheduling may consume the first response budget; failure, no partial result and
+bounded elapsed time remain required.
 
 本地通过 **58 组原生测试**。新模拟器记录 **174 次实际客户端执行、104 个叶项**：
 **57 项输出映射、5 项原始值映射、12 项拒绝映射、15 项本库边界、12 项部分输出差异及 3 项
@@ -166,6 +169,8 @@ checks unchanged. Allowed commands are user reads plus session/discovery houseke
 名字字节及 0xcc、坏响应/权限拒绝、后续失败、上限与时限。两个 CI 平台均执行；报告保留构建身份、
 精确请求/响应、完整调用、输出**十六进制字节**及可读转义视图、退出码和耗时。
 共享运行器新增可选二进制捕获，既有文本检查保持原行为。白名单仅含用户读取及会话/发现命令。
+200 ms 超时用例允许合法的一至两次请求前缀，因为 CI 调度可能消耗首个响应的时间预算；
+仍必须失败、不返回部分结果并满足总耗时限制。
 
 C19/C20 remain partial/divergent. Password testing, account writes, channel authcap,
 the complete CLI, other authentication/transports and real-device privilege policies
