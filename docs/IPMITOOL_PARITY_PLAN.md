@@ -1,5 +1,7 @@
 # ipmitool parity plan / ipmitool 完整对齐计划
 
+[English](IPMITOOL_PARITY_PLAN.en.md)
+
 状态：**待用户审核的计划，不是实现完成声明，也不授权执行后续阶段。**
 
 本次仅盘点、编写计划和验收矩阵。不操作真实设备，不开发有状态控制，不变更认证或报文校验策略，不发布 Mooncakes。
@@ -62,7 +64,7 @@ ipmitool 中不可复现的未定义行为、崩溃或对环境偶然依赖的�
 | native/OpenSSL 3，RMCP+ suite 17，User 权限，认证/完整性/防重放，单在途 UDP 请求 | 原生测试、独立 Python 合成握手/交互、既有 Linux/macOS CI | 不覆盖其他认证、接口、权限、重试和默认行为 |
 | Device ID、Chassis Status、raw Sensor Reading | 同一 Python 模拟器上 30 项三客户端对照，记录在 [COMPARISON](COMPARISON.md) | 这 30 项不是全部命令，也不验证 CLI 全输出 |
 | SDR 仓库与 Full/Compact 部分解释 | 33 项输出对照、9 项仓库边界；[SDR](SDR.md) | 非线性/动态因子、Device SDR、共享/桥接记录、阈值设置值读取等仍缺失 |
-| 机箱能力/重启原因、基础 FRU、SEL | 41 组原生测试总数；另有 30 项诊断对照/边界；[DIAGNOSTICS](DIAGNOSTICS.md) | 不覆盖 FRU/SEL 全语义、CLI、写入或真实硬件；三个计数不能直接相加成覆盖率 |
+| 机箱能力/重启原因、基础 FRU、SEL | 41 组原生测试总数；另有 30 项混合诊断执行/边界检查，并非 30 项直接客户端对照；[DIAGNOSTICS](DIAGNOSTICS.md) | 部分机箱/SEL 文本仅有限断言；不覆盖全语义、CLI、写入或真实硬件；计数不能直接相加成覆盖率 |
 | 请求者地址宽容策略 | 24 项报文策略对照 | 已知对 responder、netfn/LUN、IPMI checksum 的处理仍与参考不同 |
 
 实现提交 `81a7728` 的[确切 CI](https://github.com/pangbit/moonipmi/actions/runs/42971333879)在 Ubuntu 24.04 和 macOS 15 通过。
@@ -146,6 +148,10 @@ Mooncakes 发布是独立的用户手动决定，不属于这些阶段的自动�
 
 审核时需要确认：1.8.19 固定基线与全构建并集；CLI/库/ipmievd/配套脚本的交付边界；K01–K10 的处理方向；
 可获得的平台/设备资源；以及下一步是否只授权 P1。当前有状态开发、真实设备操作和发布限制继续有效。
+
+建议下一步只批准 P1，在合成环境取得更细的参考行为证据，再裁决 K01–K10。
+不建议用删减旧接口、弱认证或 OEM 功能来降低验收范围；若坚持完全一致，这些功能和已知差异必须实际处理。
+对潜在内存错误、真实秘密暴露及不可控副作用，不建议直接复制缺陷；保持阻塞并提交具体可复现事实供审核，不能暗改目标。
 
 ## 8. 固定源码依据 / Sources
 

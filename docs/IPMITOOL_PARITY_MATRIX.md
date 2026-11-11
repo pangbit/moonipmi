@@ -1,5 +1,7 @@
 # ipmitool parity acceptance matrix / 逐项验收矩阵
 
+[English](IPMITOOL_PARITY_MATRIX.en.md)
+
 状态：**待审核；没有任何行已通过完整一致验收。** 参考提交、阶段、冲突 K01–K10 与最终门槛见[计划](IPMITOOL_PARITY_PLAN.md)。
 [机器可读入口清单](ipmitool-parity-inventory.json)固定 38 个注册命令与 12 个接口；C39 是通用 `help`，D 行是独立 `ipmievd`。
 每个注册入口各占一行，避免把别名、OEM 或条件编译功能从范围中移除。
