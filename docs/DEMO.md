@@ -7,6 +7,9 @@ hardware-control command. Install the dependencies listed in the README first.
 演示仅使用 `127.0.0.1` 和合成数据，不需要真实 BMC、特权端口、操作者提供的密码，
 也不执行硬件控制命令。先安装 README 中列出的依赖。
 
+For goal-oriented workflows and expected data, see [three use scenarios](SCENARIOS.md).
+面向实际用途的流程和预期数据见[三个使用场景](SCENARIOS.md)。
+
 ## Default demonstration / 默认演示
 
 From the repository root / 在仓库根目录运行：

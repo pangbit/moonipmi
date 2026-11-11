@@ -82,11 +82,12 @@ Device SDR 与 SDR 仓库是不同能力，这些只是设备自报信息，不�
 
 ## 设计、证据与对照
 
-参见[可复现演示](docs/DEMO.md)、[客户端对照](docs/COMPARISON.md)、[范围/证据](docs/STATUS.md)、[安全说明](SECURITY.md)、[贡献指南](CONTRIBUTING.md)。
+参见[三个使用场景](docs/SCENARIOS.md)、[可复现演示](docs/DEMO.md)、[客户端对照](docs/COMPARISON.md)、[范围/证据](docs/STATUS.md)、[安全说明](SECURITY.md)、[贡献指南](CONTRIBUTING.md)。
 `moon info` / `moon doc` 可生成 API 描述与文档。
 
 协议依据是 **IPMI v2.0 规范**，重点包括第 13 节 RMCP+、20.1 Get Device ID、
-28.2 Get Chassis Status、35.14 Get Sensor Reading。对照项目是
+28.2 Get Chassis Status、35.14 Get Sensor Reading。主要功能基线是
+[ipmitool 1.8.19](https://codeberg.org/IPMITool/ipmitool)，仅限三项读取范围，不表示支持其全部命令。辅助对照项目是
 [bougou/go-ipmi](https://github.com/bougou/go-ipmi)，Apache-2.0，查阅版本
 [`d4fb9c6`](https://github.com/bougou/go-ipmi/tree/d4fb9c6923cb22f7e3c982590e57f1f2c3b58ce6)。
 它是参考，不是运行时依赖或背书。已运行固定版本的参考 BMC：认证成功，但首个响应

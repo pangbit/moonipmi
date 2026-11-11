@@ -97,14 +97,17 @@ See the runnable checkout examples for a credential-free local demonstration.
 
 ## Design, evidence and references
 
-See the [reproducible demo](docs/DEMO.md), [client comparison](docs/COMPARISON.md),
+See the [three use scenarios](docs/SCENARIOS.md), [reproducible demo](docs/DEMO.md),
+[client comparison](docs/COMPARISON.md),
 [scope/evidence](docs/STATUS.md),
 [security](SECURITY.md), and
 [contributing](CONTRIBUTING.md). Run `moon info` / `moon doc` for API documentation.
 
 The protocol source is the **IPMI v2.0 specification**, especially §13 RMCP+,
 §20.1 Get Device ID, §28.2 Get Chassis Status, and §35.14 Get Sensor Reading.
-The comparison implementation is [bougou/go-ipmi](https://github.com/bougou/go-ipmi),
+The primary functional baseline is [ipmitool 1.8.19](https://codeberg.org/IPMITool/ipmitool),
+within the three-read scope, not all ipmitool commands.
+The auxiliary comparison implementation is [bougou/go-ipmi](https://github.com/bougou/go-ipmi),
 Apache-2.0, reviewed at
 [`d4fb9c6`](https://github.com/bougou/go-ipmi/tree/d4fb9c6923cb22f7e3c982590e57f1f2c3b58ce6).
 It is a reference, not a runtime dependency or endorsement. The pinned reference

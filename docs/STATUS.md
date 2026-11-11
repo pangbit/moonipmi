@@ -12,7 +12,7 @@ primitives are supplied by OpenSSL 3 through a small C adapter.
 单在途请求、User 权限及关闭/中止。提供设备标识、机箱状态、传感器原始值三项类型化只读命令。
 MoonBit 负责协议和会话，薄 C 适配调用 OpenSSL 3 密码学原语。
 
-## Verified locally / 本地验证
+## Verified evidence / 已验证证据
 
 - 23 native test groups on macOS: codecs, malformed inputs, RAKP/KDF, protected
   packet tampering/truncation/replay, all AES padding residues, deadlines and cleanup.
@@ -32,12 +32,18 @@ macOS 已验证：23 组 native 测试；RFC/NIST 密码学向量；Python 独�
 ipmitool 1.8.19 已独立交叉验证 Python 模拟器的套件 17、合成设备标识及关闭；不是硬件验证。
 已完成一次认证、FFI 长度及错误清理的聚焦只读审查，不等于安全审计。
 
-The earlier 20-test / 15-case baseline passed Linux/macOS CI at `93e0b79`:
-[verified run](https://github.com/pangbit/moonipmi/actions/runs/42852603493).
-The expanded 23-test / 30-case work is verified locally; check the current commit's
-CI before treating the new coverage as Linux-verified.
-此前 20 组测试、15 项对照基线在该提交通过双平台 CI。扩展后的 23 组/30 项已在本地验证，
-新增覆盖的 Linux 结果应以当前提交 CI 为准。
+The expanded baseline at `92301fd` passed both Linux and macOS CI:
+[verified run](https://github.com/pangbit/moonipmi/actions/runs/42864609585).
+Both jobs passed the 23 native tests, check/build, offline example and complete
+MoonBit/Python loopback exchange. The 30-case three-client matrix and both
+response-address probes passed in the **Linux job**; those optional steps are
+skipped in macOS CI and have separate local macOS evidence above. This is evidence
+for that exact revision, not a claim about untested future commits.
+
+扩展基线 `92301fd` 已通过上述 Linux/macOS CI。两个任务均通过 23 组 native 测试、
+检查/构建、离线示例及 MoonBit/Python 完整本地交互。30 项三客户端矩阵与两个响应地址探针
+在 **Linux 任务**中通过；macOS CI 跳过这些可选步骤，其本地 macOS 证据见上。
+该结果对应这一确切版本，不替代后续提交的验证。
 
 ## Not verified / 尚未验证
 
