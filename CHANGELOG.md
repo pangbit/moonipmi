@@ -2,6 +2,17 @@
 
 ## Unreleased / 未发布
 
+- Add chassis capabilities/restart-cause diagnostics, bounded byte/word FRU reads
+  with validated basic areas and raw unsupported fields, and bounded SEL traversal
+  with standard event metadata, threshold transitions and explicit timestamp kinds.
+- FRU/SEL have total limits and whole-operation timeouts, fail without partial
+  results, and never perform hardware controls, FRU writes or SEL mutations.
+  Add a synthetic diagnostic example and actual ipmitool 1.8.19 comparisons.
+- 新增机箱能力/重启原因、校验基础区域的有界字节/字 FRU 读取，以及有界 SEL 遍历、
+  标准事件元数据、阈值转换和明确时间类型。不支持字段/记录保留原始数据。
+- FRU/SEL 限制总量和整体时长，失败不返回部分清单，不做硬件控制、FRU 写入或 SEL 修改。
+  增加合成诊断示例及实际 ipmitool 1.8.19 对照。
+
 - Add bounded SDR repository info/reservation/traversal and Full/Compact Sensor
   decoding, linear engineering values, units and threshold/discrete status.
   Explicitly reject unsupported routing and retain unknown record types.

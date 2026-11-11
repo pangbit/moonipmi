@@ -22,10 +22,12 @@ Use only on explicitly authorised systems and isolated management networks.
   no automatic retry, explicit close and immediate local abort.
   Use plain IPv4 rather than IPv4-mapped IPv6; mapped forms are rejected.
 - Typed Device ID, Chassis Status and raw Sensor Reading commands.
+- Chassis capabilities/restart cause, bounded basic FRU inventory and SEL records,
+  with total size/count and whole-operation deadlines. See [diagnostics](docs/DIAGNOSTICS.md).
 - Bounded SDR repository traversal, Full/Compact Sensor records, common linear
   engineering values, threshold/discrete states and units. See [SDR support](docs/SDR.md).
 
-No hardware-control writes, generic network command API, OEM/SOL, SEL/FRU,
+No hardware-control writes, generic network command API, OEM/SOL, FRU writes or SEL mutation,
 Device SDRs, bridging, IPMI 1.5, cipher negotiation, Kg override or automatic
 reconnection. Session housekeeping and SDR reservations do not change hardware
 configuration. Nonlinear/OEM conversion and shared Compact expansion are explicitly
@@ -115,7 +117,7 @@ The protocol source is the **IPMI v2.0 specification**, especially §13 RMCP+,
 §20.1 Get Device ID, §28.2 Get Chassis Status, §33 SDR Repository,
 §35.14 Get Sensor Reading and §43 Sensor Data Records.
 The primary functional baseline is [ipmitool 1.8.19](https://codeberg.org/IPMITool/ipmitool),
-within the implemented read-only and SDR subset, not all ipmitool commands.
+within the implemented read-only, SDR and diagnostics subset, not all ipmitool commands.
 The auxiliary comparison implementation is [bougou/go-ipmi](https://github.com/bougou/go-ipmi),
 Apache-2.0, reviewed at
 [`d4fb9c6`](https://github.com/bougou/go-ipmi/tree/d4fb9c6923cb22f7e3c982590e57f1f2c3b58ce6).

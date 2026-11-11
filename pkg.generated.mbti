@@ -7,6 +7,8 @@ import {
 }
 
 // Values
+pub fn decode_fru_inventory(Bytes) -> FruInventory raise ProtocolError
+
 pub fn decode_handshake(Bytes) -> HandshakePacket raise ProtocolError
 
 pub fn decode_open_session(Bytes, Int32, UInt32) -> OpenSession raise ProtocolError
@@ -19,6 +21,8 @@ pub fn decode_response(Bytes, Int32, Int32, Int32) -> Response raise ProtocolErr
 
 pub fn decode_sdr_record(Bytes) -> SdrRecord raise ProtocolError
 
+pub fn decode_sel_record(Bytes) -> SelRecord raise ProtocolError
+
 pub fn encode_handshake(Int32, Bytes) -> Bytes raise ProtocolError
 
 pub fn encode_request(Int32, Int32, Int32, Bytes) -> Bytes raise ProtocolError
@@ -29,6 +33,8 @@ pub fn rakp1_request(Int32, UInt32, Bytes, Bytes) -> Bytes raise ProtocolError
 
 pub fn rakp3_request(Int32, UInt32, Bytes) -> Bytes raise ProtocolError
 
+pub fn sel_time(UInt32) -> SelTime
+
 // Errors
 #derive(@debug.Debug)
 pub suberror ProtocolError {
@@ -37,6 +43,19 @@ pub suberror ProtocolError {
 pub fn ProtocolError::to_repr(Self) -> @debug.Repr
 
 // Types and methods
+#derive(Eq, @debug.Debug)
+pub struct ChassisCapabilities {
+  flags : Int32
+  fru_address : Int32
+  sdr_address : Int32
+  sel_address : Int32
+  system_management_address : Int32
+  bridge_address : Int32?
+}
+pub fn ChassisCapabilities::equal(Self, Self) -> Bool
+pub fn ChassisCapabilities::not_equal(Self, Self) -> Bool
+pub fn ChassisCapabilities::to_repr(Self) -> @debug.Repr
+
 #derive(Eq, @debug.Debug)
 pub struct ChassisStatus {
   power_on : Bool
@@ -61,12 +80,18 @@ pub struct Client {
   // private fields
 }
 pub fn Client::abort(Self) -> Unit
+pub async fn Client::chassis_capabilities(Self) -> ChassisCapabilities
 pub async fn Client::close(Self) -> Unit
 pub async fn Client::connect(@socket.Addr, Bytes, Bytes, timeout_ms? : Int32) -> Self
+pub async fn Client::fru_info(Self, Byte) -> FruInfo
+pub async fn Client::fru_inventory(Self, Byte, max_bytes? : Int32, timeout_ms? : Int32) -> FruInventory
 pub async fn Client::read(Self, ReadCommand) -> Response
 pub async fn Client::read_sensor(Self, SdrSensor) -> SensorReading
+pub async fn Client::restart_cause(Self) -> RestartCause
 pub async fn Client::sdr_records(Self, max_records? : Int32) -> Array[SdrRecord]
 pub async fn Client::sdr_repository_info(Self) -> SdrRepositoryInfo
+pub async fn Client::sel_info(Self) -> SelInfo
+pub async fn Client::sel_records(Self, max_records? : Int32, timeout_ms? : Int32) -> Array[SelRecord]
 
 #derive(Eq, @debug.Debug)
 pub struct DeviceId {
@@ -86,6 +111,50 @@ pub struct DeviceId {
 pub fn DeviceId::equal(Self, Self) -> Bool
 pub fn DeviceId::not_equal(Self, Self) -> Bool
 pub fn DeviceId::to_repr(Self) -> @debug.Repr
+
+#derive(Eq, @debug.Debug)
+pub struct FruArea {
+  raw : Bytes
+  fields : Array[FruField]
+  language_code : Int32?
+  chassis_type : Int32?
+  manufacturing_minutes : Int32?
+}
+pub fn FruArea::equal(Self, Self) -> Bool
+pub fn FruArea::not_equal(Self, Self) -> Bool
+pub fn FruArea::to_repr(Self) -> @debug.Repr
+
+#derive(Eq, @debug.Debug)
+pub struct FruField {
+  encoding : Int32
+  raw : Bytes
+  text : String?
+}
+pub fn FruField::equal(Self, Self) -> Bool
+pub fn FruField::not_equal(Self, Self) -> Bool
+pub fn FruField::to_repr(Self) -> @debug.Repr
+
+#derive(Eq, @debug.Debug)
+pub struct FruInfo {
+  size_bytes : Int32
+  word_access : Bool
+}
+pub fn FruInfo::equal(Self, Self) -> Bool
+pub fn FruInfo::not_equal(Self, Self) -> Bool
+pub fn FruInfo::to_repr(Self) -> @debug.Repr
+
+#derive(Eq, @debug.Debug)
+pub struct FruInventory {
+  raw : Bytes
+  chassis : FruArea?
+  board : FruArea?
+  product : FruArea?
+  internal_use : Bytes?
+  multirecord : Bytes?
+}
+pub fn FruInventory::equal(Self, Self) -> Bool
+pub fn FruInventory::not_equal(Self, Self) -> Bool
+pub fn FruInventory::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
 pub struct HandshakePacket {
@@ -127,13 +196,27 @@ pub struct Response {
   completion_code : Int32
   data : Bytes
 }
+pub fn Response::chassis_capabilities(Self) -> ChassisCapabilities raise ProtocolError
 pub fn Response::chassis_status(Self) -> ChassisStatus raise ProtocolError
 pub fn Response::device_id(Self) -> DeviceId raise ProtocolError
 pub fn Response::equal(Self, Self) -> Bool
+pub fn Response::fru_info(Self) -> FruInfo raise ProtocolError
 pub fn Response::not_equal(Self, Self) -> Bool
+pub fn Response::restart_cause(Self) -> RestartCause raise ProtocolError
 pub fn Response::sdr_repository_info(Self) -> SdrRepositoryInfo raise ProtocolError
+pub fn Response::sel_info(Self) -> SelInfo raise ProtocolError
 pub fn Response::sensor_reading(Self) -> SensorReading raise ProtocolError
 pub fn Response::to_repr(Self) -> @debug.Repr
+
+#derive(Eq, @debug.Debug)
+pub struct RestartCause {
+  cause : Int32
+  channel : Int32
+}
+pub fn RestartCause::description(Self) -> String?
+pub fn RestartCause::equal(Self, Self) -> Bool
+pub fn RestartCause::not_equal(Self, Self) -> Bool
+pub fn RestartCause::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
 pub struct SdrRecord {
@@ -189,6 +272,56 @@ pub fn SdrSensor::state(Self, SensorReading) -> SensorState
 pub fn SdrSensor::to_repr(Self) -> @debug.Repr
 pub fn SdrSensor::unit(Self) -> String?
 pub fn SdrSensor::value(Self, SensorReading) -> SensorValue
+
+#derive(Eq, @debug.Debug)
+pub struct SelEvent {
+  timestamp : UInt32
+  generator_id : Int32
+  revision : Int32
+  sensor_type : Int32
+  sensor_number : Int32
+  event_type : Int32
+  deassertion : Bool
+  event_data : Bytes
+}
+pub fn SelEvent::equal(Self, Self) -> Bool
+pub fn SelEvent::not_equal(Self, Self) -> Bool
+pub fn SelEvent::threshold_description(Self) -> String?
+pub fn SelEvent::to_repr(Self) -> @debug.Repr
+
+#derive(Eq, @debug.Debug)
+pub struct SelInfo {
+  version : Int32
+  entries : Int32
+  free_space : Int32
+  last_addition : UInt32
+  last_erase : UInt32
+  operations : Int32
+}
+pub fn SelInfo::equal(Self, Self) -> Bool
+pub fn SelInfo::not_equal(Self, Self) -> Bool
+pub fn SelInfo::to_repr(Self) -> @debug.Repr
+
+#derive(Eq, @debug.Debug)
+pub struct SelRecord {
+  record_id : Int32
+  record_type : Int32
+  raw : Bytes
+}
+pub fn SelRecord::equal(Self, Self) -> Bool
+pub fn SelRecord::event(Self) -> SelEvent? raise ProtocolError
+pub fn SelRecord::not_equal(Self, Self) -> Bool
+pub fn SelRecord::to_repr(Self) -> @debug.Repr
+
+#derive(Eq, @debug.Debug)
+pub(all) enum SelTime {
+  Unspecified
+  Relative(UInt32)
+  UnixSeconds(UInt32)
+}
+pub fn SelTime::equal(Self, Self) -> Bool
+pub fn SelTime::not_equal(Self, Self) -> Bool
+pub fn SelTime::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
 pub struct SensorConversion {

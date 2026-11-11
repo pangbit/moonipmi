@@ -13,6 +13,21 @@ primitives are supplied by OpenSSL 3 through a small C adapter.
 单在途请求、User 权限及关闭/中止。提供设备标识、机箱状态、传感器原始值三项类型化只读命令，以及 SDR 仓库遍历和 Full/Compact 解释。
 MoonBit 负责协议和会话，薄 C 适配调用 OpenSSL 3 密码学原语。
 
+## Read-only diagnostics / 只读诊断
+
+Current unreleased source also provides chassis capabilities/restart cause,
+validated basic FRU inventory (byte/word access), and bounded SEL enumeration with
+raw OEM retention and standard event metadata. FRU/SEL enforce total size/count
+and overall deadlines. See [scope and reproduction](DIAGNOSTICS.md). Local macOS
+verification passes 41 native test groups and the focused ipmitool 1.8.19
+comparison/boundary checker. Exact-commit CI is separate evidence; no real BMC
+validation or publication is claimed.
+
+当前未发布源码新增机箱能力/重启原因、经校验的基础 FRU（字节/字访问）和有界 SEL 枚举，
+保留 OEM 原始记录，解析标准事件元数据。FRU/SEL 限制总量及整体时长。
+本地 macOS 已通过 41 组原生测试和聚焦 ipmitool 1.8.19 对照/边界检查；确切提交的 CI
+是独立证据，不宣称实机验证或已发布。
+
 ## Verified evidence / 已验证证据
 
 - 24 native test groups on macOS: codecs, malformed inputs, RAKP/KDF, protected

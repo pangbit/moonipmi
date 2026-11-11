@@ -12,7 +12,9 @@ ID, HMAC and anti-replay checks still apply; `decode_response` alone is only a
 codec and does not authenticate. Other malformed/authentication/I/O failures close
 the client. There is no anonymous mode, automatic downgrade or retry.
 
-The high-level client exposes three read-only operations and session housekeeping.
+The high-level client exposes typed read-only device/sensor/chassis diagnostics,
+bounded SDR/FRU/SEL retrieval and session housekeeping. FRU/SEL enforce total
+size/count and whole-operation deadlines; they never write inventory or logs.
 The low-level `encode_request` function only returns bytes and sends nothing.
 Use only explicitly authorised systems and isolated management networks. Even
 read-only requests may leave audit records and consume BMC resources. UDP peer
@@ -41,7 +43,8 @@ details or private information.
 不取消认证。响应者地址、两个 LUN、netfn、命令、序号、校验和、连接对端、会话 ID、HMAC 与防重放检查仍保留。
 单独调用 `decode_response` 只是编解码，不提供认证。其他畸形、认证或 I/O 错误会关闭会话，不提供匿名、自动降级或重试。
 
-高层客户端仅提供三项只读操作与会话管理；底层 encode_request 只生成字节，不发送。
+高层客户端仅提供设备/传感器/机箱只读诊断、有界 SDR/FRU/SEL 获取及会话管理。
+FRU/SEL 限制总量与整体时长，不修改清单或日志；底层 encode_request 只生成字节，不发送。
 仅访问明确授权的系统和隔离管理网络。只读请求仍可能产生日志、占用资源；UDP 对端过滤不能替代认证。
 本仓库测试未使用真实 BMC 或真实凭据。
 

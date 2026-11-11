@@ -19,3 +19,6 @@ tools/address_check.py
 
 tools/sdr_check.py
 tools/sdr_fixture.py
+
+tools/diagnostics_check.py
+tools/diagnostics_fixture.py
