@@ -182,6 +182,10 @@ pub async fn Client::sel_info(Self) -> SelInfo
 pub async fn Client::sel_records(Self, max_records? : Int32, timeout_ms? : Int32) -> Array[SelRecord]
 pub async fn Client::self_test(Self) -> SelfTestResult
 pub async fn Client::system_info(Self, SystemInfoParameter, max_bytes? : Int32, timeout_ms? : Int32) -> SystemInfoString
+pub async fn Client::user_access(Self, Int32, channel? : Int32) -> UserAccess
+pub async fn Client::user_name(Self, Int32) -> UserName
+pub async fn Client::user_record(Self, Int32, channel? : Int32, timeout_ms? : Int32) -> UserRecord
+pub async fn Client::users(Self, channel? : Int32, mode? : UserListMode, max_users? : Int32, timeout_ms? : Int32) -> Array[UserRecord]
 pub async fn Client::watchdog_timer(Self) -> WatchdogTimer
 
 #derive(Eq, @debug.Debug)
@@ -364,6 +368,8 @@ pub fn Response::self_test(Self) -> SelfTestResult raise ProtocolError
 pub fn Response::sensor_reading(Self) -> SensorReading raise ProtocolError
 pub fn Response::system_info_block(Self) -> SystemInfoBlock raise ProtocolError
 pub fn Response::to_repr(Self) -> @debug.Repr
+pub fn Response::user_access(Self) -> UserAccess raise ProtocolError
+pub fn Response::user_name(Self) -> UserName raise ProtocolError
 pub fn Response::watchdog_timer(Self) -> WatchdogTimer raise ProtocolError
 
 #derive(Eq, @debug.Debug)
@@ -592,6 +598,51 @@ pub fn SystemInfoString::ascii_text(Self) -> String?
 pub fn SystemInfoString::equal(Self, Self) -> Bool
 pub fn SystemInfoString::not_equal(Self, Self) -> Bool
 pub fn SystemInfoString::to_repr(Self) -> @debug.Repr
+
+#derive(Eq, @debug.Debug)
+pub struct UserAccess {
+  max_user_ids : Int32
+  enabled_user_ids : Int32
+  fixed_user_ids : Int32
+  enable_status : Int32
+  call_in_allowed : Bool
+  link_authentication : Bool
+  ipmi_messaging : Bool
+  privilege_limit : Int32
+  raw : Bytes
+}
+pub fn UserAccess::equal(Self, Self) -> Bool
+pub fn UserAccess::not_equal(Self, Self) -> Bool
+pub fn UserAccess::to_repr(Self) -> @debug.Repr
+
+#derive(Eq, @debug.Debug)
+pub(all) enum UserListMode {
+  FollowMaximum
+  InitialMaximum
+}
+pub fn UserListMode::equal(Self, Self) -> Bool
+pub fn UserListMode::not_equal(Self, Self) -> Bool
+pub fn UserListMode::to_repr(Self) -> @debug.Repr
+
+#derive(Eq, @debug.Debug)
+pub struct UserName {
+  data : Bytes
+  raw : Bytes
+}
+pub fn UserName::ascii_text(Self) -> String?
+pub fn UserName::equal(Self, Self) -> Bool
+pub fn UserName::not_equal(Self, Self) -> Bool
+pub fn UserName::to_repr(Self) -> @debug.Repr
+
+#derive(Eq, @debug.Debug)
+pub struct UserRecord {
+  user_id : Int32
+  access : UserAccess
+  name : UserName?
+}
+pub fn UserRecord::equal(Self, Self) -> Bool
+pub fn UserRecord::not_equal(Self, Self) -> Bool
+pub fn UserRecord::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
 pub struct WatchdogTimer {

@@ -59,17 +59,34 @@ CLI policy remains open. No full-family parity or real-device evidence is claime
 ## Channel reads / 通道读取
 
 Current source adds `channel_info`, `channel_access` for volatile/nonvolatile
-policy and `channel_cipher_suites` for IPMI/SOL advertisements. Local native
-checks total 55 groups. [178 executions / 108 leaves](CHANNEL.md) record 61
+policy and `channel_cipher_suites` for IPMI/SOL advertisements. That batch
+passed 55 native test groups. [178 executions / 108 leaves](CHANNEL.md) record 61
 output, 2 raw, 9 rejection, 10 moon-only boundaries and 26 divergent outcomes.
 Reference list truncation, unknown-label aliasing and partial outputs remain
 open in the [decision register](PARITY_DECISIONS.md). No authentication, privilege,
 cipher selection, SOL activation or real-device controls were added or changed.
 
-当前新增通道信息、活动/持久通道策略和 IPMI/SOL 套件声明读取；本地原生测试共 55 组。
+当前新增通道信息、活动/持久通道策略和 IPMI/SOL 套件声明读取；该批次原生测试共 55 组。
 [178 次执行、108 个叶项](CHANNEL.md)包含 61 项输出映射、2 项 raw、9 项拒绝、10 项本库边界
 和 26 项差异。参考列表截断、未知标签别名与部分输出继续列入[裁决汇总](PARITY_DECISIONS.md)。
 未新增或改变认证、权限、套件选择、SOL 激活或真实设备控制。
+
+## User reads / 用户读取
+
+Current source adds `user_access`, `user_name`, `user_record` and `users`, including
+both reference enumeration rules and explicit name-completion-0xcc handling.
+Local native tests total 58 groups. [174 actual-client executions / 104 leaves](USERS.md)
+record 57 output, 5 raw, 12 rejection, 15 moon-only boundaries, 12 partial-output
+differences and 3 unescaped-name observations. Reports retain exact output bytes,
+including binary names. The [decision register](PARITY_DECISIONS.md) keeps these
+unresolved alongside GUID, precision, safety and earlier partial-output differences.
+No account writes, password tests, privilege changes or real-device controls were added.
+
+当前新增用户权限、名字、单用户记录及列表读取，包含两种参考枚举规则和名字完成码 0xcc 的明确处理。
+本地原生测试共 58 组；[174 次实际客户端执行、104 个叶项](USERS.md)记录 57 项输出映射、5 项 raw、
+12 项拒绝、15 项本库边界、12 项部分输出差异和 3 项未转义名字观察。报告保留含二进制名字在内的
+精确输出字节；上述未决事项与 GUID、精度、安全及既有部分输出差异一起纳入[裁决汇总](PARITY_DECISIONS.md)。
+未新增账户写入、密码测试、权限变更或真实设备控制。
 
 ## Full-parity work / 完整对齐工作
 

@@ -279,6 +279,11 @@ async fn run_case() -> Unit {
         parts[0] == "channel-access" ||
         parts[0] == "ciphers" {
         run_channel_case(client, parts)
+      } else if parts[0] == "user-access" ||
+        parts[0] == "user-name" ||
+        parts[0] == "user-record" ||
+        parts[0] == "users" {
+        run_user_case(client, parts)
       } else {
         fail("unknown read-only scenario")
       }

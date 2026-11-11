@@ -13,7 +13,7 @@ import shared_bmc
 import reference_profile
 
 
-def execute(executable, mode, *, moon=False, fault=None, word=False, cwd=None, model=None):
+def execute(executable, mode, *, moon=False, fault=None, word=False, cwd=None, model=None, binary=False):
     trace = {"authenticated": False, "closed": False, "commands": []}
     model = fixture.Diagnostics(fault, word) if model is None else model
     errors = []
@@ -38,7 +38,7 @@ def execute(executable, mode, *, moon=False, fault=None, word=False, cwd=None, m
             "-p", str(port), "-N", "1", "-R", "1", *mode.split()]
         start = time.monotonic()
         try:
-            result = subprocess.run(args, capture_output=True, text=True, timeout=15, cwd=cwd, stdin=subprocess.DEVNULL,
+            result = subprocess.run(args, capture_output=True, text=not binary, timeout=15, cwd=cwd, stdin=subprocess.DEVNULL,
                                     env=reference_profile.environment())
         finally:
             stop.set()

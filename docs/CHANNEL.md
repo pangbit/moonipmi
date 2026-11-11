@@ -25,14 +25,14 @@ let suites = client.channel_cipher_suites(Ipmi, channel=1,
 All channel arguments default to 14 and accept 0..11, 14 or 15, matching the
 reference's public channel-number validation. Invalid numbers fail before the
 read. `channel_access` reads **channel policy**: it is not the reference CLI's
-`channel getaccess`, which reads **per-user access** and remains unimplemented.
+`channel getaccess`, which reads **per-user access**, now available in the subsequent [user-read batch](USERS.md).
 The reference `channel info` reads channel policy for LAN media 4 and 6, first
 volatile, then nonvolatile; the demonstration adapter follows that sequence.
 The library exposes separate operations, without claiming an atomic combined snapshot.
 
 通道默认值均为 14，接受 0..11、14、15，与参考公开参数检查一致，非法值在发起读取前拒绝。
 `channel_access` 读取**通道策略**，并非参考 CLI 的**逐用户权限**命令 `channel getaccess`，
-后者仍未实现。参考 `channel info` 对 LAN 介质 4/6 依次读取活动及持久策略，示例按此顺序执行。
+后者已由后续[用户读取批次](USERS.md)补充。参考 `channel info` 对 LAN 介质 4/6 依次读取活动及持久策略，示例按此顺序执行。
 库提供独立操作，不保证三次读取组成原子快照。
 
 ## Returned fields / 返回字段
@@ -157,11 +157,11 @@ plus session/discovery housekeeping. The adapter is localhost-only.
 部分失败、协议页数上限、字节限制与整体时限。两个 CI 平台均执行并保留构建身份、完整调用/
 输出/退出码和认证 trace。命令白名单只含这些读取及会话/发现操作，适配器仅连接本机。
 
-C20 remains partial/divergent. `authcap`, per-user `getaccess`, controls, a complete
+C20 remains partial/divergent. `authcap`, controls, a complete
 CLI, other authentication/transports, real privilege policies and hardware are
 still absent or unverified. No test count is a full-parity percentage.
 
-C20 仍为部分实现/存在差异；认证能力查询、逐用户访问读取、控制、完整 CLI、其他认证/传输、
+C20 仍为部分实现/存在差异；认证能力查询、控制、完整 CLI、其他认证/传输、
 实际权限策略及硬件仍缺失或未验证，测试计数不是完整对齐覆盖率。
 
 Pinned sources: [channel implementation](https://github.com/ipmitool/ipmitool/blob/19d78782d795d0cf4ceefe655f616210c9143e62/lib/ipmi_channel.c),
