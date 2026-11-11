@@ -69,6 +69,8 @@ jobs:
         run: python3 tools/channel_check.py --reference-profile _build/ipmitool-reference/profile.json --moon-client _build/native/debug/build/examples/diagnostics/diagnostics.exe --output _build/channel-comparison.json
       - name: Compare user reads with ipmitool
         run: python3 tools/user_check.py --reference-profile _build/ipmitool-reference/profile.json --moon-client _build/native/debug/build/examples/diagnostics/diagnostics.exe --output _build/user-comparison.json
+      - name: Compare session reads with ipmitool
+        run: python3 tools/session_check.py --reference-profile _build/ipmitool-reference/profile.json --moon-client _build/native/debug/build/examples/diagnostics/diagnostics.exe --output _build/session-comparison.json
       - name: Compare reads and command limits against the go-ipmi BMC
         if: runner.os == 'Linux'
         run: python3 tools/go_interop.py _build/native/debug/build/examples/comparison/comparison.exe _build/reference-bmc --compare-reads --reference-profile _build/ipmitool-reference/profile.json

@@ -284,6 +284,8 @@ async fn run_case() -> Unit {
         parts[0] == "user-record" ||
         parts[0] == "users" {
         run_user_case(client, parts)
+      } else if parts[0] == "session-info" || parts[0] == "sessions" {
+        run_session_case(client, parts)
       } else {
         fail("unknown read-only scenario")
       }

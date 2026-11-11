@@ -181,6 +181,8 @@ pub async fn Client::sdr_repository_info(Self) -> SdrRepositoryInfo
 pub async fn Client::sel_info(Self) -> SelInfo
 pub async fn Client::sel_records(Self, max_records? : Int32, timeout_ms? : Int32) -> Array[SelRecord]
 pub async fn Client::self_test(Self) -> SelfTestResult
+pub async fn Client::session_info(Self, selector? : SessionSelector) -> SessionInfo
+pub async fn Client::sessions(Self, max_slots? : Int32, timeout_ms? : Int32) -> Array[SessionEntry]
 pub async fn Client::system_info(Self, SystemInfoParameter, max_bytes? : Int32, timeout_ms? : Int32) -> SystemInfoString
 pub async fn Client::user_access(Self, Int32, channel? : Int32) -> UserAccess
 pub async fn Client::user_name(Self, Int32) -> UserName
@@ -366,6 +368,7 @@ pub fn Response::sdr_repository_info(Self) -> SdrRepositoryInfo raise ProtocolEr
 pub fn Response::sel_info(Self) -> SelInfo raise ProtocolError
 pub fn Response::self_test(Self) -> SelfTestResult raise ProtocolError
 pub fn Response::sensor_reading(Self) -> SensorReading raise ProtocolError
+pub fn Response::session_info(Self) -> SessionInfo raise ProtocolError
 pub fn Response::system_info_block(Self) -> SystemInfoBlock raise ProtocolError
 pub fn Response::to_repr(Self) -> @debug.Repr
 pub fn Response::user_access(Self) -> UserAccess raise ProtocolError
@@ -560,6 +563,61 @@ pub(all) enum SensorValue {
 pub fn SensorValue::equal(Self, Self) -> Bool
 pub fn SensorValue::not_equal(Self, Self) -> Bool
 pub fn SensorValue::to_repr(Self) -> @debug.Repr
+
+#derive(Eq, @debug.Debug)
+pub(all) enum SessionConnection {
+  HeaderOnly
+  Lan(console_ip~ : Bytes, console_mac~ : Bytes, console_port~ : Int32)
+  Serial(activity~ : Int32, destination~ : Int32, console_ip~ : Bytes, console_port~ : Int32?)
+}
+pub fn SessionConnection::equal(Self, Self) -> Bool
+pub fn SessionConnection::not_equal(Self, Self) -> Bool
+pub fn SessionConnection::to_repr(Self) -> @debug.Repr
+
+#derive(Eq, @debug.Debug)
+pub struct SessionDetails {
+  user_id : Int32
+  privilege_level : Int32
+  channel : Int32
+  auxiliary : Int32
+  connection : SessionConnection
+}
+pub fn SessionDetails::equal(Self, Self) -> Bool
+pub fn SessionDetails::not_equal(Self, Self) -> Bool
+pub fn SessionDetails::to_repr(Self) -> @debug.Repr
+
+#derive(Eq, @debug.Debug)
+pub struct SessionEntry {
+  slot : Int32
+  completion_code : Int32
+  info : SessionInfo
+}
+pub fn SessionEntry::equal(Self, Self) -> Bool
+pub fn SessionEntry::not_equal(Self, Self) -> Bool
+pub fn SessionEntry::to_repr(Self) -> @debug.Repr
+
+#derive(Eq, @debug.Debug)
+pub struct SessionInfo {
+  handle : Int32
+  slot_count : Int32
+  active_count : Int32
+  details : SessionDetails?
+  raw : Bytes
+}
+pub fn SessionInfo::equal(Self, Self) -> Bool
+pub fn SessionInfo::not_equal(Self, Self) -> Bool
+pub fn SessionInfo::to_repr(Self) -> @debug.Repr
+
+#derive(Eq, @debug.Debug)
+pub(all) enum SessionSelector {
+  Current
+  Id(UInt32)
+  Handle(Int32)
+  Slot(Int32)
+}
+pub fn SessionSelector::equal(Self, Self) -> Bool
+pub fn SessionSelector::not_equal(Self, Self) -> Bool
+pub fn SessionSelector::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
 pub struct SystemInfoBlock {

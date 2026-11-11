@@ -75,7 +75,7 @@ cipher selection, SOL activation or real-device controls were added or changed.
 
 Current source adds `user_access`, `user_name`, `user_record` and `users`, including
 both reference enumeration rules and explicit name-completion-0xcc handling.
-Local native tests total 58 groups. [174 actual-client executions / 104 leaves](USERS.md)
+That batch passed 58 native test groups. [174 actual-client executions / 104 leaves](USERS.md)
 record 57 output, 5 raw, 12 rejection, 15 moon-only boundaries, 12 partial-output
 differences and 3 unescaped-name observations. Reports retain exact output bytes,
 including binary names. The [decision register](PARITY_DECISIONS.md) keeps these
@@ -83,10 +83,25 @@ unresolved alongside GUID, precision, safety and earlier partial-output differen
 No account writes, password tests, privilege changes or real-device controls were added.
 
 当前新增用户权限、名字、单用户记录及列表读取，包含两种参考枚举规则和名字完成码 0xcc 的明确处理。
-本地原生测试共 58 组；[174 次实际客户端执行、104 个叶项](USERS.md)记录 57 项输出映射、5 项 raw、
+该批次原生测试共 58 组；[174 次实际客户端执行、104 个叶项](USERS.md)记录 57 项输出映射、5 项 raw、
 12 项拒绝、15 项本库边界、12 项部分输出差异和 3 项未转义名字观察。报告保留含二进制名字在内的
 精确输出字节；上述未决事项与 GUID、精度、安全及既有部分输出差异一起纳入[裁决汇总](PARITY_DECISIONS.md)。
 未新增账户写入、密码测试、权限变更或真实设备控制。
+
+## Session information reads / 会话信息读取
+
+Current source adds `session_info` with current/ID/handle/slot selectors and
+bounded `sessions` enumeration. Local native tests total 61 groups.
+[283 executions / 186 leaves](SESSIONS.md) record 116 output, 2 raw, 12 rejection,
+12 moon-only boundaries, 43 differences and one reference-only observation.
+PPP port offsets, accepted malformed lengths, partial output and handle truncation
+remain open in the [decision register](PARITY_DECISIONS.md). No remote session
+controls, authentication changes or real-device evidence are introduced.
+
+当前新增四种选择器的会话信息查询及有界枚举，本地原生测试共 61 组。
+[283 次执行、186 个叶项](SESSIONS.md)包含 116 项输出、2 项 raw、12 项拒绝、12 项本库边界、
+43 项差异及一项参考单侧观察。PPP 端口偏移、坏长度接受、部分输出和句柄截断继续列入
+[裁决汇总](PARITY_DECISIONS.md)，未新增远端会话控制、认证变更或实机证据。
 
 ## Full-parity work / 完整对齐工作
 

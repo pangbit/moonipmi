@@ -56,7 +56,7 @@
 | C18 `isol` [源码][isol] | Intel IPMI 1.5 SOL info/set/activate | N | 配置字段、legacy session、终端数据、逃逸字符/关闭、接口不支持时的参考结果 | R/W/T/V；P3/P5 |
 | C19 `user` [源码][user] | summary/list、test、set name/password/priv、enable/disable | P/D：已有计数/权限/名字及两种扫描规则；部分输出/名字显示待定，test/写入/CLI 缺失 | ID/channel 边界、16/20 字节密码、禁用/权限矩阵、密码测试与设置区别、部分失败后状态 | R/W、合成用户；P3/P4 |
 | C20 `channel` [源码][channel] | authcap/info/getaccess/setaccess/getciphers ipmi/sol | P/D：已有信息/通道策略/套件列表/逐用户权限 API，显示/部分输出有差异；authcap、控制及 CLI 缺失 | 每个 channel、访问位/持久性、分页密码套件、权限拒绝和非法 payload；设置后实际权限 | R/W；P3/P4 |
-| C21 `session` [源码][session] | info active/all/id/handle | N：本库 session 类型是内部协议状态，不是此命令 | 活跃/缺失/多个 session、地址字段、ID/handle 选择、短响应与限制 | R；P3 |
+| C21 `session` [源码][session] | info active/all/id/handle | P/D：已有当前/ID/句柄/槽位读取及有界枚举；PPP 端口/长度/部分输出/句柄有差异，CLI 与实机缺失 | 活跃/缺失/多个 session、地址字段、ID/handle 选择、短响应与限制 | R；P3 |
 | C22 `dcmi` [源码][dcmi] | discover/oob_discover、sensors、asset_tag/set_asset_tag、get/set_mc_id_string、get_temp_reading、get/set_conf_param、thermalpolicy get/set；power reading/get_limit/set_limit/activate/deactivate | N | 能力页/温度实体、字符串分块、功率限制动作/采样、DHCP 配置、Ping/Pong；每个表驱动参数独立建例 | R/W/V、DCMI peer；P3/P6 |
 | C23 `nm` [源码][dcmi] | discover/capability/control；policy add/get/remove/limiting；statistics、power range、suspend、reset、alert、threshold | N | domain/policy ID、trigger、volatile/cores_off、统计模式、阈值和暂停数组、告警目标/删除/重置；按实际版本能力 | R/W/V、Intel NM；P3/P6 |
 | C24 `sunoem` [源码][sunoem] | cli（含 force/wait）、led/sbled、sshkey set/del、ping/version/nacname/getval/setval/getfile/getbehavior | N | 属性/传感器映射、交互 CLI、LED 组、文件传输、SSH key 分块、版本能力与厂商错误 | R/W/F/T/V；P3/P6 |
@@ -158,6 +158,10 @@
 ## 已实现的用户读取
 
 [四个用户 API](USERS.md)新增权限/计数、固定字段名字、单用户记录及两种参考上限规则的有界扫描。174 次执行、104 个叶项包含 57 项输出映射、5 项 raw、12 项拒绝、15 项本库边界、12 项部分输出差异和 3 项未转义名字观察。C19/C20 仍部分实现/有差异，写入、密码测试、authcap、完整 CLI 和真实权限/硬件证据仍缺失；K04/K06/K08 显示、部分结果及清理决策继续保留在[汇总](PARITY_DECISIONS.md)。
+
+## 已实现的会话信息读取
+
+[会话信息及有界枚举](SESSIONS.md)新增 283 次执行、186 个叶项：116 项输出映射、2 项 raw、12 项拒绝映射、12 项本库边界、43 项差异及一项参考单侧句柄截断观察。已验证选择器、LAN/串口布局、变化的槽位计数、完成码例外和时限。PPP 端口偏移、坏长度接受、部分输出与句柄截断继续列入[裁决汇总](PARITY_DECISIONS.md)；C21 保持部分实现/存在差异，不宣称完整 CLI、其他传输或实机一致。
 
 ## 后续叶用例示例 / Reviewable test records
 

@@ -30,6 +30,8 @@ Use only on explicitly authorised systems and isolated management networks.
   reads, without enabling algorithms or payloads. See [channel reads](docs/CHANNEL.md).
 - Per-user access/counts, lossless 16-byte names and bounded user enumeration with
   both reference scan rules. See [user reads](docs/USERS.md).
+- Current/ID/handle/slot session information and bounded enumeration, including
+  LAN/serial layouts and retained reference differences. See [session reads](docs/SESSIONS.md).
 - Chassis capabilities/restart cause, bounded basic FRU inventory and SEL records,
   SEL info accepts reference version bytes `0x51` and `0x02`; known restart descriptions match ipmitool 1.8.19.
   Reads have total size/count and whole-operation deadlines. See [diagnostics](docs/DIAGNOSTICS.md).

@@ -55,7 +55,7 @@ G1 includes help, empty invocation and argument-error behavior for every entry. 
 | C18 `isol` [source][isol] | Intel IPMI 1.5 SOL info/set/activate | N | Configuration, legacy session, terminal bytes, escapes/close and reference unsupported-interface outcomes | R/W/T/V; P3/P5 |
 | C19 `user` [source][user] | summary/list/test, set name/password/priv, enable/disable | P/D: counts/access/names/both scan rules; partial output and name rendering unresolved; test/writes/CLI absent | ID/channel bounds, 16/20-byte passwords, disabled/privilege matrix, test versus set, partial-failure state | R/W, synthetic users; P3/P4 |
 | C20 `channel` [source][channel] | authcap/info/getaccess/setaccess/getciphers ipmi/sol | P/D: info/channel-policy/cipher-list/per-user access APIs; display/partial-output differences; authcap, controls and CLI missing | Channels/access bits/persistence, suite pagination, privilege denial/invalid payload, effective changed privileges | R/W; P3/P4 |
-| C21 `session` [source][session] | info active/all/id/handle | N: internal session state is not this command | Active/missing/multiple sessions, address fields, ID/handle selectors, short responses/limits | R; P3 |
+| C21 `session` [source][session] | info active/all/id/handle | P/D: current/ID/handle/slot reads and bounded enumeration; PPP port/length/partial-output/handle differences; CLI and hardware missing | Active/missing/multiple sessions, address fields, ID/handle selectors, short responses/limits | R; P3 |
 | C22 `dcmi` [source][dcmi] | discover/oob_discover/sensors; asset_tag/set_asset_tag; get/set_mc_id_string; get_temp_reading; get/set_conf_param; thermalpolicy get/set; power reading/get_limit/set_limit/activate/deactivate | N | Capability pages/temp entities/string chunks, power actions/sampling, DHCP, Ping/Pong; every table-driven parameter | R/W/V, DCMI peer; P3/P6 |
 | C23 `nm` [source][dcmi] | discover/capability/control; policy add/get/remove/limiting; statistics/power range/suspend/reset/alert/threshold | N | Domains/policy IDs/triggers/volatile/cores_off, statistics modes, thresholds/suspend arrays, alerts/removal/reset and version capabilities | R/W/V, Intel NM; P3/P6 |
 | C24 `sunoem` [source][sunoem] | cli force/wait; led/sbled; sshkey set/del; ping/version/nacname/getval/setval/getfile/getbehavior | N | Property/sensor mappings, interactive CLI, LED groups, file/key chunks, version capability/vendor errors | R/W/F/T/V; P3/P6 |
@@ -157,6 +157,10 @@ See [reference profiles and leaf evidence](IPMITOOL_REFERENCE.md): 71 reference 
 ## Implemented user reads
 
 [Four user APIs](USERS.md) add access/counts, fixed-field names, single-user records and bounded scans with both reference maximum rules. Their 174 executions / 104 leaves contain 57 output projections, 5 raw projections, 12 rejection projections, 15 moon-only boundaries, 12 partial-output differences and 3 unescaped-name observations. C19/C20 remain partial/divergent: writes, password tests, authcap, full CLI and actual privilege/hardware evidence remain absent. K04/K06/K08 rendering, partial-result and cleanup decisions stay open in the [register](PARITY_DECISIONS.md).
+
+## Implemented session information reads
+
+[Session information and bounded enumeration](SESSIONS.md) add 283 executions / 186 leaves: 116 output projections, 2 raw projections, 12 rejection projections, 12 moon-only boundaries, 43 differences and one reference-only handle-truncation observation. Selectors, LAN/serial layouts, changing slot counts, completion exceptions and deadlines are exercised. PPP port offsets, malformed-length acceptance, partial output and handle truncation remain unresolved in the [decision register](PARITY_DECISIONS.md); C21 stays partial/divergent, with no full CLI, other-transport or hardware claim.
 
 ## Example leaf records for review
 
