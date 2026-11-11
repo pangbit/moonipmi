@@ -22,6 +22,8 @@ Use only on explicitly authorised systems and isolated management networks.
   no automatic retry, explicit close and immediate local abort.
   Use plain IPv4 rather than IPv4-mapped IPv6; mapped forms are rejected.
 - Typed Device ID, Chassis Status and raw Sensor Reading commands.
+- Stored self-test results, global enables, watchdog status and the power-on counter,
+  with exact countdown/counter units. See [management reads](docs/MANAGEMENT.md).
 - Chassis capabilities/restart cause, bounded basic FRU inventory and SEL records,
   SEL info accepts reference version bytes `0x51` and `0x02`; known restart descriptions match ipmitool 1.8.19.
   Reads have total size/count and whole-operation deadlines. See [diagnostics](docs/DIAGNOSTICS.md).

@@ -91,3 +91,39 @@ pub async fn Client::chassis_capabilities(self : Client) -> ChassisCapabilities 
 pub async fn Client::restart_cause(self : Client) -> RestartCause {
   self.exchange(0, 7, b"").restart_cause()
 }
+
+///|
+/// Get Power-On Hours Counter. Preserve the reported unit, including zero.
+#derive(Eq, @debug.Debug)
+pub struct PowerOnHours {
+  minutes_per_count : Int32
+  count : UInt32
+}
+
+///|
+/// Exact product without ipmitool 1.8.19's single-precision display rounding.
+pub fn PowerOnHours::total_minutes(self : PowerOnHours) -> UInt64 {
+  self.count.to_uint64() * self.minutes_per_count.to_uint64()
+}
+
+///|
+pub fn Response::power_on_hours(
+  self : Response,
+) -> PowerOnHours raise ProtocolError {
+  let d = command_data(self, "Get Power-On Hours Counter")
+  guard d.length() == 5 else {
+    raise invalid("Power-On Hours Counter must contain 5 bytes")
+  }
+  { minutes_per_count: d[0].to_int(), count: u32(d, 1), }
+}
+
+///|
+pub async fn Client::power_on_hours(self : Client) -> PowerOnHours {
+  self.exchange(0, 0x0f, b"").power_on_hours()
+}
+
+///|
+pub extend PowerOnHours with Eq::{equal, not_equal}
+
+///|
+pub extend PowerOnHours with @debug.Debug::{to_repr}

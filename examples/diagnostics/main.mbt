@@ -20,7 +20,7 @@ async fn run_case() -> Unit {
   let args = @env.args()
   guard args.length() == 3 else {
     fail(
-      "usage: diagnostics <local mock port> <chassis|fru|sel|sel-info|fru-timeout|sel-timeout>",
+      "usage: diagnostics <local mock port> <chassis|fru|sel|sel-info|self-test|enables|watchdog|poh|fru-timeout|sel-timeout>",
     )
   }
   let port = @string.parse_int(args[1])
@@ -33,6 +33,70 @@ async fn run_case() -> Unit {
   )
   defer client.abort()
   match args[2] {
+    "self-test" => {
+      let result = client.self_test()
+      let status = match result.status() {
+        Passed => "passed"
+        NotImplemented => "not-implemented"
+        Corrupted => "corrupted"
+        FatalError => "fatal"
+        Reserved => "reserved"
+        DeviceSpecific => "device-specific"
+      }
+      let output : Json = {
+        "code": result.code,
+        "detail": result.detail,
+        "status": status,
+        "corruption_flags": optional_int(result.corruption_flags()),
+      }
+      println(output.stringify())
+    }
+    "enables" => {
+      let e = client.global_enables()
+      let output : Json = {
+        "flags": e.flags,
+        "receive_message_queue_interrupt": e.receive_message_queue_interrupt,
+        "event_message_buffer_full_interrupt": e.event_message_buffer_full_interrupt,
+        "event_message_buffer": e.event_message_buffer,
+        "system_event_logging": e.system_event_logging,
+        "oem0": e.oem0,
+        "oem1": e.oem1,
+        "oem2": e.oem2,
+      }
+      println(output.stringify())
+    }
+    "watchdog" => {
+      let timer = client.watchdog_timer()
+      let output : Json = {
+        "timer_use": timer.timer_use,
+        "timer_use_description": timer.timer_use_description(),
+        "running": timer.running,
+        "logging_enabled": timer.logging_enabled,
+        "timeout_action": timer.timeout_action,
+        "timeout_action_description": timer.timeout_action_description(),
+        "pre_timeout_interrupt": timer.pre_timeout_interrupt,
+        "pre_timeout_interrupt_description": timer.pre_timeout_interrupt_description(),
+        "pre_timeout_seconds": timer.pre_timeout_seconds,
+        "expiration_flags": timer.expiration_flags,
+        "initial_countdown_tenths": timer.initial_countdown_tenths,
+        "present_countdown_tenths": timer.present_countdown_tenths,
+        "initial_countdown_seconds": timer.initial_countdown_seconds(),
+        "present_countdown_seconds": timer.present_countdown_seconds(),
+        "raw": Json::array(
+          timer.raw.to_array().map(b => Json::number(b.to_int().to_double())),
+        ),
+      }
+      println(output.stringify())
+    }
+    "poh" => {
+      let counter = client.power_on_hours()
+      let output : Json = {
+        "minutes_per_count": counter.minutes_per_count,
+        "count": counter.count.to_double(),
+        "total_minutes": counter.total_minutes().to_double(),
+      }
+      println(output.stringify())
+    }
     "chassis" => {
       let c = client.chassis_capabilities()
       let status = client.read(GetChassisStatus).chassis_status()

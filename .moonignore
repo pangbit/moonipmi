@@ -25,3 +25,4 @@ tools/diagnostics_fixture.py
 tools/reference_build.py
 tools/reference_profile.py
 tools/reference_cases.py
+tools/management_check.py

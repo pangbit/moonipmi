@@ -2,7 +2,7 @@
 
 [简体中文](IPMITOOL_PARITY_MATRIX.md)
 
-Status: **P1 in progress; no row has passed full-parity acceptance.** See the [plan](IPMITOOL_PARITY_PLAN.en.md) for the pinned reference, stages, K01–K10 conflicts and completion rules.
+Status: **P1 and selected read-only implementation work in progress; no row has passed full-parity acceptance.** See the [plan](IPMITOOL_PARITY_PLAN.en.md) for the pinned reference, stages, K01–K10 conflicts and completion rules.
 The [machine-readable inventory](ipmitool-parity-inventory.json) contains all 38 registered commands and 12 interfaces. C39 is generic `help`; D rows cover the separate `ipmievd` executable.
 Every registered entry has a row, including aliases, OEM commands and conditional features.
 
@@ -13,7 +13,7 @@ Every registered entry has a row, including aliases, OEM commands and conditiona
 - `R` = device read; `W` = device/configuration/event mutation; `F` = file; `T` = terminal; `L` = local driver/service; `V` = vendor/extension hardware. Reads can still log, reserve or consume resources. W does not imply execution authorization. Determine minimum privileges from target policy/reference cases and test all denial paths.
 - Every row-specific criterion includes G0–G7. Each subcommand/parameter group inside a cell needs separate leaf IDs; one representative case cannot pass the group.
 - Use stable leaf IDs such as `C12.print.word.short-count`, with build/interface/privilege/fixture dimensions. Existing evidence only fills the leaves it actually covered.
-- **P1 executes reference/help and existing read-only leaves only against synthetic loopback peers. W-class development and real-device actions remain prohibited.** P2–P7 remain proposed stages.
+- **P1 executes reference/help and existing read-only leaves only against synthetic loopback peers. W-class development and real-device actions remain prohibited.** Selected P3 read leaves now use the existing session; remaining P2–P7 work stays open.
 
 ## Common acceptance dimensions
 
@@ -39,10 +39,10 @@ G1 includes help, empty invocation and argument-error behavior for every entry. 
 | C02 `i2c` [source][raw] | Master Write-Read, bus/channel/public/address/read count/write bytes | N | Bus selection, mixed read/write, length/NACK/errors/output; a read with a write prefix is not effect-free | R/W, I2C target; P3/P4 |
 | C03 `spd` [source][raw] | I2C SPD read and memory interpretation | N | Each reference-recognized SPD type/field, missing/truncated data, output and bus errors | R, SPD fixture/hardware; P3/P7 |
 | C04 `lan` [source][lanp] | print/printconf; set IP/netmask/MAC/gateway/ARP/VLAN/auth/access/user/password/SNMP/alert/cipher_privs/bad_pass_thresh; alert print/set; stats get/clear | N | Every parameter/default channel, readback, set/commit order, disconnected state and counter clearing | R/W, channel policy; P3/P4 |
-| C05 `chassis` [source][chassis] | status/power/selftest/identify/poh/restart_cause/policy; bootparam get/set, bootdev, bootmbox | P: status/capabilities/restart APIs; other reads, controls and CLI missing | Optional bits, power aliases, boot/mailbox blocks/persistence, identify durations, policy and interrupted failures | R/W, general BMC; P3/P4 |
+| C05 `chassis` [source][chassis] | status/power/selftest/identify/poh/restart_cause/policy; bootparam get/set, bootdev, bootmbox | P/D: status/capabilities/restart/self-test/POH APIs; POH precision differs; other reads, controls and CLI missing | Optional bits, power aliases, boot/mailbox blocks/persistence, identify durations, policy and interrupted failures | R/W, general BMC; P3/P4 |
 | C06 `power` [source][chassis] | chassis power shortcut: status, on/up, off/down, cycle/reset/diag/soft/acpi | P: state through chassis API only | Match corresponding C05 output/status/requests; sharing a success return is insufficient | R/W; P2/P4 |
 | C07 `event` [source][event] | Predefined events, sensor/event states, event files | N | Every send mode, assertion/deassertion, file syntax, record side effects, invalid states and duplicates | W/F; P4 |
-| C08 `mc` [source][mc] | info; guid auto/ipmi/smbios/rfc/dump; getenables/setenables/selftest; reset cold/warm; watchdog get/set/off/reset; getsysinfo/setsysinfo | P: Device ID API only | GUID modes/manual alias discrepancies, system-info chunks/encoding, enables/watchdog state, post-reset session | R/W; P3/P4 |
+| C08 `mc` [source][mc] | info; guid auto/ipmi/smbios/rfc/dump; getenables/setenables/selftest; reset cold/warm; watchdog get/set/off/reset; getsysinfo/setsysinfo | P: Device ID/self-test/global-enables/watchdog-get APIs; GUID/system-info, controls and CLI missing | GUID modes/manual alias discrepancies, system-info chunks/encoding, enables/watchdog state, post-reset session | R/W; P3/P4 |
 | C09 `bmc` [source][mc] | Compatibility alias of mc | N: no CLI alias | Repeat every C08 leaf through alias, including error text/exit codes | R/W; P2/P4 |
 | C10 `sdr` [source][sdr] | list/elist all/full/compact/event/mcloc/fru/generic; type/entity/info/get/dump; fill sensors/nosat/file/range | P: repository and partial Full/Compact; Device SDR/shared/bridged/full encodings/types/CLI/cache/dump/fill missing | Every type/route/shared expansion, reservation/retry, cache/files, fill/mutation; single/multiple/empty/changing records | R/W/F; P3/P4 |
 | C11 `sensor` [source][sensor] | list/get/reading; thresh individual/lower/upper groups | P: raw and partial linear values/state; complete threshold reads, accuracy, nonlinear/dynamic factors and writes missing | Actual reference conversion branches, units/precision, unavailable/discrete readings, SDR lookup, threshold request order/errors | R/W; P3/P4 |
@@ -128,7 +128,7 @@ Compare CLI/environment/file/default/repeated-option precedence. Requiring a lib
 | X02 | RAKP/HMAC/AES, session identity/sequence/replay/padding | P/U: existing positive/negative tests are not complete differential coverage; algorithms/fields/random relations/failure stages | P2; K01/K03 |
 | X03 | Deadlines/retry/backoff/cancel/close/abort, concurrency/session reuse | D: no-retry/local-abort versus reference close/wait; inject faults at each exchange/multichunk step and compare cleanup/total duration | P2/P5; K04 |
 | X04 | Completion codes/errors/exit/partial output/missing capabilities | P/U: typed errors are not CLI error parity; every command's output/status/continuation, including unknown/OEM codes | P2–P6 |
-| X05 | Text/numbers/time/binary exports | P/D: existing comparisons normalize fields; add encodings/vendor names/units/precision/order/empty/locale/DST; do not skip differences | P3; K08/K10 |
+| X05 | Text/numbers/time/binary exports | P/D: existing comparisons normalize fields; exact POH API minutes differ from reference float display; add encodings/vendor names/units/precision/order/empty/locale/DST; do not skip differences | P3; K08/K10 |
 | X06 | Automatic OEM detection/profiles [source][oem] | N: supermicro/intelwv2/intelplus/icts/ibm/i82571spt/kontron/quanta; manufacturer/product branches, IBM data, PICMG/VITA probes | V; P2/P6 |
 | X07 | Files/scripts/install [directory][contrib] | N: enterprise-numbers, OEM maps, manuals, services, bmclanconf, bmc-snmp-proxy, exchange-bmc-os-info, collect/log/RRD/web examples; call contracts/paths/permissions/dependencies | F/R/W, isolated shell/SNMP/RRD; P3–P7 |
 | X08 | Crypto/driver/runtime dependencies/build variants [configure][configure] | P/U: native/OpenSSL 3 does not cover libcrypto/internal MD5/readline/FreeIPMI/libsystemd combinations; pin supported/failing profiles | P1/P2/P7; K09 |
@@ -141,6 +141,10 @@ Compare CLI/environment/file/default/repeated-option precedence. Requiring a lib
 ## Executed P1 leaf seeds
 
 See [reference profiles and leaf evidence](IPMITOOL_REFERENCE.md): 71 reference states (70 observed, one build-blocked) and 24 diagnostic projections across 62 executions. Scripts emit stable per-leaf IDs, stdout/stderr/exit and traces. These are partial G1/semantic seeds; every family status above remains unchanged. Additional subcommands, parameters, privileges, builds and failures still need expansion.
+
+## Implemented management reads
+
+[Four actual client APIs](MANAGEMENT.md) add self-test results, global enables, watchdog status and POH. Their report has 56 output projections, eight completion-error projections, 11 moon-only length checks and one `DIVERGENT_DISPLAY_PRECISION` leaf, across 127 executions. `C05.poh.unit-1-count-16777217` retains exact raw/API minutes while reference display loses one minute (K10 decision). Self-test projections preserve the different MC/chassis outputs and exits. C05/C08 remain partial; no full CLI/default/privilege/hardware equivalence is claimed.
 
 ## Example leaf records for review
 

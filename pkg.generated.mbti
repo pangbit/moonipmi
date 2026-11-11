@@ -85,6 +85,8 @@ pub async fn Client::close(Self) -> Unit
 pub async fn Client::connect(@socket.Addr, Bytes, Bytes, timeout_ms? : Int32) -> Self
 pub async fn Client::fru_info(Self, Byte) -> FruInfo
 pub async fn Client::fru_inventory(Self, Byte, max_bytes? : Int32, timeout_ms? : Int32) -> FruInventory
+pub async fn Client::global_enables(Self) -> GlobalEnables
+pub async fn Client::power_on_hours(Self) -> PowerOnHours
 pub async fn Client::read(Self, ReadCommand) -> Response
 pub async fn Client::read_sensor(Self, SdrSensor) -> SensorReading
 pub async fn Client::restart_cause(Self) -> RestartCause
@@ -92,6 +94,8 @@ pub async fn Client::sdr_records(Self, max_records? : Int32) -> Array[SdrRecord]
 pub async fn Client::sdr_repository_info(Self) -> SdrRepositoryInfo
 pub async fn Client::sel_info(Self) -> SelInfo
 pub async fn Client::sel_records(Self, max_records? : Int32, timeout_ms? : Int32) -> Array[SelRecord]
+pub async fn Client::self_test(Self) -> SelfTestResult
+pub async fn Client::watchdog_timer(Self) -> WatchdogTimer
 
 #derive(Eq, @debug.Debug)
 pub struct DeviceId {
@@ -157,6 +161,21 @@ pub fn FruInventory::not_equal(Self, Self) -> Bool
 pub fn FruInventory::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
+pub struct GlobalEnables {
+  flags : Int32
+  receive_message_queue_interrupt : Bool
+  event_message_buffer_full_interrupt : Bool
+  event_message_buffer : Bool
+  system_event_logging : Bool
+  oem0 : Bool
+  oem1 : Bool
+  oem2 : Bool
+}
+pub fn GlobalEnables::equal(Self, Self) -> Bool
+pub fn GlobalEnables::not_equal(Self, Self) -> Bool
+pub fn GlobalEnables::to_repr(Self) -> @debug.Repr
+
+#derive(Eq, @debug.Debug)
 pub struct HandshakePacket {
   payload_type : Int32
   payload : Bytes
@@ -172,6 +191,16 @@ pub struct OpenSession {
 pub fn OpenSession::equal(Self, Self) -> Bool
 pub fn OpenSession::not_equal(Self, Self) -> Bool
 pub fn OpenSession::to_repr(Self) -> @debug.Repr
+
+#derive(Eq, @debug.Debug)
+pub struct PowerOnHours {
+  minutes_per_count : Int32
+  count : UInt32
+}
+pub fn PowerOnHours::equal(Self, Self) -> Bool
+pub fn PowerOnHours::not_equal(Self, Self) -> Bool
+pub fn PowerOnHours::to_repr(Self) -> @debug.Repr
+pub fn PowerOnHours::total_minutes(Self) -> UInt64
 
 pub struct RakpChallenge {
   bmc_random : Bytes
@@ -201,12 +230,16 @@ pub fn Response::chassis_status(Self) -> ChassisStatus raise ProtocolError
 pub fn Response::device_id(Self) -> DeviceId raise ProtocolError
 pub fn Response::equal(Self, Self) -> Bool
 pub fn Response::fru_info(Self) -> FruInfo raise ProtocolError
+pub fn Response::global_enables(Self) -> GlobalEnables raise ProtocolError
 pub fn Response::not_equal(Self, Self) -> Bool
+pub fn Response::power_on_hours(Self) -> PowerOnHours raise ProtocolError
 pub fn Response::restart_cause(Self) -> RestartCause raise ProtocolError
 pub fn Response::sdr_repository_info(Self) -> SdrRepositoryInfo raise ProtocolError
 pub fn Response::sel_info(Self) -> SelInfo raise ProtocolError
+pub fn Response::self_test(Self) -> SelfTestResult raise ProtocolError
 pub fn Response::sensor_reading(Self) -> SensorReading raise ProtocolError
 pub fn Response::to_repr(Self) -> @debug.Repr
+pub fn Response::watchdog_timer(Self) -> WatchdogTimer raise ProtocolError
 
 #derive(Eq, @debug.Debug)
 pub struct RestartCause {
@@ -324,6 +357,30 @@ pub fn SelTime::not_equal(Self, Self) -> Bool
 pub fn SelTime::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
+pub struct SelfTestResult {
+  code : Int32
+  detail : Int32
+}
+pub fn SelfTestResult::corruption_flags(Self) -> Int32?
+pub fn SelfTestResult::equal(Self, Self) -> Bool
+pub fn SelfTestResult::not_equal(Self, Self) -> Bool
+pub fn SelfTestResult::status(Self) -> SelfTestStatus
+pub fn SelfTestResult::to_repr(Self) -> @debug.Repr
+
+#derive(Eq, @debug.Debug)
+pub(all) enum SelfTestStatus {
+  Passed
+  NotImplemented
+  Corrupted
+  FatalError
+  Reserved
+  DeviceSpecific
+}
+pub fn SelfTestStatus::equal(Self, Self) -> Bool
+pub fn SelfTestStatus::not_equal(Self, Self) -> Bool
+pub fn SelfTestStatus::to_repr(Self) -> @debug.Repr
+
+#derive(Eq, @debug.Debug)
 pub struct SensorConversion {
   linearization : Int32
   m : Int32
@@ -372,6 +429,28 @@ pub(all) enum SensorValue {
 pub fn SensorValue::equal(Self, Self) -> Bool
 pub fn SensorValue::not_equal(Self, Self) -> Bool
 pub fn SensorValue::to_repr(Self) -> @debug.Repr
+
+#derive(Eq, @debug.Debug)
+pub struct WatchdogTimer {
+  timer_use : Int32
+  running : Bool
+  logging_enabled : Bool
+  timeout_action : Int32
+  pre_timeout_interrupt : Int32
+  pre_timeout_seconds : Int32
+  expiration_flags : Int32
+  initial_countdown_tenths : Int32
+  present_countdown_tenths : Int32
+  raw : Bytes
+}
+pub fn WatchdogTimer::equal(Self, Self) -> Bool
+pub fn WatchdogTimer::initial_countdown_seconds(Self) -> Double
+pub fn WatchdogTimer::not_equal(Self, Self) -> Bool
+pub fn WatchdogTimer::pre_timeout_interrupt_description(Self) -> String
+pub fn WatchdogTimer::present_countdown_seconds(Self) -> Double
+pub fn WatchdogTimer::timeout_action_description(Self) -> String
+pub fn WatchdogTimer::timer_use_description(Self) -> String
+pub fn WatchdogTimer::to_repr(Self) -> @debug.Repr
 
 // Type aliases
 

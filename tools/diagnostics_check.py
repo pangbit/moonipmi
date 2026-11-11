@@ -13,9 +13,9 @@ import shared_bmc
 import reference_profile
 
 
-def execute(executable, mode, *, moon=False, fault=None, word=False, cwd=None):
+def execute(executable, mode, *, moon=False, fault=None, word=False, cwd=None, model=None):
     trace = {"authenticated": False, "closed": False, "commands": []}
-    model = fixture.Diagnostics(fault, word)
+    model = fixture.Diagnostics(fault, word) if model is None else model
     errors = []
     stop = threading.Event()
     with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as server:

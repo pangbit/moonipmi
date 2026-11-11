@@ -25,6 +25,12 @@ No power, reset, boot, identify or front-panel controls are exposed.
 重启原因和通道保留数值，`restart.description()` 返回与 ipmitool 1.8.19 一致的已知描述，保留值返回 `None`。
 每次请求沿用客户端交换超时。不提供电源、复位、启动、指示灯或前面板控制。
 
+Stored self-test results and the power-on counter are now available alongside
+these chassis reads; see [management status](MANAGEMENT.md) for API examples,
+reference self-test exit differences and the POH rounding difference.
+
+现也可读取已有自检结果与累计通电计数；[管理状态](MANAGEMENT.md)说明 API、参考自检退出差异和计数显示舍入差异。
+
 ## Basic FRU inventory / 基础 FRU 清单
 
 ```moonbit

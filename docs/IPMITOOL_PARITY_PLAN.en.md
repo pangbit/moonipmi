@@ -2,7 +2,7 @@
 
 [简体中文](IPMITOOL_PARITY_PLAN.md)
 
-Status: **P1 reference/case work is authorized and in progress; no complete-parity claim or authorization for state-changing stages.**
+Status: **P1 reference/case work and selected read-only implementation are authorized and in progress; no complete-parity claim or authorization for state-changing stages.**
 
 This plan tracks the full scope. Authorized work now includes reference-build identification, leaf cases, differential validation and unambiguous read-only corrections. It does not operate real devices, develop state-changing controls, relax authentication/packet checks, or publish to Mooncakes.
 The requested goal includes every reference feature and observable behavior. Current moonipmi is a read-only subset with substantial omissions and known differences; it is not a complete ipmitool replacement.
@@ -58,7 +58,8 @@ Finite tests cannot prove equivalence for every unknown device or input. Final s
 | Native/OpenSSL 3; suite 17 RMCP+; User privilege; authentication/integrity/replay checks; single-flight UDP | Native tests, independent synthetic Python handshake/exchanges, existing Linux/macOS CI | Other authentication, transports, privileges, defaults and retries |
 | Device ID, Chassis Status, raw Sensor Reading | 30-case three-client common-Python-fixture matrix; [comparison](COMPARISON.md) | All commands or full CLI-output parity |
 | SDR repository and partial Full/Compact interpretation | 33 output comparisons and nine repository boundaries; [SDR](SDR.md) | Nonlinear/dynamic factors, Device SDR, shared/bridged records, reading configured thresholds and other omitted fields |
-| Chassis capabilities/restart cause, basic FRU, SEL | 41 native test groups in total; separately 30 mixed diagnostic executions/boundary cases, not 30 direct client comparisons; [diagnostics](DIAGNOSTICS.md) | Historical text assertions were limited; [P1](IPMITOOL_REFERENCE.md) adds 24 field/description/raw projections across 62 executions. Still no complete semantics, CLI, writes or hardware validation; counts are not a coverage percentage |
+| Chassis capabilities/restart cause, basic FRU, SEL | Historical stage: 41 native test groups in total; separately 30 mixed diagnostic executions/boundary cases, not 30 direct client comparisons; [diagnostics](DIAGNOSTICS.md) | Historical text assertions were limited; [P1](IPMITOOL_REFERENCE.md) adds 24 field/description/raw projections across 62 executions. Still no complete semantics, CLI, writes or hardware validation; counts are not a coverage percentage |
+| Self-test/global-enables/watchdog/POH reads | 46 native groups in total; [127 management executions](MANAGEMENT.md), including 56 output projections, eight completion-error projections, 11 moon-only boundaries and one display difference | Typed APIs only; full CLI, GUID/system-info, controls and hardware still missing; POH float display differs |
 | Requester-address tolerance | 24 packet-policy comparisons | Responder, netfn/LUN and IPMI-checksum acceptance still differs |
 
 Implementation commit `81a7728` passed [exact-commit CI](https://github.com/pangbit/moonipmi/actions/runs/42971333879) on Ubuntu 24.04 and macOS 15.
@@ -68,7 +69,7 @@ There is no real-BMC validation, comprehensive platform certification or externa
 
 ## 4. Proposed stages
 
-**P0 is delivered and P1 work is authorized and in progress. Security/major compatibility choices await review; state-changing development remains prohibited.**
+**P0 is delivered; P1 and selected reads on the existing suite-17/User session are authorized and in progress. Security/major compatibility choices await review; state-changing development remains prohibited.**
 P2/P3 must not use raw access, diagnostics or reservation operations to introduce arbitrary write support.
 
 | Stage | Deliverables and dependencies | Exit gate |
@@ -76,7 +77,7 @@ P2/P3 must not use raw access, diagnostics or reservation operations to introduc
 | P0: inventory and contract | This plan, pinned source, inventory, matrix, resource/conflict register and review decisions | Map 38/38 registered entries and 12/12 interfaces; no full-parity passes claimed; documentation only |
 | P1: reference builds and differential harness | In progress: first profile, 71 reference leaf states and 24 diagnostic projections; complete reference/dependency profiles; independent fixtures and argv/output/trace/state records; expand all groups into leaves | Run the actual reference for every leaf; reconcile help, dispatcher branches and configuration tables; explain every unknown/skip; no production evidence gathering |
 | P2: CLI, sessions and transports | P1 and K01–K10 decisions; CLI/configuration/identity/errors, transport abstraction, bridging, authentication/retry; simulate local drivers first | Differential O/T/X cases; unresolved safety choices stay blocked; reproduce reference failure for unsupported combinations instead of inventing success |
-| P3: complete reads and offline processing | Required P2 transports; complete SDR/sensor/FRU/SEL, MC/channel/user/session, network configuration reads, DCMI/NM/OEM reads and file parsing | Every read leaf includes malformed/boundary/missing-capability/permission cases; retained raw bytes are not interpreted support; compare files and text too |
+| P3: complete reads and offline processing | Selected [management reads](MANAGEMENT.md) implemented on the existing transport; remaining work needs the required P2 transports; complete SDR/sensor/FRU/SEL, MC/channel/user/session, network configuration reads, DCMI/NM/OEM reads and file parsing | Every read leaf includes malformed/boundary/missing-capability/permission cases; retained raw bytes are not interpreted support; compare files and text too |
 | P4: standard state-changing controls | **Currently prohibited**; separate approval, then P1–P3; power/boot/reset, accounts/channels/LAN, thresholds, SDR/FRU/SEL writes, events/PEF/firewall | Resettable simulators first; compare each effect, failure point, duplicate, disconnect and uncertain outcome. Real devices need separate authorization; do not assume rollback is possible |
 | P5: interactive and long-lived operations | Separate approval; SOL/ISOL/TSOL, complete shell/exec session behavior, ipmievd | PTY/escape/retransmission/flow-control/keepalive, signal and terminal recovery, duplicate/lost events and daemon lifecycle; record notification-enabling side effects |
 | P6: platform extensions and firmware | Separate approval; PICMG/VITA, DCMI/NM controls, Sun/Dell/Kontron OEM, HPM/FWUM/IME | Specific simulators, lawful image samples and vendor state machines; separately test upload/activation/rollback/interruption. Generic raw is not feature completion |
@@ -139,9 +140,9 @@ Full completion requires:
 - Specific model/firmware/privilege/interface evidence for hardware claims; one BMC cannot establish all-BMC compatibility and simulation is not hardware validation.
 - Focused review of authentication, FFI/drivers, files, long sessions and firmware paths. Such review does not automatically constitute an external audit or authorize release.
 
-Review must settle the 1.8.19/full-build-union baseline; CLI/library/ipmievd/companion-script deliverables; K01–K10; available resources; and the remaining P1 work/later-stage boundaries. P1 is already authorized; see the [progress and recommendations](IPMITOOL_REFERENCE.md).
+Review must settle the 1.8.19/full-build-union baseline; CLI/library/ipmievd/companion-script deliverables; K01–K10; available resources; and the remaining P1 work/later-stage boundaries. P1 and selected independent read-only implementation are authorized; see the [progress and recommendations](IPMITOOL_REFERENCE.md).
 The existing restrictions on state-changing development, real-device operations and release remain in force.
-**Recommendation:** continue P1 synthetic reference evidence; keep unresolved K01–K10 implementation changes blocked. Do not reduce acceptance scope by removing legacy interfaces, weak authentication or OEM features.
+**Recommendation:** continue reference evidence and independent read-only functionality; keep unresolved K01–K10 implementation changes blocked. Do not reduce acceptance scope by removing legacy interfaces, weak authentication or OEM features.
 Full equivalence requires actually addressing those capabilities and differences. Do not directly reproduce memory errors, real-secret exposure or uncontrolled effects; retain blockers and submit concrete reproducible evidence for review rather than silently changing the goal.
 
 ## 8. Pinned primary sources

@@ -28,6 +28,19 @@ validation or publication is claimed.
 本地 macOS 已通过 41 组原生测试和聚焦 ipmitool 1.8.19 对照/边界检查；确切提交的 CI
 是独立证据，不宣称实机验证或已发布。
 
+## Management reads / 管理状态读取
+
+The current source also implements `self_test`, `global_enables`, `watchdog_timer`
+and `power_on_hours`. Local native tests now total 46 groups. The new checker
+records 56 output projections, eight completion-error projections, 11 moon-only
+length boundaries and one POH display-precision difference across 127 executions.
+See [API semantics and evidence](MANAGEMENT.md). These actual read-only APIs do
+not add a compatible CLI, controls or real-device evidence.
+
+当前源码还实现四个管理状态读取 API；本地原生测试增至 46 组。新检查在 127 次执行中记录
+56 项输出映射、8 项完成码错误映射、11 项仅 moonipmi 的长度边界及 1 项通电计数显示精度差异。
+语义与证据见 [管理状态读取](MANAGEMENT.md)；尚无兼容 CLI、控制功能或实机证据。
+
 ## Full-parity work / 完整对齐工作
 
 P1 now identifies an unpatched reference build and per-platform CI artifacts,

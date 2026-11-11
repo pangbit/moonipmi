@@ -2,7 +2,7 @@
 
 [English](IPMITOOL_PARITY_MATRIX.en.md)
 
-状态：**P1 进行中；没有任何行已通过完整一致验收。** 参考提交、阶段、冲突 K01–K10 与最终门槛见[计划](IPMITOOL_PARITY_PLAN.md)。
+状态：**P1 及选定只读实现进行中；没有任何行已通过完整一致验收。** 参考提交、阶段、冲突 K01–K10 与最终门槛见[计划](IPMITOOL_PARITY_PLAN.md)。
 [机器可读入口清单](ipmitool-parity-inventory.json)固定 38 个注册命令与 12 个接口；C39 是通用 `help`，D 行是独立 `ipmievd`。
 每个注册入口各占一行，避免把别名、OEM 或条件编译功能从范围中移除。
 
@@ -14,7 +14,7 @@
   R 也可能产生日志、预留或占用资源；W 不代表已经获准执行。远程最低权限由目标策略和参考用例确定，所有权限拒绝路径均需测试。
 - 下表每行的“专项验收”都必须叠加 G0–G7 通用用例；同一单元格中的各子命令/参数组必须分别生成 ID，不能只测一个代表即将整行通过。
 - 叶 ID 采用 `C12.print.word.short-count` 这样的稳定名称，并附 build/interface/privilege/fixture 维度。已有测试只能回填其实际覆盖的叶项。
-- **P1 仅在合成本机对端运行参考帮助及已有只读叶项；不接触真实 BMC，也不开始 W 类开发。** P2–P7 仍为建议阶段。
+- **P1 仅在合成本机对端运行参考帮助及已有只读叶项；不接触真实 BMC，也不开始 W 类开发。** 选定 P3 只读叶项已沿用现有会话实现，其余 P2–P7 工作仍未完成。
 
 ## 通用验收维度 / Common cases
 
@@ -40,10 +40,10 @@
 | C02 `i2c` [源码][raw] | bus/channel、public、地址、读长度和写数据的 Master Write-Read | N | 总线选择、读写组合、长度、NACK/错误、输出；不能把带写前缀的读取当成无副作用 | R/W、I2C 目标；P3/P4 |
 | C03 `spd` [源码][raw] | I2C SPD 读取及内存信息解释 | N | 各被参考识别的 SPD 类型/字段、缺失/截断、输出和总线失败 | R、SPD fixture/硬件；P3/P7 |
 | C04 `lan` [源码][lanp] | print/printconf；set 的 IP/netmask/MAC/gateway/ARP/VLAN/auth/access/user/password/SNMP/alert/cipher_privs/bad_pass_thresh；alert print/set；stats get/clear | N | 每个参数值/默认 channel、读回、设置顺序/提交、掉线后的状态、统计清除 | R/W、channel 策略；P3/P4 |
-| C05 `chassis` [源码][chassis] | status/power/selftest/identify/poh/restart_cause/policy；bootparam get/set、bootdev、bootmbox | P：状态、能力、重启原因 API；其他读取和控制/CLI 缺失 | 位字段和可选字段；每个 power 别名；启动参数/邮箱块/持久标志、identify 时长、策略、失败中断 | R/W、通用 BMC；P3/P4 |
+| C05 `chassis` [源码][chassis] | status/power/selftest/identify/poh/restart_cause/policy；bootparam get/set、bootdev、bootmbox | P/D：已有状态/能力/重启原因/自检/通电计数 API；计数显示精度有差异，其他读取、控制及 CLI 未完成 | 位字段和可选字段；每个 power 别名；启动参数/邮箱块/持久标志、identify 时长、策略、失败中断 | R/W、通用 BMC；P3/P4 |
 | C06 `power` [源码][chassis] | chassis power 快捷入口；status、on/up、off/down、cycle/reset/diag/soft/acpi | P：仅能通过 chassis API 得知状态，无此入口 | 与 C05 对应调用的输出/退出/实际命令一致；不能只复用成功返回 | R/W；P2/P4 |
 | C07 `event` [源码][event] | 预定义事件、sensor/event state、事件文件 | N | 所有发送模式、断言/撤销、文件语法、记录副作用、非法状态和重复发送 | W/F；P4 |
-| C08 `mc` [源码][mc] | info、guid（auto/ipmi/smbios/rfc/dump）、getenables/setenables、selftest、reset cold/warm、watchdog get/set/off/reset、getsysinfo/setsysinfo | P：Device ID API；其余及 CLI 缺失 | GUID 模式和手册别名差异、系统信息分块/编码、全局 enables、watchdog 状态机、复位后会话 | R/W；P3/P4 |
+| C08 `mc` [源码][mc] | info、guid（auto/ipmi/smbios/rfc/dump）、getenables/setenables、selftest、reset cold/warm、watchdog get/set/off/reset、getsysinfo/setsysinfo | P：已有 Device ID/自检/全局使能/看门狗读取 API；GUID/系统信息、控制及 CLI 缺失 | GUID 模式和手册别名差异、系统信息分块/编码、全局 enables、watchdog 状态机、复位后会话 | R/W；P3/P4 |
 | C09 `bmc` [源码][mc] | `mc` 的兼容别名 | N：库无命令别名 | C08 每个叶用例以别名重跑，比较错误文本与退出码 | R/W；P2/P4 |
 | C10 `sdr` [源码][sdr] | list/elist 的 all/full/compact/event/mcloc/fru/generic；type/entity/info/get/dump；fill sensors/nosat/file/range | P：仓库遍历、部分 Full/Compact；Device SDR、共享/桥接、完整编码/记录类型、CLI/cache/dump/fill 缺失 | 所有记录类型/路由/共享展开、动态保留与重试、缓存/文件、填充/仓库修改；分别覆盖单条/多条/空/变化 | R/W/F；P3/P4 |
 | C11 `sensor` [源码][sensor] | list/get/reading；thresh 单阈值与 lower/upper 组 | P：原始读数、部分线性工程值/状态；完整动态阈值读取、精度、非线性/动态因子与设置缺失 | 每个上游换算分支、单位/精度、不可用与离散值、SDR 查找、阈值 get/set 顺序/错误；支持范围按实际参考测定 | R/W；P3/P4 |
@@ -129,7 +129,7 @@
 | X02 | RAKP/HMAC/AES、会话 ID/序号/重放/padding | P/U：已有正负测试不是完整差分；逐种算法/身份字段/随机关联/错误阶段与参考对照 | P2；K01/K03 |
 | X03 | deadline/retry/backoff/取消/close/abort、并发和会话复用 | D：无重试及本地 abort 与参考关闭/等待不同；故障注入每个 exchange/多块操作、资源回收及总用时 | P2/P5；K04 |
 | X04 | 完成码、失败退出、部分结果、缺失能力 | P/U：现有 typed 错误不等于 CLI 错误；逐命令比输出/退出/继续或中止，未知/OEM 完成码也覆盖 | P2–P6 |
-| X05 | 文本、数字、时间、二进制导出 | P/D：已有测试做字段归一化；扩展到编码、厂商名、单位/精度、排序、空记录与 locale/DST，保留差异不跳过 | P3；K08/K10 |
+| X05 | 文本、数字、时间、二进制导出 | P/D：通电分钟精确 API 与参考 float 显示有差异；已有测试做字段归一化；扩展到编码、厂商名、单位/精度、排序、空记录与 locale/DST，保留差异不跳过 | P3；K08/K10 |
 | X06 | OEM 自动识别与 profiles [源码][oem] | N：supermicro/intelwv2/intelplus/icts/ibm/i82571spt/kontron/quanta；厂商/产品 ID 分支和 IBM 数据文件、PICMG/VITA 自动发现 | V；P2/P6 |
 | X07 | 配套文件/脚本与安装 [目录][contrib] | N：enterprise-numbers、OEM maps、manpages、ipmievd 服务、bmclanconf、bmc-snmp-proxy、exchange-bmc-os-info、collect/log/RRD/web 示例的调用契约；安装路径/权限/外部依赖 | F/R/W、shell/SNMP/RRD 隔离环境；P3–P7 |
 | X08 | 加密/驱动/运行依赖与构建变体 [配置][configure] | P/U：native/OpenSSL 3 不能代表 upstream 的 libcrypto/internal MD5、readline、FreeIPMI、libsystemd 组合；冻结支持/失败 profile | P1/P2/P7；K09 |
@@ -142,6 +142,10 @@
 ## 已执行的 P1 叶项种子
 
 [参考构建及叶项证据](IPMITOOL_REFERENCE.md)记录 71 个参考状态（70 已观察、1 构建阻塞），以及 62 次诊断执行中的 24 项差分映射。脚本输出稳定叶 ID、stdout/stderr/退出码及 trace。这些仅为部分 G1/语义种子，上述所有功能族状态保持不变；其他子命令、参数、权限、构建和错误路径仍待展开。
+
+## 已实现的管理状态读取
+
+[四个实际客户端 API](MANAGEMENT.md)补齐自检结果、全局使能、看门狗状态和累计通电计数。报告在 127 次执行中记录 56 项输出映射、8 项完成码错误映射、11 项仅 moonipmi 的长度检查及 1 项显示精度差异。`C05.poh.unit-1-count-16777217` 保留准确原始/API 分钟值，参考显示少一分钟（K10 待决定）；自检映射保留 MC/机箱的不同输出与退出码。C05/C08 仍为部分实现，不宣称完整 CLI、默认值、权限或硬件一致。
 
 ## 后续叶用例示例 / Reviewable test records
 
