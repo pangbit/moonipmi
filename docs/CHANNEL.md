@@ -157,11 +157,12 @@ plus session/discovery housekeeping. The adapter is localhost-only.
 部分失败、协议页数上限、字节限制与整体时限。两个 CI 平台均执行并保留构建身份、完整调用/
 输出/退出码和认证 trace。命令白名单只含这些读取及会话/发现操作，适配器仅连接本机。
 
-C20 remains partial/divergent. `authcap`, controls, a complete
-CLI, other authentication/transports, real privilege policies and hardware are
+C20 remains partial/divergent. [Capability queries](NETWORK_STATUS.md) now exist
+with fallback/length differences. Controls, a complete CLI, other authentication/transports, real privilege policies and hardware are
 still absent or unverified. No test count is a full-parity percentage.
 
-C20 仍为部分实现/存在差异；认证能力查询、控制、完整 CLI、其他认证/传输、
+C20 仍为部分实现/存在差异；现有[认证能力查询](NETWORK_STATUS.md)保留回退/长度差异。
+控制、完整 CLI、其他认证/传输、
 实际权限策略及硬件仍缺失或未验证，测试计数不是完整对齐覆盖率。
 
 Pinned sources: [channel implementation](https://github.com/ipmitool/ipmitool/blob/19d78782d795d0cf4ceefe655f616210c9143e62/lib/ipmi_channel.c),

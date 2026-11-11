@@ -286,6 +286,8 @@ async fn run_case() -> Unit {
         run_user_case(client, parts)
       } else if parts[0] == "session-info" || parts[0] == "sessions" {
         run_session_case(client, parts)
+      } else if parts[0] == "authcap" || parts[0] == "lan-stats" {
+        run_network_status_case(client, parts)
       } else {
         fail("unknown read-only scenario")
       }

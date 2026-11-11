@@ -30,3 +30,4 @@ tools/identity_check.py
 tools/channel_check.py
 tools/user_check.py
 tools/session_check.py
+tools/network_status_check.py

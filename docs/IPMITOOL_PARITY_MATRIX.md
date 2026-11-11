@@ -39,7 +39,7 @@
 | C01 `raw` [源码][raw] | 任意 netfn/cmd/data，目标 LUN/地址，响应与完成码 | P：离线 `encode_request`，无通用发送 API/CLI | 全字节输入、边界长度、响应 hex、专用超时/尝试次数；读取与写入分别建例 | R/W；P2/P4；K03–K05 |
 | C02 `i2c` [源码][raw] | bus/channel、public、地址、读长度和写数据的 Master Write-Read | N | 总线选择、读写组合、长度、NACK/错误、输出；不能把带写前缀的读取当成无副作用 | R/W、I2C 目标；P3/P4 |
 | C03 `spd` [源码][raw] | I2C SPD 读取及内存信息解释 | N | 各被参考识别的 SPD 类型/字段、缺失/截断、输出和总线失败 | R、SPD fixture/硬件；P3/P7 |
-| C04 `lan` [源码][lanp] | print/printconf；set 的 IP/netmask/MAC/gateway/ARP/VLAN/auth/access/user/password/SNMP/alert/cipher_privs/bad_pass_thresh；alert print/set；stats get/clear | N | 每个参数值/默认 channel、读回、设置顺序/提交、掉线后的状态、统计清除 | R/W、channel 策略；P3/P4 |
+| C04 `lan` [源码][lanp] | print/printconf；set 的 IP/netmask/MAC/gateway/ARP/VLAN/auth/access/user/password/SNMP/alert/cipher_privs/bad_pass_thresh；alert print/set；stats get/clear | P/D：已有显式通道不清零统计，长度接受有差异；配置/告警/发现/清零/CLI 缺失 | 每个参数值/默认 channel、读回、设置顺序/提交、掉线后的状态、统计清除 | R/W、channel 策略；P3/P4 |
 | C05 `chassis` [源码][chassis] | status/power/selftest/identify/poh/restart_cause/policy；bootparam get/set、bootdev、bootmbox | P/D：已有状态/能力/重启原因/自检/通电计数 API；计数显示精度有差异，其他读取、控制及 CLI 未完成 | 位字段和可选字段；每个 power 别名；启动参数/邮箱块/持久标志、identify 时长、策略、失败中断 | R/W、通用 BMC；P3/P4 |
 | C06 `power` [源码][chassis] | chassis power 快捷入口；status、on/up、off/down、cycle/reset/diag/soft/acpi | P：仅能通过 chassis API 得知状态，无此入口 | 与 C05 对应调用的输出/退出/实际命令一致；不能只复用成功返回 | R/W；P2/P4 |
 | C07 `event` [源码][event] | 预定义事件、sensor/event state、事件文件 | N | 所有发送模式、断言/撤销、文件语法、记录副作用、非法状态和重复发送 | W/F；P4 |
@@ -55,7 +55,7 @@
 | C17 `tsol` [源码][tsol] | Tyan IPMI 1.5 SOL；IP/port、ro/rw、rows/cols、altterm | N | 目标/端口、只读与输入、终端大小/转义、启动/停止、丢包和退出恢复 | W/T/V、Tyan fixture；P5/P7 |
 | C18 `isol` [源码][isol] | Intel IPMI 1.5 SOL info/set/activate | N | 配置字段、legacy session、终端数据、逃逸字符/关闭、接口不支持时的参考结果 | R/W/T/V；P3/P5 |
 | C19 `user` [源码][user] | summary/list、test、set name/password/priv、enable/disable | P/D：已有计数/权限/名字及两种扫描规则；部分输出/名字显示待定，test/写入/CLI 缺失 | ID/channel 边界、16/20 字节密码、禁用/权限矩阵、密码测试与设置区别、部分失败后状态 | R/W、合成用户；P3/P4 |
-| C20 `channel` [源码][channel] | authcap/info/getaccess/setaccess/getciphers ipmi/sol | P/D：已有信息/通道策略/套件列表/逐用户权限 API，显示/部分输出有差异；authcap、控制及 CLI 缺失 | 每个 channel、访问位/持久性、分页密码套件、权限拒绝和非法 payload；设置后实际权限 | R/W；P3/P4 |
+| C20 `channel` [源码][channel] | authcap/info/getaccess/setaccess/getciphers ipmi/sol | P/D：已有信息/通道策略/套件列表/逐用户权限/authcap API，显示/部分输出/查询回退/长度有差异；控制及 CLI 缺失 | 每个 channel、访问位/持久性、分页密码套件、权限拒绝和非法 payload；设置后实际权限 | R/W；P3/P4 |
 | C21 `session` [源码][session] | info active/all/id/handle | P/D：已有当前/ID/句柄/槽位读取及有界枚举；PPP 端口/长度/部分输出/句柄有差异，CLI 与实机缺失 | 活跃/缺失/多个 session、地址字段、ID/handle 选择、短响应与限制 | R；P3 |
 | C22 `dcmi` [源码][dcmi] | discover/oob_discover、sensors、asset_tag/set_asset_tag、get/set_mc_id_string、get_temp_reading、get/set_conf_param、thermalpolicy get/set；power reading/get_limit/set_limit/activate/deactivate | N | 能力页/温度实体、字符串分块、功率限制动作/采样、DHCP 配置、Ping/Pong；每个表驱动参数独立建例 | R/W/V、DCMI peer；P3/P6 |
 | C23 `nm` [源码][dcmi] | discover/capability/control；policy add/get/remove/limiting；statistics、power range、suspend、reset、alert、threshold | N | domain/policy ID、trigger、volatile/cores_off、统计模式、阈值和暂停数组、告警目标/删除/重置；按实际版本能力 | R/W/V、Intel NM；P3/P6 |
@@ -153,15 +153,19 @@
 
 ## 已实现的通道读取
 
-[通道信息、活动/持久访问策略及套件列表 API](CHANNEL.md)新增 178 次执行、108 个叶项：61 项输出映射、2 项 raw、9 项拒绝、10 项本库边界及 26 项保留差异。参考记录数限制、共享未知标签、解析前缀及通道信息部分输出仍有差异。后续[用户批次](USERS.md)已新增逐用户 `channel getaccess` 读取，`authcap` 仍缺失，读取套件声明不等于实现协商或 SOL。详见[统一裁决汇总](PARITY_DECISIONS.md)，不宣称 C20 或完整功能族通过。
+[通道信息、活动/持久访问策略及套件列表 API](CHANNEL.md)新增 178 次执行、108 个叶项：61 项输出映射、2 项 raw、9 项拒绝、10 项本库边界及 26 项保留差异。参考记录数限制、共享未知标签、解析前缀及通道信息部分输出仍有差异。后续[用户批次](USERS.md)已新增逐用户 `channel getaccess` 读取，现有[认证能力查询](NETWORK_STATUS.md)保留回退/长度差异，读取套件声明不等于实现协商或 SOL。详见[统一裁决汇总](PARITY_DECISIONS.md)，不宣称 C20 或完整功能族通过。
 
 ## 已实现的用户读取
 
-[四个用户 API](USERS.md)新增权限/计数、固定字段名字、单用户记录及两种参考上限规则的有界扫描。174 次执行、104 个叶项包含 57 项输出映射、5 项 raw、12 项拒绝、15 项本库边界、12 项部分输出差异和 3 项未转义名字观察。C19/C20 仍部分实现/有差异，写入、密码测试、authcap、完整 CLI 和真实权限/硬件证据仍缺失；K04/K06/K08 显示、部分结果及清理决策继续保留在[汇总](PARITY_DECISIONS.md)。
+[四个用户 API](USERS.md)新增权限/计数、固定字段名字、单用户记录及两种参考上限规则的有界扫描。174 次执行、104 个叶项包含 57 项输出映射、5 项 raw、12 项拒绝、15 项本库边界、12 项部分输出差异和 3 项未转义名字观察。C19/C20 仍部分实现/有差异，写入、密码测试、完整 CLI 和真实权限/硬件证据仍缺失；K04/K06/K08 显示、部分结果及清理决策继续保留在[汇总](PARITY_DECISIONS.md)。
 
 ## 已实现的会话信息读取
 
 [会话信息及有界枚举](SESSIONS.md)新增 283 次执行、186 个叶项：116 项输出映射、2 项 raw、12 项拒绝映射、12 项本库边界、43 项差异及一项参考单侧句柄截断观察。已验证选择器、LAN/串口布局、变化的槽位计数、完成码例外和时限。PPP 端口偏移、坏长度接受、部分输出与句柄截断继续列入[裁决汇总](PARITY_DECISIONS.md)；C21 保持部分实现/存在差异，不宣称完整 CLI、其他传输或实机一致。
+
+## 已实现的网络状态读取
+
+[认证能力与不清零 LAN 统计](NETWORK_STATUS.md)新增 291 次执行、158 个叶项：105 项输出映射、6 项 raw、18 项拒绝映射、17 项本库边界、8 项差异及 4 项短响应观察。已验证能力掩码、认证权限不变、显式查询模式、LAN 预检查顺序、计数、坏响应和时限。查询回退及长度接受仍待裁决，C04/C20 继续部分实现/有差异；自动通道发现、LAN 配置/告警、控制、完整 CLI 与实机语义仍缺失。
 
 ## 后续叶用例示例 / Reviewable test records
 

@@ -59,6 +59,27 @@ pub fn ChannelAccess::not_equal(Self, Self) -> Bool
 pub fn ChannelAccess::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
+pub struct ChannelAuthCapabilities {
+  channel : Int32
+  auth_types : Int32
+  v20_data_available : Bool
+  kg_nonzero : Bool
+  per_message_auth_enabled : Bool
+  user_level_auth_enabled : Bool
+  non_null_usernames : Bool
+  null_usernames : Bool
+  anonymous_login : Bool
+  ipmi15_supported : Bool
+  ipmi20_supported : Bool
+  oem_id : Int32
+  oem_auxiliary : Int32
+  raw : Bytes
+}
+pub fn ChannelAuthCapabilities::equal(Self, Self) -> Bool
+pub fn ChannelAuthCapabilities::not_equal(Self, Self) -> Bool
+pub fn ChannelAuthCapabilities::to_repr(Self) -> @debug.Repr
+
+#derive(Eq, @debug.Debug)
 pub struct ChannelCipherPage {
   channel : Int32
   raw_channel : Int32
@@ -163,6 +184,7 @@ pub struct Client {
 }
 pub fn Client::abort(Self) -> Unit
 pub async fn Client::channel_access(Self, ChannelSettings, channel? : Int32) -> ChannelAccess
+pub async fn Client::channel_auth_capabilities(Self, Int32, channel? : Int32, version2? : Bool) -> ChannelAuthCapabilities
 pub async fn Client::channel_cipher_suites(Self, CipherPayload, channel? : Int32, max_bytes? : Int32, timeout_ms? : Int32) -> ChannelCipherSuites
 pub async fn Client::channel_info(Self, channel? : Int32) -> ChannelInfo
 pub async fn Client::chassis_capabilities(Self) -> ChassisCapabilities
@@ -172,6 +194,7 @@ pub async fn Client::device_guid(Self) -> DeviceGuid
 pub async fn Client::fru_info(Self, Byte) -> FruInfo
 pub async fn Client::fru_inventory(Self, Byte, max_bytes? : Int32, timeout_ms? : Int32) -> FruInventory
 pub async fn Client::global_enables(Self) -> GlobalEnables
+pub async fn Client::lan_statistics(Self, Int32, timeout_ms? : Int32) -> LanStatistics
 pub async fn Client::power_on_hours(Self) -> PowerOnHours
 pub async fn Client::read(Self, ReadCommand) -> Response
 pub async fn Client::read_sensor(Self, SdrSensor) -> SensorReading
@@ -311,6 +334,23 @@ pub fn HandshakePacket::not_equal(Self, Self) -> Bool
 pub fn HandshakePacket::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
+pub struct LanStatistics {
+  ip_received : Int32
+  ip_header_errors : Int32
+  ip_address_errors : Int32
+  ip_fragmented : Int32
+  ip_transmitted : Int32
+  udp_received : Int32
+  rmcp_received : Int32
+  udp_proxy_received : Int32
+  udp_proxy_dropped : Int32
+  raw : Bytes
+}
+pub fn LanStatistics::equal(Self, Self) -> Bool
+pub fn LanStatistics::not_equal(Self, Self) -> Bool
+pub fn LanStatistics::to_repr(Self) -> @debug.Repr
+
+#derive(Eq, @debug.Debug)
 pub struct OpenSession {
   bmc_id : UInt32
 }
@@ -352,6 +392,7 @@ pub struct Response {
   data : Bytes
 }
 pub fn Response::channel_access(Self) -> ChannelAccess raise ProtocolError
+pub fn Response::channel_auth_capabilities(Self) -> ChannelAuthCapabilities raise ProtocolError
 pub fn Response::channel_cipher_page(Self) -> ChannelCipherPage raise ProtocolError
 pub fn Response::channel_info(Self) -> ChannelInfo raise ProtocolError
 pub fn Response::chassis_capabilities(Self) -> ChassisCapabilities raise ProtocolError
@@ -361,6 +402,7 @@ pub fn Response::device_id(Self) -> DeviceId raise ProtocolError
 pub fn Response::equal(Self, Self) -> Bool
 pub fn Response::fru_info(Self) -> FruInfo raise ProtocolError
 pub fn Response::global_enables(Self) -> GlobalEnables raise ProtocolError
+pub fn Response::lan_statistics(Self) -> LanStatistics raise ProtocolError
 pub fn Response::not_equal(Self, Self) -> Bool
 pub fn Response::power_on_hours(Self) -> PowerOnHours raise ProtocolError
 pub fn Response::restart_cause(Self) -> RestartCause raise ProtocolError

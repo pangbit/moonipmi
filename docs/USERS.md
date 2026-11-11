@@ -172,11 +172,12 @@ bounded elapsed time remain required.
 200 ms 超时用例允许合法的一至两次请求前缀，因为 CI 调度可能消耗首个响应的时间预算；
 仍必须失败、不返回部分结果并满足总耗时限制。
 
-C19/C20 remain partial/divergent. Password testing, account writes, channel authcap,
-the complete CLI, other authentication/transports and real-device privilege policies
+C19/C20 remain partial/divergent. [Capability queries](NETWORK_STATUS.md) are now
+available with fallback/length differences. Password testing, account writes, the complete CLI, other authentication/transports and real-device privilege policies
 remain missing or unverified. No local simulation establishes full ipmitool parity.
 
-C19/C20 仍为部分实现/存在差异；密码测试、账户写入、通道认证能力查询、完整 CLI、其他认证/传输
+C19/C20 仍为部分实现/存在差异；现有[认证能力查询](NETWORK_STATUS.md)保留回退/长度差异。
+密码测试、账户写入、完整 CLI、其他认证/传输
 及真实设备权限策略仍缺失或未验证。本地模拟不能证明完整 ipmitool 一致。
 
 Pinned sources: [user operations](https://github.com/ipmitool/ipmitool/blob/19d78782d795d0cf4ceefe655f616210c9143e62/lib/ipmi_user.c),

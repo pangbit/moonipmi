@@ -91,17 +91,33 @@ No account writes, password tests, privilege changes or real-device controls wer
 ## Session information reads / 会话信息读取
 
 Current source adds `session_info` with current/ID/handle/slot selectors and
-bounded `sessions` enumeration. Local native tests total 61 groups.
+bounded `sessions` enumeration. That batch passed 61 native test groups.
 [283 executions / 186 leaves](SESSIONS.md) record 116 output, 2 raw, 12 rejection,
 12 moon-only boundaries, 43 differences and one reference-only observation.
 PPP port offsets, accepted malformed lengths, partial output and handle truncation
 remain open in the [decision register](PARITY_DECISIONS.md). No remote session
 controls, authentication changes or real-device evidence are introduced.
 
-当前新增四种选择器的会话信息查询及有界枚举，本地原生测试共 61 组。
+当前新增四种选择器的会话信息查询及有界枚举，该批次原生测试共 61 组。
 [283 次执行、186 个叶项](SESSIONS.md)包含 116 项输出、2 项 raw、12 项拒绝、12 项本库边界、
 43 项差异及一项参考单侧观察。PPP 端口偏移、坏长度接受、部分输出和句柄截断继续列入
 [裁决汇总](PARITY_DECISIONS.md)，未新增远端会话控制、认证变更或实机证据。
+
+## Network status reads / 网络状态读取
+
+Current source adds `channel_auth_capabilities` and non-clearing `lan_statistics`.
+Local native tests total 64 groups. [291 executions / 158 leaves](NETWORK_STATUS.md)
+record 105 output, 6 raw, 18 rejection, 17 moon-only boundaries, 8 differences and
+4 short-response observations. Query fallback and response-length tolerance stay
+open in the [decision register](PARITY_DECISIONS.md). The query's version/privilege
+parameters do not alter the existing suite-17/User session. LAN configuration,
+automatic discovery, controls, compatible CLI and real-device semantics remain absent.
+
+当前新增通道认证能力查询及不清零的 LAN 统计，本地原生测试共 64 组。
+[291 次执行、158 个叶项](NETWORK_STATUS.md)包含 105 项输出、6 项 raw、18 项拒绝、17 项本库
+边界、8 项差异及 4 项短响应观察。查询回退和长度接受继续列入[裁决汇总](PARITY_DECISIONS.md)。
+查询的版本/权限参数不改变既有 suite 17/User 会话；LAN 配置、自动发现、控制、兼容 CLI
+及实机语义仍缺失。
 
 ## Full-parity work / 完整对齐工作
 
