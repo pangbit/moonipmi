@@ -45,6 +45,9 @@ jobs:
       - name: Compare three clients against one synthetic BMC
         if: runner.os == 'Linux'
         run: python3 tools/compare_clients.py --moon-client _build/native/debug/build/examples/comparison/comparison.exe --go-client _build/reference-client --output _build/client-comparison.json
+      - name: Compare SDR-backed readings with ipmitool sdr and sensor
+        if: runner.os == 'Linux'
+        run: python3 tools/sdr_check.py --moon-client _build/native/debug/build/examples/sdr/sdr.exe --output _build/sdr-comparison.json
       - name: Compare reads and command limits against the go-ipmi BMC
         if: runner.os == 'Linux'
         run: python3 tools/go_interop.py _build/native/debug/build/examples/comparison/comparison.exe _build/reference-bmc --compare-reads

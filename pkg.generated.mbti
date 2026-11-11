@@ -17,6 +17,8 @@ pub fn decode_rakp4(Bytes, Int32, UInt32) -> Bytes raise ProtocolError
 
 pub fn decode_response(Bytes, Int32, Int32, Int32) -> Response raise ProtocolError
 
+pub fn decode_sdr_record(Bytes) -> SdrRecord raise ProtocolError
+
 pub fn encode_handshake(Int32, Bytes) -> Bytes raise ProtocolError
 
 pub fn encode_request(Int32, Int32, Int32, Bytes) -> Bytes raise ProtocolError
@@ -62,6 +64,9 @@ pub fn Client::abort(Self) -> Unit
 pub async fn Client::close(Self) -> Unit
 pub async fn Client::connect(@socket.Addr, Bytes, Bytes, timeout_ms? : Int32) -> Self
 pub async fn Client::read(Self, ReadCommand) -> Response
+pub async fn Client::read_sensor(Self, SdrSensor) -> SensorReading
+pub async fn Client::sdr_records(Self, max_records? : Int32) -> Array[SdrRecord]
+pub async fn Client::sdr_repository_info(Self) -> SdrRepositoryInfo
 
 #derive(Eq, @debug.Debug)
 pub struct DeviceId {
@@ -126,8 +131,76 @@ pub fn Response::chassis_status(Self) -> ChassisStatus raise ProtocolError
 pub fn Response::device_id(Self) -> DeviceId raise ProtocolError
 pub fn Response::equal(Self, Self) -> Bool
 pub fn Response::not_equal(Self, Self) -> Bool
+pub fn Response::sdr_repository_info(Self) -> SdrRepositoryInfo raise ProtocolError
 pub fn Response::sensor_reading(Self) -> SensorReading raise ProtocolError
 pub fn Response::to_repr(Self) -> @debug.Repr
+
+#derive(Eq, @debug.Debug)
+pub struct SdrRecord {
+  record_id : Int32
+  record_type : Int32
+  data : Bytes
+}
+pub fn SdrRecord::equal(Self, Self) -> Bool
+pub fn SdrRecord::not_equal(Self, Self) -> Bool
+pub fn SdrRecord::sensor(Self) -> SdrSensor? raise ProtocolError
+pub fn SdrRecord::to_repr(Self) -> @debug.Repr
+
+#derive(Eq, @debug.Debug)
+pub struct SdrRepositoryInfo {
+  version : Int32
+  record_count : Int32
+  free_space : Int32
+  last_addition : UInt32
+  last_erase : UInt32
+  operations : Int32
+}
+pub fn SdrRepositoryInfo::equal(Self, Self) -> Bool
+pub fn SdrRepositoryInfo::not_equal(Self, Self) -> Bool
+pub fn SdrRepositoryInfo::to_repr(Self) -> @debug.Repr
+
+#derive(Eq, @debug.Debug)
+pub struct SdrSensor {
+  record_type : Int32
+  owner_id : Int32
+  owner_lun : Int32
+  owner_channel : Int32
+  number : Byte
+  entity_id : Int32
+  entity_instance : Int32
+  logical_entity : Bool
+  sensor_type : Int32
+  event_type : Int32
+  name : String?
+  raw_name : Bytes
+  name_encoding : Int32
+  analog_format : Int32
+  unit_flags : Int32
+  base_unit : Int32
+  modifier_unit : Int32
+  sharing_count : Int32
+  conversion : SensorConversion?
+}
+pub fn SdrSensor::discrete_state_name(Self, Int32) -> String?
+pub fn SdrSensor::equal(Self, Self) -> Bool
+pub fn SdrSensor::not_equal(Self, Self) -> Bool
+pub fn SdrSensor::read_support(Self) -> String?
+pub fn SdrSensor::state(Self, SensorReading) -> SensorState
+pub fn SdrSensor::to_repr(Self) -> @debug.Repr
+pub fn SdrSensor::unit(Self) -> String?
+pub fn SdrSensor::value(Self, SensorReading) -> SensorValue
+
+#derive(Eq, @debug.Debug)
+pub struct SensorConversion {
+  linearization : Int32
+  m : Int32
+  b : Int32
+  b_exponent : Int32
+  result_exponent : Int32
+}
+pub fn SensorConversion::equal(Self, Self) -> Bool
+pub fn SensorConversion::not_equal(Self, Self) -> Bool
+pub fn SensorConversion::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
 pub struct SensorReading {
@@ -141,6 +214,31 @@ pub fn SensorReading::equal(Self, Self) -> Bool
 pub fn SensorReading::not_equal(Self, Self) -> Bool
 pub fn SensorReading::to_repr(Self) -> @debug.Repr
 pub fn SensorReading::usable_raw_reading(Self) -> Int32?
+
+#derive(Eq, @debug.Debug)
+pub(all) enum SensorState {
+  Unavailable
+  ScanningDisabled
+  MissingStatus
+  Threshold(Int32)
+  Discrete(Int32)
+}
+pub fn SensorState::equal(Self, Self) -> Bool
+pub fn SensorState::not_equal(Self, Self) -> Bool
+pub fn SensorState::threshold_status(Self) -> String?
+pub fn SensorState::to_repr(Self) -> @debug.Repr
+
+#derive(Eq, @debug.Debug)
+pub(all) enum SensorValue {
+  Numeric(Double)
+  Discrete
+  Unavailable
+  ScanningDisabled
+  Unsupported(String)
+}
+pub fn SensorValue::equal(Self, Self) -> Bool
+pub fn SensorValue::not_equal(Self, Self) -> Bool
+pub fn SensorValue::to_repr(Self) -> @debug.Repr
 
 // Type aliases
 

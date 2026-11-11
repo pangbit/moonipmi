@@ -188,7 +188,7 @@ async fn Client::exchange(
 }
 
 ///|
-/// Execute one of the three explicitly read-only command variants.
+/// Execute one of the explicitly read-only command variants.
 /// Any I/O, authentication, identity or framing failure closes the session.
 pub async fn Client::read(self : Client, command : ReadCommand) -> Response {
   match command {

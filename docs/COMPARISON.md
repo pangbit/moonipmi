@@ -62,8 +62,9 @@ positive cases, and specific failure phases/codes, not just subprocess exit code
 传感器覆盖正常、不可用、停扫及关闭事件消息；新增可选原始值入口拒绝不可用/停扫，关闭事件消息仍可读。
 五项原始值/标志之外另检查一个推导的可用值。不存在的传感器改用 `0xfe`，不再用保留编号 `0xff`。
 
-The sensor baseline invokes **`ipmitool raw 0x04 0x2d`**, not `sensor list/get`.
-Its usable-value normalization is derived from the response flags; it does not
+The original three-read sensor baseline invokes **`ipmitool raw 0x04 0x2d`**, not `sensor list/get`.
+The new, separate [SDR comparison](SDR.md) actually executes `sdr list all` and `sensor list`.
+The original baseline's usable-value normalization is derived from response flags; it does not
 claim an execution of ipmitool's SDR-based presentation. The rule is checked
 against IPMI §16.5 and [ipmitool 1.8.19's actual sensor-reading logic](https://github.com/ipmitool/ipmitool/blob/19d78782d795d0cf4ceefe655f616210c9143e62/lib/ipmi_sdr.c#L1643-L1664):
 scanning and availability gate the reading; SDR metadata separately determines
@@ -71,7 +72,8 @@ whether it is an analog value. No physical units or numeric sensor type are infe
 Device/chassis semantics also use [Get Device ID](https://github.com/ipmitool/ipmitool/blob/19d78782d795d0cf4ceefe655f616210c9143e62/lib/ipmi_mc.c#L394-L475)
 and [Chassis Status](https://github.com/ipmitool/ipmitool/blob/19d78782d795d0cf4ceefe655f616210c9143e62/lib/ipmi_chassis.c#L411-L464).
 
-传感器实际基线命令是 `ipmitool raw`，不是依赖 SDR 的 `sensor list/get`。
+原三读对照的传感器基线命令是 `ipmitool raw`，不是依赖 SDR 的 `sensor list/get`。
+新增的独立 [SDR 对照](SDR.md) 已实际执行 `sdr list all` 和 `sensor list`。
 归一化的可用值由响应标志推导，并以规范 §16.5 与固定版本源码核对，不冒称已实测完整传感器展示功能。
 是否为数值型及物理单位仍需 SDR；设备和机箱的对应源码链接如上。
 
@@ -216,9 +218,11 @@ python3 tools/go_interop.py "$(command -v ipmitool)" _build/reference-bmc \
 These checks passed locally on macOS with ipmitool 1.8.19; Linux CI runs them too.
 Reports contain synthetic results, not verbose cryptographic logs. This change
 is unreleased: Mooncakes 0.1.0 retains its prior requester check. No real BMC,
-full protocol coverage or security audit is claimed. SDR/physical units, writes,
-other suites, IPMI 1.5 sessions, OEM/SOL and SEL/FRU traversal remain outside scope.
+full protocol coverage or security audit is claimed. The [SDR subset](SDR.md) is
+now implemented separately; writes, other suites, IPMI 1.5 sessions, OEM/SOL,
+bridging and SEL/FRU traversal remain outside scope.
 
 上述检查已在 macOS 本地以 ipmitool 1.8.19 通过，Linux CI 也执行这些检查。
 报告只含合成结果，不输出密码学调试日志。改动尚未发布，Mooncakes 0.1.0 仍使用旧请求者校验。
-不宣称真实 BMC、完整协议或安全审计；SDR/物理单位、写操作、其他套件、IPMI 1.5、OEM/SOL、SEL/FRU 不在范围内。
+不宣称真实 BMC、完整协议或安全审计；[SDR 子集](SDR.md) 已单独实现，
+写操作、其他套件、IPMI 1.5、OEM/SOL、桥接、SEL/FRU 仍不在范围内。

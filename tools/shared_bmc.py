@@ -61,7 +61,7 @@ def fault_response(payload, fault):
     return bytes(out)
 
 
-def serve(server, stop, trace, profile="default", wire_fault=None):
+def serve(server, stop, trace, profile="default", wire_fault=None, command_handler=None, max_exchanges=16):
     assert wire_fault is None or wire_fault in WIRE_FAULTS, "unknown wire fault"
     values = PROFILES.get(profile, {})
     peer = None
@@ -78,7 +78,7 @@ def serve(server, stop, trace, profile="default", wire_fault=None):
                 peer = sender
             assert sender == peer, "unexpected fixture peer"
             count += 1
-            assert count <= 24, "bounded fixture exchange exceeded"
+            assert count <= max_exchanges + 8, "bounded fixture exchange exceeded"
             return packet
         raise Stopped
 
@@ -128,13 +128,16 @@ def serve(server, stop, trace, profile="default", wire_fault=None):
     send(wire.envelope(0x15, bytes([rakp3[0], 0, 0, 0]) + wire.u32(console) + rakp4))
     trace["authenticated"] = True
     previous = 0
-    for index in range(16):
+    for index in range(max_exchanges):
         previous, req = wire.unprotect(receive(), previous, k1, k2)
         assert len(req) >= 7 and req[0] == 0x20 and req[3] in (0x81, 0x20)
         assert req[1] & 3 == 0 and req[4] & 3 == 0
         netfn, cmd, data = req[1] >> 2, req[5], req[6:-1]
         reply, completion = b"", 0
-        if (netfn, cmd) == (6, 0x3b):
+        handled = command_handler(netfn, cmd, data) if command_handler else None
+        if handled is not None:
+            reply, completion = handled
+        elif (netfn, cmd) == (6, 0x3b):
             assert data == b"\x02"
             reply = b"\x02"
         elif (netfn, cmd) == (6, 1):

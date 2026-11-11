@@ -21,13 +21,15 @@ Use only on explicitly authorised systems and isolated management networks.
 - A single connected UDP peer, one request in flight, per-exchange deadlines,
   no automatic retry, explicit close and immediate local abort.
   Use plain IPv4 rather than IPv4-mapped IPv6; mapped forms are rejected.
-- Three typed read-only commands: Get Device ID, Get Chassis Status, Get Sensor Reading.
+- Typed Device ID, Chassis Status and raw Sensor Reading commands.
+- Bounded SDR repository traversal, Full/Compact Sensor records, common linear
+  engineering values, threshold/discrete states and units. See [SDR support](docs/SDR.md).
 
-No hardware-control writes, generic network command API, OEM/SOL, SEL/FRU/SDR
-repository traversal, IPMI 1.5, cipher negotiation, Kg override or automatic
-reconnection. Set Session Privilege and Close Session are session housekeeping,
-not hardware configuration. Raw sensor values need SDR metadata before they can
-be converted into physical units. Username/password lengths are 1..16/1..20 bytes.
+No hardware-control writes, generic network command API, OEM/SOL, SEL/FRU,
+Device SDRs, bridging, IPMI 1.5, cipher negotiation, Kg override or automatic
+reconnection. Session housekeeping and SDR reservations do not change hardware
+configuration. Nonlinear/OEM conversion and shared Compact expansion are explicitly
+unsupported. Username/password lengths are 1..16/1..20 bytes.
 
 ## Build and test
 
@@ -84,7 +86,12 @@ intrusion/lockout/drive/cooling flags; raw historical events and optional panel
 metadata remain available. For a sensor, use `reading.usable_raw_reading()` instead
 of assuming its raw byte is meaningful: unavailable or disabled-scanning results
 return `None`, not zero. Disabling event messages alone does not invalidate the
-read. SDR metadata is still required to interpret a sensor type, states or units.
+read. For discovery and engineering values, use `client.sdr_records()`,
+`record.sensor()`, `client.read_sensor(sensor)`, then `sensor.value(reading)`,
+`state(reading)` and `unit()`. Value/status enums distinguish missing and unsupported
+results from numeric zero. Check `sensor.read_support()` before attempting a read.
+The [SDR example and limits](docs/SDR.md) include real ipmitool `sdr`/`sensor`
+commands against the same synthetic repository.
 
 A completion-code failure is returned as `Response.completion_code`; typed
 successful-result decoders reject it. Network, framing, authentication or replay
@@ -105,9 +112,10 @@ See the [three use scenarios](docs/SCENARIOS.md), [reproducible demo](docs/DEMO.
 [contributing](CONTRIBUTING.md). Run `moon info` / `moon doc` for API documentation.
 
 The protocol source is the **IPMI v2.0 specification**, especially §13 RMCP+,
-§20.1 Get Device ID, §28.2 Get Chassis Status, and §35.14 Get Sensor Reading.
+§20.1 Get Device ID, §28.2 Get Chassis Status, §33 SDR Repository,
+§35.14 Get Sensor Reading and §43 Sensor Data Records.
 The primary functional baseline is [ipmitool 1.8.19](https://codeberg.org/IPMITool/ipmitool),
-within the three-read scope, not all ipmitool commands.
+within the implemented read-only and SDR subset, not all ipmitool commands.
 The auxiliary comparison implementation is [bougou/go-ipmi](https://github.com/bougou/go-ipmi),
 Apache-2.0, reviewed at
 [`d4fb9c6`](https://github.com/bougou/go-ipmi/tree/d4fb9c6923cb22f7e3c982590e57f1f2c3b58ce6).

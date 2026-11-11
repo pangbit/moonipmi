@@ -135,14 +135,13 @@ Inspect these `matched` rows / 检查下列 `matched` 结果：
 **Outcome:** retain 42 only for usable samples; preserve missingness instead of
 substituting zero. Disabling event messages alone does not invalidate a reading.
 The independent comparison uses `ipmitool raw 0x04 0x2d`, **not** `sensor list/get`.
-This library neither discovers sensor numbers through SDR nor turns raw 42 into
-degrees, volts or a health threshold. Supply separately verified sensor metadata
-before interpreting units; do not infer an actual temperature from this fixture.
+This raw-only workflow does not attach units. The separate [SDR workflow](SDR.md)
+discovers sensor numbers and converts supported values using repository metadata.
+Neither synthetic fixture measures an actual temperature.
 
 **结果：**仅对有效样本保留 42，无效时保留缺失，不填零。仅关闭事件消息不会令读数无效。
-独立对照用 `ipmitool raw 0x04 0x2d`，**不是** `sensor list/get`。本库不通过 SDR 发现
-传感器编号，也不将原始 42 转成温度、电压或健康阈值。解释单位前须另有经验证的元数据，
-不能把模拟值误称为实际温度。
+独立对照用 `ipmitool raw 0x04 0x2d`，**不是** `sensor list/get`。此原始值流程不附加单位；独立的 [SDR 流程](SDR.md)
+通过仓库元数据发现传感器并换算受支持的数值。两种合成场景都不能当作实际温度测量。
 
 See [comparison details](COMPARISON.md) for normalization and intentional differences,
 and [scope/evidence](STATUS.md) for exact CI coverage and remaining limitations.

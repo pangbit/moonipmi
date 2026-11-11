@@ -16,3 +16,6 @@ tools/ipmitool_check.py
 tools/compare_clients.py
 tools/shared_bmc.py
 tools/address_check.py
+
+tools/sdr_check.py
+tools/sdr_fixture.py

@@ -17,11 +17,12 @@
   与 ipmitool 1.8.19 一致，不要求响应请求者地址回显 `0x81`。
 - 连接单一 UDP 对端，同一会话只允许一个在途请求；每次交换有超时，不自动重试；支持关闭与本地立即中止。
   IPv4 对端使用普通 IPv4 地址，不接受 IPv4-mapped IPv6 表示。
-- 三项类型化只读命令：Get Device ID、Get Chassis Status、Get Sensor Reading。
+- 类型化设备标识、机箱状态和传感器原始读数。
+- 有界 SDR 仓库遍历、Full/Compact 记录、常见线性工程值、阈值/离散状态及单位，见 [SDR 支持](docs/SDR.md)。
 
-不包含硬件控制写操作、通用网络命令入口、OEM/SOL、SEL/FRU/SDR 仓库遍历、IPMI 1.5、
-密码套件协商、Kg 覆盖或自动重连。Set Session Privilege 与 Close Session 仅管理会话，不修改硬件配置。
-传感器原始值转换成物理单位还需要 SDR 元数据。用户名/密码长度分别为 1..16 / 1..20 字节。
+不包含硬件控制写操作、通用网络命令入口、OEM/SOL、SEL/FRU、Device SDR、桥接、IPMI 1.5、
+密码套件协商、Kg 覆盖或自动重连。会话管理与 SDR 预留不修改硬件配置。
+非线性/OEM 换算和共享 Compact 展开明确标记为不支持。用户名/密码长度分别为 1..16 / 1..20 字节。
 
 ## 构建与测试
 
@@ -71,7 +72,11 @@ client.close()
 Device SDR 与 SDR 仓库是不同能力，这些只是设备自报信息，不证明其他命令已可用。
 机箱提供入侵、前面板锁定、驱动器与风扇故障便捷入口，历史事件和可选面板信息仍保留原始值。
 传感器优先使用 `reading.usable_raw_reading()`：不可用或停扫时返回 `None`，不把无效值替换为零；
-仅关闭事件消息不影响读数。类型、状态含义和物理单位仍需要 SDR。这些新增入口尚未发布到 Mooncakes。
+仅关闭事件消息不影响读数。发现传感器和工程值时，使用 `client.sdr_records()`、`record.sensor()`、
+`client.read_sensor(sensor)`，再调用 `sensor.value(reading)`、`state(reading)` 与 `unit()`。
+枚举区分缺失、不支持与数值零，读取前可检查 `sensor.read_support()`。
+[SDR 示例与边界](docs/SDR.md) 实际运行 ipmitool `sdr`/`sensor` 对同一合成仓库进行对照。
+这些新增入口尚未发布到 Mooncakes。
 
 失败完成码保留在 `Response.completion_code`，类型化成功结果解析器会拒绝失败响应。
 网络、报文、认证或重放错误会关闭客户端，避免不确定状态下重发。
@@ -87,8 +92,8 @@ Device SDR 与 SDR 仓库是不同能力，这些只是设备自报信息，不�
 `moon info` / `moon doc` 可生成 API 描述与文档。
 
 协议依据是 **IPMI v2.0 规范**，重点包括第 13 节 RMCP+、20.1 Get Device ID、
-28.2 Get Chassis Status、35.14 Get Sensor Reading。主要功能基线是
-[ipmitool 1.8.19](https://codeberg.org/IPMITool/ipmitool)，仅限三项读取范围，不表示支持其全部命令。辅助对照项目是
+28.2 Get Chassis Status、33 SDR Repository、35.14 Get Sensor Reading、43 Sensor Data Records。主要功能基线是
+[ipmitool 1.8.19](https://codeberg.org/IPMITool/ipmitool)，仅限已实现的只读与 SDR 子集，不表示支持其全部命令。辅助对照项目是
 [bougou/go-ipmi](https://github.com/bougou/go-ipmi)，Apache-2.0，查阅版本
 [`d4fb9c6`](https://github.com/bougou/go-ipmi/tree/d4fb9c6923cb22f7e3c982590e57f1f2c3b58ce6)。
 它是参考，不是运行时依赖或背书。固定版本参考 BMC 将响应请求者地址硬编码为 `0x20`，

@@ -5,11 +5,12 @@
 Suite 17 RAKP authentication, protected RMCP+ packets, replay/identity validation,
 connected UDP transport, per-exchange deadlines, single-flight requests, User
 privilege and close/abort. Three typed read-only commands: Device ID, Chassis
-Status and raw Sensor Reading. Protocol/session logic is MoonBit; cryptographic
+Status and raw Sensor Reading, plus SDR repository traversal and Full/Compact
+sensor interpretation. Protocol/session logic is MoonBit; cryptographic
 primitives are supplied by OpenSSL 3 through a small C adapter.
 
 已实现套件 17 RAKP 认证、受保护 RMCP+ 报文、防重放/身份校验、连接式 UDP、逐次超时、
-单在途请求、User 权限及关闭/中止。提供设备标识、机箱状态、传感器原始值三项类型化只读命令。
+单在途请求、User 权限及关闭/中止。提供设备标识、机箱状态、传感器原始值三项类型化只读命令，以及 SDR 仓库遍历和 Full/Compact 解释。
 MoonBit 负责协议和会话，薄 C 适配调用 OpenSSL 3 密码学原语。
 
 ## Verified evidence / 已验证证据
@@ -44,6 +45,19 @@ for that exact revision, not a claim about untested future commits.
 检查/构建、离线示例及 MoonBit/Python 完整本地交互。30 项三客户端矩阵与两个响应地址探针
 在 **Linux 任务**中通过；macOS CI 跳过这些可选步骤，其本地 macOS 证据见上。
 该结果对应这一确切版本，不替代后续提交的验证。
+
+## SDR subset / SDR 子集
+
+The current source passed 32 native test groups on local macOS, 33 output comparisons
+across moonipmi and actual ipmitool 1.8.19 `sdr list all`/`sensor list`, and nine
+repository boundary scenarios. Linux CI includes the same SDR comparison; macOS
+CI covers native tests/build but does not install ipmitool. See [scope and reproduction](SDR.md).
+These local results do not substitute for CI on a specific commit.
+
+当前源码在本地 macOS 通过 32 组 native 测试、moonipmi 与实际 ipmitool 1.8.19
+`sdr list all`/`sensor list` 的 33 项输出对照及九项仓库边界场景。Linux CI 加入相同 SDR 对照，
+macOS CI 运行原生测试/构建但不安装 ipmitool。范围及复现见 [SDR 文档](SDR.md)。
+本地结果不替代确切提交的 CI 证据。
 
 ## Not verified / 尚未验证
 
@@ -103,11 +117,12 @@ needed later, requires a separately authorised target and account.
 ## Explicit exclusions / 明确不含
 
 No anonymous access, downgrade fallback, IPMI 1.5, Kg override, OEM/SOL, hardware
-writes, automatic reconnect/retry, SDR-based physical-unit conversion or network
-scanning. Each exchange fails closed; an application may explicitly reconnect.
+writes, automatic reconnect/retry, nonlinear/OEM sensor conversion, Device SDRs,
+bridging, shared Compact expansion or network scanning. Each exchange fails closed; an application may explicitly reconnect.
 The module uses the toolchain's documented experimental native build-config API;
 that API and its pinned toolchain compatibility are maintenance considerations.
 
-不含匿名、降级、IPMI 1.5、Kg 覆盖、OEM/SOL、硬件写操作、自动重连/重试、SDR 物理单位换算或扫描。
+不含匿名、降级、IPMI 1.5、Kg 覆盖、OEM/SOL、硬件写操作、自动重连/重试、非线性/OEM 换算、
+Device SDR、桥接、共享 Compact 展开或网络扫描。
 每次交换失败即关闭；应用可以明确重新连接。使用官方文档中的实验性原生构建配置 API，
 维护时需要关注其变化和固定工具链兼容性。

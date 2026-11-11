@@ -2,6 +2,17 @@
 
 ## Unreleased / 未发布
 
+- Add bounded SDR repository info/reservation/traversal and Full/Compact Sensor
+  decoding, linear engineering values, units and threshold/discrete status.
+  Explicitly reject unsupported routing and retain unknown record types.
+- Add a loopback SDR example, 33 output comparisons with actual ipmitool 1.8.19
+  `sdr list all`/`sensor list`, and nine repository boundary scenarios. No hardware
+  compatibility or dynamic threshold-setting support is claimed.
+- 新增有界 SDR 仓库信息/预留/遍历、Full/Compact 记录、线性工程值、单位及阈值/离散状态。
+  明确拒绝不支持的路由，保留未知记录类型。
+- 增加本地 SDR 示例、实际 ipmitool 1.8.19 `sdr list all`/`sensor list` 的 33 项输出对照及
+  九项仓库边界场景，不宣称实机兼容或动态阈值设置支持。
+
 - Match ipmitool 1.8.19 requester-address tolerance by default, preserving all
   other existing validation. Add 24 authenticated response-policy comparisons
   and document retained differences and risks.
