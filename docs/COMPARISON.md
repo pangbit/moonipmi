@@ -218,11 +218,43 @@ python3 tools/go_interop.py "$(command -v ipmitool)" _build/reference-bmc \
 These checks passed locally on macOS with ipmitool 1.8.19; Linux CI runs them too.
 Reports contain synthetic results, not verbose cryptographic logs. This change
 is unreleased: Mooncakes 0.1.0 retains its prior requester check. No real BMC,
-full protocol coverage or security audit is claimed. The [SDR subset](SDR.md) is
-now implemented separately; writes, other suites, IPMI 1.5 sessions, OEM/SOL,
-bridging and SEL/FRU traversal remain outside scope.
+full protocol coverage or security audit is claimed.
 
 上述检查已在 macOS 本地以 ipmitool 1.8.19 通过，Linux CI 也执行这些检查。
 报告只含合成结果，不输出密码学调试日志。改动尚未发布，Mooncakes 0.1.0 仍使用旧请求者校验。
-不宣称真实 BMC、完整协议或安全审计；[SDR 子集](SDR.md) 已单独实现，
-写操作、其他套件、IPMI 1.5、OEM/SOL、桥接、SEL/FRU 仍不在范围内。
+不宣称真实 BMC、完整协议或安全审计。
+
+## Separate read-only subsets / 单独实现的只读子集
+
+The current unreleased source separately implements the [SDR subset](SDR.md) and
+[chassis, FRU and SEL diagnostics](DIAGNOSTICS.md): chassis capabilities/restart
+cause, validated basic FRU inventory in byte/word access modes, and bounded SEL
+enumeration with standard event metadata. FRU/SEL enforce total limits and
+overall deadlines and fail without partial results. Unsupported FRU encodings
+and internal-use/multirecord semantics, plus unsupported SEL sensor-specific/OEM
+meanings, remain uninterpreted with raw data retained. These reads are not atomic
+snapshots. Hardware controls, FRU writes, SEL mutations, automatic FRU discovery,
+other cipher suites, IPMI 1.5 sessions, OEM commands/SOL and bridging remain
+outside scope.
+
+当前未发布源码已单独实现 [SDR 子集](SDR.md)及[机箱、FRU 与 SEL 只读诊断](DIAGNOSTICS.md)：
+机箱能力/重启原因、经校验的基础 FRU 字节/字访问清单，以及带标准事件元数据的有界 SEL 枚举。
+FRU/SEL 限制总量和整体时长，失败不返回部分结果。不支持的 FRU 编码与内部区/多记录区语义，
+以及不支持的 SEL 传感器专有/OEM 含义均不作解释，保留原始数据。读取不是原子快照。
+硬件控制、FRU 写入、SEL 修改、FRU 自动发现、其他密码套件、IPMI 1.5 会话、OEM 命令/SOL
+及桥接仍不在范围内。
+
+The separate diagnostic checker passed 30 focused synthetic-loopback comparisons
+and boundary cases locally on macOS with ipmitool 1.8.19, including byte/word FRU
+reads, SEL records, malformed responses, total limits and overall timeouts. Linux
+CI runs this checker; macOS CI runs native tests/build and skips the ipmitool
+comparison. This evidence does not extend the original three-client matrix or
+the pinned go-ipmi BMC comparison to FRU/SEL. It does not establish real-BMC
+compatibility, full IPMI coverage or a security audit. These APIs remain unreleased;
+Mooncakes 0.1.0 is unchanged.
+
+独立诊断检查已在 macOS 本地使用 ipmitool 1.8.19 通过 30 项合成本机对照及边界用例，
+包括字节/字 FRU 读取、SEL 记录、畸形响应、总量限制与整体超时。Linux CI 执行此检查；
+macOS CI 执行原生测试/构建，跳过 ipmitool 对照。这些证据不表示原三客户端矩阵或固定
+go-ipmi BMC 对照已扩展到 FRU/SEL，也不证明真实 BMC 兼容、完整 IPMI 覆盖或完成安全审计。
+这些 API 仍未发布，Mooncakes 0.1.0 不变。
