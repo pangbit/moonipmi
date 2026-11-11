@@ -4,22 +4,18 @@ Only loopback and synthetic credentials are possible; no real BMC is contacted.
 """
 import argparse
 import json
-import os
 import re
 import selectors
-import shutil
 import subprocess
 import sys
 import tempfile
 
 from compare_clients import EXPECTED, ipmitool_command, normalize_ipmitool
+import reference_profile
 
 
-def compare_reads(client, port):
+def compare_reads(client, port, ipmitool):
     """Do not mistake the reference BMC's unsupported sensor command for success."""
-    ipmitool = shutil.which("ipmitool")
-    if not ipmitool or subprocess.check_output([ipmitool, "-V"], text=True).strip() != "ipmitool version 1.8.19":
-        raise RuntimeError("this read comparison requires ipmitool 1.8.19")
     for case in ("device", "chassis", "sensor"):
         for name, executable in (("moonipmi", client), ("ipmitool", ipmitool)):
             command = (ipmitool_command(executable, port, case) if name == "ipmitool"
@@ -27,7 +23,7 @@ def compare_reads(client, port):
             if name == "ipmitool":
                 command[command.index("-R") + 1] = "1"
             result = subprocess.run(command, capture_output=True, text=True, timeout=8,
-                                    env={**os.environ, "LC_ALL": "C"})
+                                    env=reference_profile.environment())
             if case == "sensor":
                 marker = "rsp=0xc1" if name == "ipmitool" else "FAIL: Get Sensor Reading failed (completion code 193)"
                 if result.returncode <= 0 or marker not in result.stdout + result.stderr:
@@ -55,9 +51,16 @@ def main():
                        help="compare the MoonBit comparison example and ipmitool, including the reference sensor limitation")
     modes.add_argument("--ipmitool-address-probe", action="store_true",
                        help="observe ipmitool's permissive address handling against the same unmodified server")
+    reference_profile.add_arguments(parser)
     args = parser.parse_args()
+    if args.compare_reads or args.ipmitool_address_probe:
+        if args.ipmitool_address_probe and not args.reference_profile and not args.ipmitool:
+            args.ipmitool = args.client
+        ipmitool, reference = reference_profile.resolve(args)
+        print("REFERENCE:", json.dumps(reference, sort_keys=True))
     with tempfile.TemporaryFile(mode="w+") as errors:
-        server = subprocess.Popen([args.server], stdout=subprocess.PIPE, stderr=errors, text=True)
+        server = subprocess.Popen([args.server], stdout=subprocess.PIPE, stderr=errors, text=True,
+                                  env=reference_profile.environment())
         try:
             with selectors.DefaultSelector() as poll:
                 poll.register(server.stdout, selectors.EVENT_READ)
@@ -67,16 +70,17 @@ def main():
             if not isinstance(port, int) or not 1 <= port <= 65535:
                 raise RuntimeError("invalid loopback simulator port")
             if args.compare_reads:
-                compare_reads(args.client, port)
+                compare_reads(args.client, port, ipmitool)
                 if server.poll() is not None:
                     raise RuntimeError("go-ipmi simulator exited before cleanup")
                 return
             command = [args.client, str(port)]
             if args.ipmitool_address_probe:
-                command = [args.client, "-vvv", "-I", "lanplus", "-C", "17", "-L", "USER",
+                command = [ipmitool, "-vvv", "-I", "lanplus", "-C", "17", "-L", "USER",
                            "-U", "tester", "-P", "synthetic-password", "-H", "127.0.0.1",
                            "-p", str(port), "-N", "1", "-R", "0", "mc", "info"]
-            client = subprocess.run(command, capture_output=True, text=True, timeout=10)
+            client = subprocess.run(command, capture_output=True, text=True, timeout=10,
+                                    env=reference_profile.environment())
             if server.poll() is not None:
                 raise RuntimeError("go-ipmi simulator exited before cleanup")
             if args.ipmitool_address_probe:
@@ -86,7 +90,7 @@ def main():
                 fields = {key.strip(): value.strip() for key, value in fields.items()}
                 if fields.get("Manufacturer ID") != "343" or fields.get("Product ID") != "4660 (0x1234)":
                     raise RuntimeError("unexpected synthetic Device ID from go-ipmi")
-                print(subprocess.check_output([args.client, "-V"], text=True).strip())
+                print(reference["version"])
                 print("OBSERVED: ipmitool accepted rqAddr 0x20 in responses to requester 0x81")
                 print("LIMIT: permissive client behaviour is not evidence of a conforming response address")
             else:

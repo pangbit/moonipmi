@@ -40,9 +40,9 @@ python3 tools/reference_cases.py --reference-profile _build/ipmitool-reference/p
 python3 tools/diagnostics_check.py --reference-profile _build/ipmitool-reference/profile.json --moon-client _build/native/debug/build/examples/diagnostics/diagnostics.exe --output _build/diagnostics-comparison.json
 ```
 
-The same `--reference-profile` argument is supported by `compare_clients.py`, `sdr_check.py` and `address_check.py`. Reports/build logs stay under ignored `_build`; do not commit local paths, generated binaries or execution reports. CI retains profiles and reports as artifacts.
+The same `--reference-profile` argument is supported by `compare_clients.py`, `sdr_check.py`, `address_check.py` and the reference modes of `go_interop.py`. Reports/build logs stay under ignored `_build`; do not commit local paths, generated binaries or execution reports. CI retains profiles and reports as artifacts.
 
-原三读、SDR 及地址校验脚本也接受同一参数。报告及日志留在忽略目录，不提交本机路径、二进制或执行报告。CI 以产物保存证据。
+原三读、SDR、地址校验及 `go_interop.py` 的参考模式也接受同一参数。报告及日志留在忽略目录，不提交本机路径、二进制或执行报告。CI 以产物保存证据。
 
 ## Leaf inventory and actual evidence / 叶项及实际证据
 
