@@ -1,0 +1,578 @@
+{
+  "schema_version": 1,
+  "status": "Source inventory for review; no full-parity acceptance has passed",
+  "reference": {
+    "project": "ipmitool/ipmitool",
+    "tag": "IPMITOOL_1_8_19",
+    "tag_object": "259e69af5d72fd57cddf8f3aa9783e4acc406dc0",
+    "commit": "19d78782d795d0cf4ceefe655f616210c9143e62",
+    "baseline_policy": "Unmodified pinned source; retain all compile-time variants in the union; freeze per-platform build profiles before behavioral acceptance",
+    "catalogued_on": "2026-11-11"
+  },
+  "moonipmi_baseline": "355682ea7fdaa8355747c901601a41569570f33f",
+  "commands": [
+    {
+      "id": "C01",
+      "name": "raw",
+      "handler": "ipmi_raw_main",
+      "sources": [
+        {
+          "path": "lib/ipmi_raw.c",
+          "line": 319
+        }
+      ],
+      "condition": "registered unconditionally"
+    },
+    {
+      "id": "C02",
+      "name": "i2c",
+      "handler": "ipmi_rawi2c_main",
+      "sources": [
+        {
+          "path": "lib/ipmi_raw.c",
+          "line": 197
+        }
+      ],
+      "condition": "registered unconditionally"
+    },
+    {
+      "id": "C03",
+      "name": "spd",
+      "handler": "ipmi_rawspd_main",
+      "sources": [
+        {
+          "path": "lib/ipmi_raw.c",
+          "line": 136
+        }
+      ],
+      "condition": "registered unconditionally"
+    },
+    {
+      "id": "C04",
+      "name": "lan",
+      "handler": "ipmi_lanp_main",
+      "sources": [
+        {
+          "path": "lib/ipmi_lanp.c",
+          "line": 2495
+        }
+      ],
+      "condition": "registered unconditionally"
+    },
+    {
+      "id": "C05",
+      "name": "chassis",
+      "handler": "ipmi_chassis_main",
+      "sources": [
+        {
+          "path": "lib/ipmi_chassis.c",
+          "line": 1900
+        }
+      ],
+      "condition": "registered unconditionally"
+    },
+    {
+      "id": "C06",
+      "name": "power",
+      "handler": "ipmi_power_main",
+      "sources": [
+        {
+          "path": "lib/ipmi_chassis.c",
+          "line": 1646
+        }
+      ],
+      "condition": "registered unconditionally",
+      "alias_of": "chassis power"
+    },
+    {
+      "id": "C07",
+      "name": "event",
+      "handler": "ipmi_event_main",
+      "sources": [
+        {
+          "path": "lib/ipmi_event.c",
+          "line": 595
+        }
+      ],
+      "condition": "registered unconditionally"
+    },
+    {
+      "id": "C08",
+      "name": "mc",
+      "handler": "ipmi_mc_main",
+      "sources": [
+        {
+          "path": "lib/ipmi_mc.c",
+          "line": 1278
+        }
+      ],
+      "condition": "registered unconditionally"
+    },
+    {
+      "id": "C09",
+      "name": "bmc",
+      "handler": "ipmi_mc_main",
+      "sources": [
+        {
+          "path": "lib/ipmi_mc.c",
+          "line": 1278
+        }
+      ],
+      "condition": "registered unconditionally",
+      "alias_of": "mc"
+    },
+    {
+      "id": "C10",
+      "name": "sdr",
+      "handler": "ipmi_sdr_main",
+      "sources": [
+        {
+          "path": "lib/ipmi_sdr.c",
+          "line": 4737
+        }
+      ],
+      "condition": "registered unconditionally"
+    },
+    {
+      "id": "C11",
+      "name": "sensor",
+      "handler": "ipmi_sensor_main",
+      "sources": [
+        {
+          "path": "lib/ipmi_sensor.c",
+          "line": 992
+        }
+      ],
+      "condition": "registered unconditionally"
+    },
+    {
+      "id": "C12",
+      "name": "fru",
+      "handler": "ipmi_fru_main",
+      "sources": [
+        {
+          "path": "lib/ipmi_fru.c",
+          "line": 4419
+        }
+      ],
+      "condition": "registered unconditionally"
+    },
+    {
+      "id": "C13",
+      "name": "gendev",
+      "handler": "ipmi_gendev_main",
+      "sources": [
+        {
+          "path": "lib/ipmi_gendev.c",
+          "line": 535
+        }
+      ],
+      "condition": "registered unconditionally"
+    },
+    {
+      "id": "C14",
+      "name": "sel",
+      "handler": "ipmi_sel_main",
+      "sources": [
+        {
+          "path": "lib/ipmi_sel.c",
+          "line": 2996
+        }
+      ],
+      "condition": "registered unconditionally"
+    },
+    {
+      "id": "C15",
+      "name": "pef",
+      "handler": "ipmi_pef_main",
+      "sources": [
+        {
+          "path": "lib/ipmi_pef.c",
+          "line": 1807
+        }
+      ],
+      "condition": "registered unconditionally"
+    },
+    {
+      "id": "C16",
+      "name": "sol",
+      "handler": "ipmi_sol_main",
+      "sources": [
+        {
+          "path": "lib/ipmi_sol.c",
+          "line": 1908
+        }
+      ],
+      "condition": "registered unconditionally"
+    },
+    {
+      "id": "C17",
+      "name": "tsol",
+      "handler": "ipmi_tsol_main",
+      "sources": [
+        {
+          "path": "lib/ipmi_tsol.c",
+          "line": 369
+        }
+      ],
+      "condition": "registered unconditionally"
+    },
+    {
+      "id": "C18",
+      "name": "isol",
+      "handler": "ipmi_isol_main",
+      "sources": [
+        {
+          "path": "lib/ipmi_isol.c",
+          "line": 786
+        }
+      ],
+      "condition": "registered unconditionally"
+    },
+    {
+      "id": "C19",
+      "name": "user",
+      "handler": "ipmi_user_main",
+      "sources": [
+        {
+          "path": "lib/ipmi_user.c",
+          "line": 736
+        }
+      ],
+      "condition": "registered unconditionally"
+    },
+    {
+      "id": "C20",
+      "name": "channel",
+      "handler": "ipmi_channel_main",
+      "sources": [
+        {
+          "path": "lib/ipmi_channel.c",
+          "line": 905
+        }
+      ],
+      "condition": "registered unconditionally"
+    },
+    {
+      "id": "C21",
+      "name": "session",
+      "handler": "ipmi_session_main",
+      "sources": [
+        {
+          "path": "lib/ipmi_session.c",
+          "line": 370
+        }
+      ],
+      "condition": "registered unconditionally"
+    },
+    {
+      "id": "C22",
+      "name": "dcmi",
+      "handler": "ipmi_dcmi_main",
+      "sources": [
+        {
+          "path": "lib/ipmi_dcmi.c",
+          "line": 3687
+        }
+      ],
+      "condition": "registered unconditionally"
+    },
+    {
+      "id": "C23",
+      "name": "nm",
+      "handler": "ipmi_nm_main",
+      "sources": [
+        {
+          "path": "lib/ipmi_dcmi.c",
+          "line": 3872
+        }
+      ],
+      "condition": "registered unconditionally"
+    },
+    {
+      "id": "C24",
+      "name": "sunoem",
+      "handler": "ipmi_sunoem_main",
+      "sources": [
+        {
+          "path": "lib/ipmi_sunoem.c",
+          "line": 2319
+        }
+      ],
+      "condition": "registered unconditionally"
+    },
+    {
+      "id": "C25",
+      "name": "kontronoem",
+      "handler": "ipmi_kontronoem_main",
+      "sources": [
+        {
+          "path": "lib/ipmi_kontronoem.c",
+          "line": 70
+        }
+      ],
+      "condition": "registered unconditionally"
+    },
+    {
+      "id": "C26",
+      "name": "picmg",
+      "handler": "ipmi_picmg_main",
+      "sources": [
+        {
+          "path": "lib/ipmi_picmg.c",
+          "line": 1881
+        }
+      ],
+      "condition": "registered unconditionally"
+    },
+    {
+      "id": "C27",
+      "name": "fwum",
+      "handler": "ipmi_fwum_main",
+      "sources": [
+        {
+          "path": "lib/ipmi_fwum.c",
+          "line": 145
+        }
+      ],
+      "condition": "registered unconditionally"
+    },
+    {
+      "id": "C28",
+      "name": "firewall",
+      "handler": "ipmi_firewall_main",
+      "sources": [
+        {
+          "path": "lib/ipmi_firewall.c",
+          "line": 1170
+        }
+      ],
+      "condition": "registered unconditionally"
+    },
+    {
+      "id": "C29",
+      "name": "delloem",
+      "handler": "ipmi_delloem_main",
+      "sources": [
+        {
+          "path": "lib/ipmi_delloem.c",
+          "line": 268
+        }
+      ],
+      "condition": "registered unconditionally"
+    },
+    {
+      "id": "C30",
+      "name": "shell",
+      "handler": "ipmi_shell_main",
+      "sources": [
+        {
+          "path": "src/ipmishell.c",
+          "line": 99
+        }
+      ],
+      "condition": "HAVE_READLINE"
+    },
+    {
+      "id": "C31",
+      "name": "exec",
+      "handler": "ipmi_exec_main",
+      "sources": [
+        {
+          "path": "src/ipmishell.c",
+          "line": 403
+        }
+      ],
+      "condition": "registered unconditionally"
+    },
+    {
+      "id": "C32",
+      "name": "set",
+      "handler": "ipmi_set_main",
+      "sources": [
+        {
+          "path": "src/ipmishell.c",
+          "line": 257
+        }
+      ],
+      "condition": "registered unconditionally"
+    },
+    {
+      "id": "C33",
+      "name": "echo",
+      "handler": "ipmi_echo_main",
+      "sources": [
+        {
+          "path": "src/ipmishell.c",
+          "line": 226
+        }
+      ],
+      "condition": "registered unconditionally"
+    },
+    {
+      "id": "C34",
+      "name": "hpm",
+      "handler": "ipmi_hpmfwupg_main",
+      "sources": [
+        {
+          "path": "lib/ipmi_hpmfwupg.c",
+          "line": 2461
+        }
+      ],
+      "condition": "registered unconditionally"
+    },
+    {
+      "id": "C35",
+      "name": "ekanalyzer",
+      "handler": "ipmi_ekanalyzer_main",
+      "sources": [
+        {
+          "path": "lib/ipmi_ekanalyzer.c",
+          "line": 460
+        }
+      ],
+      "condition": "registered unconditionally"
+    },
+    {
+      "id": "C36",
+      "name": "ime",
+      "handler": "ipmi_ime_main",
+      "sources": [
+        {
+          "path": "lib/ipmi_ime.c",
+          "line": 984
+        }
+      ],
+      "condition": "registered unconditionally"
+    },
+    {
+      "id": "C37",
+      "name": "vita",
+      "handler": "ipmi_vita_main",
+      "sources": [
+        {
+          "path": "lib/ipmi_vita.c",
+          "line": 906
+        }
+      ],
+      "condition": "registered unconditionally"
+    },
+    {
+      "id": "C38",
+      "name": "lan6",
+      "handler": "ipmi_lan6_main",
+      "sources": [
+        {
+          "path": "lib/ipmi_lanp6.c",
+          "line": 1065
+        }
+      ],
+      "condition": "registered unconditionally"
+    }
+  ],
+  "interfaces": [
+    {
+      "id": "T01",
+      "name": "bmc",
+      "source": "src/plugins/bmc/bmc.c",
+      "availability": "compile-time conditional; build and device access not yet verified"
+    },
+    {
+      "id": "T02",
+      "name": "dbus",
+      "source": "src/plugins/dbus/dbus.c",
+      "availability": "compile-time conditional; build and device access not yet verified"
+    },
+    {
+      "id": "T03",
+      "name": "dummy",
+      "source": "src/plugins/dummy/dummy.c",
+      "availability": "compile-time conditional; build and device access not yet verified"
+    },
+    {
+      "id": "T04",
+      "name": "free",
+      "source": "src/plugins/free/free.c",
+      "availability": "compile-time conditional; build and device access not yet verified"
+    },
+    {
+      "id": "T05",
+      "name": "imb",
+      "source": "src/plugins/imb/imb.c",
+      "availability": "compile-time conditional; build and device access not yet verified"
+    },
+    {
+      "id": "T06",
+      "name": "lan",
+      "source": "src/plugins/lan/lan.c",
+      "availability": "compile-time conditional; build and device access not yet verified"
+    },
+    {
+      "id": "T07",
+      "name": "lanplus",
+      "source": "src/plugins/lanplus/lanplus.c",
+      "availability": "compile-time conditional; build and device access not yet verified"
+    },
+    {
+      "id": "T08",
+      "name": "lipmi",
+      "source": "src/plugins/lipmi/lipmi.c",
+      "availability": "compile-time conditional; build and device access not yet verified"
+    },
+    {
+      "id": "T09",
+      "name": "open",
+      "source": "src/plugins/open/open.c",
+      "availability": "compile-time conditional; build and device access not yet verified"
+    },
+    {
+      "id": "T10",
+      "name": "serial-basic",
+      "source": "src/plugins/serial/serial_basic.c",
+      "availability": "compile-time conditional; build and device access not yet verified"
+    },
+    {
+      "id": "T11",
+      "name": "serial-terminal",
+      "source": "src/plugins/serial/serial_terminal.c",
+      "availability": "compile-time conditional; build and device access not yet verified"
+    },
+    {
+      "id": "T12",
+      "name": "usb",
+      "source": "src/plugins/usb/usb.c",
+      "availability": "compile-time conditional; build and device access not yet verified"
+    }
+  ],
+  "special_entries": [
+    {
+      "id": "C39",
+      "name": "help",
+      "source": "lib/ipmi_main.c"
+    },
+    {
+      "id": "D01",
+      "name": "ipmievd",
+      "source": "src/ipmievd.c",
+      "modes": [
+        "open",
+        "sel"
+      ]
+    }
+  ],
+  "option_strings": {
+    "all": "I:46hVvcgsEKYao:H:d:P:f:U:p:C:L:A:t:T:m:z:S:l:b:B:e:k:y:O:R:N:D:Z",
+    "restricted": "I:46hVvcH:f:U:p:d:S:D:"
+  },
+  "oem_profiles": [
+    "supermicro",
+    "intelwv2",
+    "intelplus",
+    "icts",
+    "ibm",
+    "i82571spt",
+    "kontron",
+    "quanta"
+  ],
+  "coverage_note": "Command registrations and transport names are exhaustive for this commit. Matrix subcommand groups are review units; leaf command/option/response/profile cases must be expanded and measured before their parent can pass. This file is not a claim of exhaustive test-case coverage."
+}
