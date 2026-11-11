@@ -199,19 +199,44 @@ test "failure diagnostics retain status codes without request data" {
 }
 
 ///|
-test "a checksummed response must return to the original requester address" {
-  let packet = response_fixture(6, 0x3b, 0, 0, b"\x02").to_array()
-  // Pinned go-ipmi BMC uses 0x20 here instead of echoing our requester 0x81.
-  // Recompute the checksum: this must fail identity, not checksum validation.
-  packet[0] = 0x20
-  packet[2] = checksum(packet[0:2])
-  let error = try {
-    ignore(decode_response(Bytes::from_array(packet), 6, 0x3b, 0))
-    "unexpected success"
-  } catch {
-    ProtocolError(message) => message
+test "requester address tolerance matches ipmitool without rewriting requests" {
+  assert_eq(encode_request(6, 1, 0, b"")[3], 0x81)
+  // ipmitool does not use rqAddr for matching, rather than allowing only 0x20.
+  for address in 0..<=255 {
+    let packet = response_fixture(6, 0x3b, 0, 0, b"\x02").to_array()
+    packet[0] = byte(address)
+    packet[2] = checksum(packet[0:2])
+    assert_eq(
+      decode_response(Bytes::from_array(packet), 6, 0x3b, 0).data,
+      b"\x02",
+    )
   }
-  assert_eq(error, "IPMI response address mismatch")
+}
+
+///|
+test "requester tolerance retains responder, LUN, netfn, command and sequence checks" {
+  for
+    (index, value) in [(3, 0x22), (1, 0x24), (1, 0x1d), (4, 1), (4, 4), (5, 2)] {
+    let packet = response_fixture(6, 1, 0, 0, b"").to_array()
+    packet[0] = 0x20
+    packet[index] = byte(value)
+    packet[2] = checksum(packet[0:2])
+    packet[packet.length() - 1] = checksum(packet[3:packet.length() - 1])
+    let error = try {
+      ignore(decode_response(Bytes::from_array(packet), 6, 1, 0))
+      "unexpected success"
+    } catch {
+      ProtocolError(message) => message
+    }
+    assert_eq(
+      error,
+      if index == 3 {
+        "IPMI response address mismatch"
+      } else {
+        "IPMI response does not match request"
+      },
+    )
+  }
 }
 
 ///|

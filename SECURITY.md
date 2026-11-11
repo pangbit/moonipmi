@@ -4,8 +4,13 @@ Only cipher suite 17 and User privilege are supported. RAKP2/RAKP4 are verified;
 packet HMAC is checked before AES-CBC decryption or padding validation. Nonces
 and IVs come from OpenSSL RAND_bytes. Authentication tags are compared using
 CRYPTO_memcmp. Session IDs, request identities and increasing sequence numbers
-are checked. Any malformed/authentication/I/O failure closes the client. There
-is no anonymous mode, automatic downgrade or retry.
+are checked. The response requester-address byte is not used for correlation,
+matching ipmitool 1.8.19; a wrong echo alone is no longer an error. This removes
+one diagnostic/misrouting check, not authentication. Responder address, both LUNs,
+netfn, command, sequence and checksums remain checked. The connected peer, session
+ID, HMAC and anti-replay checks still apply; `decode_response` alone is only a
+codec and does not authenticate. Other malformed/authentication/I/O failures close
+the client. There is no anonymous mode, automatic downgrade or retry.
 
 The high-level client exposes three read-only operations and session housekeeping.
 The low-level `encode_request` function only returns bytes and sends nothing.
@@ -31,8 +36,10 @@ otherwise open an issue requesting a private contact, without including exploit
 details or private information.
 
 仅支持套件 17 与 User 权限；校验 RAKP2/RAKP4，先验证 HMAC 再解密或检查 AES padding。
-随机数和 IV 来自 OpenSSL RAND_bytes，标签使用 CRYPTO_memcmp 比较。校验会话 ID、请求身份和递增序号；
-畸形、认证或 I/O 错误会关闭会话，不提供匿名、自动降级或重试。
+随机数和 IV 来自 OpenSSL RAND_bytes，标签使用 CRYPTO_memcmp 比较。校验会话 ID、请求身份和递增序号。
+响应请求者地址字节与 ipmitool 1.8.19 一样不参与关联，单独回显错误不再拒绝；这减少了一项错误路由/诊断检查，
+不取消认证。响应者地址、两个 LUN、netfn、命令、序号、校验和、连接对端、会话 ID、HMAC 与防重放检查仍保留。
+单独调用 `decode_response` 只是编解码，不提供认证。其他畸形、认证或 I/O 错误会关闭会话，不提供匿名、自动降级或重试。
 
 高层客户端仅提供三项只读操作与会话管理；底层 encode_request 只生成字节，不发送。
 仅访问明确授权的系统和隔离管理网络。只读请求仍可能产生日志、占用资源；UDP 对端过滤不能替代认证。

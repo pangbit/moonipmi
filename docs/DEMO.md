@@ -79,37 +79,35 @@ non-loopback address or select a hardware HAL.
 ```sh
 go -C tools/go-reference build -mod=readonly -o ../../_build/reference-bmc .
 python3 tools/go_interop.py \
-  _build/native/debug/build/examples/loopback/loopback.exe \
-  _build/reference-bmc --expect-address-rejection
+  _build/native/debug/build/examples/comparison/comparison.exe \
+  _build/reference-bmc --compare-reads
 ```
 
 The reference is pinned in `tools/go-reference/go.mod` and `go.sum` to commit
-`d4fb9c6923cb22f7e3c982590e57f1f2c3b58ce6`. This revision hardcodes a response
-requester address that differs from our request. The explicit flag verifies that
-the client rejects this exact mismatch after successful authentication. It does
-**not** turn any error into a pass. Omitting the flag attempts the full exchange
-and currently fails. Expected output:
+`d4fb9c6923cb22f7e3c982590e57f1f2c3b58ce6`. Its non-echoed requester address is
+now accepted like ipmitool. Both clients return matching Device ID and Chassis
+Status. Both receive completion `0xc1` for Get Sensor Reading, unsupported by this
+reference server. The runner checks that exact code, not arbitrary failures.
+The old `--expect-address-rejection` mode has been removed. The original loopback
+example still requires all three reads and therefore does not pass on this server.
 
-```text
-PASS: pinned go-ipmi response-address mismatch rejected after authenticated handshake
-LIMIT: full go-ipmi interoperability is NOT verified; no checks were relaxed
-```
-
-参考版本由 go.mod 与 go.sum 固定到上述提交。该版本硬编码的响应请求者地址与请求不一致。
-显式开关只验证认证后拒绝这一具体地址不匹配，**不会**将任意错误算作通过。
-省略开关会尝试完整交互，目前失败。预期输出如上；原因详见 [STATUS](STATUS.md)。
+参考版本由 go.mod 与 go.sum 固定到上述提交。其未回显的请求者地址现与 ipmitool 一样被接受。
+两客户端均返回一致的设备标识和机箱状态；读取传感器均收到 `0xc1`，该参考服务端未实现此命令。
+运行器核对具体完成码，不将任意失败算作通过。旧 `--expect-address-rejection` 模式已移除；
+原 loopback 示例仍要求三读，因此在此服务端不能通过。
 
 ## What this proves / 证明范围
 
 The default demonstration covers RAKP authentication, encrypted/integrity-protected
 request/response framing, three read-only results, and graceful close between
-independent implementations. The go-ipmi check demonstrates the known rejection,
-not full interoperability. Unit tests cover rejection and timeout cases.
+independent implementations. The go-ipmi check demonstrates two successful reads
+and the unsupported sensor command, not full three-read interoperability.
+Unit tests cover rejection and timeout cases.
 Neither demonstration proves real-BMC compatibility, full IPMI coverage, a
 security audit, or compliance with a competition's submission rules.
 
 默认演示验证独立实现之间的 RAKP 认证、加密/完整性保护报文、三项只读结果与正常关闭。
-go-ipmi 对照证明已知拒绝行为，不是完整互通。拒绝畸形输入和超时由单元测试覆盖。演示不代表真实 BMC 兼容、完整 IPMI、安全审计，
+go-ipmi 对照证明两项成功读取和未支持的传感器命令，不是完整三读互通。拒绝畸形输入和超时由单元测试覆盖。演示不代表真实 BMC 兼容、完整 IPMI、安全审计，
 也不代表已满足赛事申报规则。
 
 ## Same-target client comparison / 同目标客户端对照

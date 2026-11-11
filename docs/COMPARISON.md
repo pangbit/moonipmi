@@ -117,51 +117,108 @@ MoonBit/ipmitool, not the full three-client matrix. No package is published.
 JSON 只记录合成命令/结果和非秘密协议元数据，并列明实际运行的客户端。
 省略 `--go-client` 时只运行 MoonBit/ipmitool 的二十项，不能视为完整三客户端矩阵。不发布包。
 
-## Address mismatch: format versus tolerance / 地址不匹配：格式与宽容策略
+## Requester-address compatibility / 请求者地址兼容
 
-This common-fixture comparison is distinct from the known **go-ipmi BMC** issue.
-At the pinned revision, its response builder hardcodes requester address `0x20`
-instead of echoing our request's `0x81`. moonipmi rejects that response. Direct
-loopback testing with the same unmodified server shows ipmitool 1.8.19 sends
-`rqAddr=0x81`, receives `rqAddr=0x20`, yet returns Device ID successfully (exit 0).
+The default now follows **ipmitool 1.8.19 lanplus**: requests still use `rqSA=0x81`,
+but the response's requester-address byte is not a correlation key. There is no
+special `0x20` exception or opt-in flag. Checksums and every other existing check
+remain in place. This applies to both `decode_response` and the authenticated
+`Client`; the low-level decoder alone does not provide authentication.
 
-共同模拟器对照与已知 **go-ipmi BMC** 问题不同。固定版本的响应构造器将请求者地址硬编码为
-`0x20`，未回显请求的 `0x81`；moonipmi 拒绝它。对同一未修改服务端的本机实测显示，
-ipmitool 1.8.19 发送 `rqAddr=0x81`、收到 `rqAddr=0x20`，仍成功读取设备标识（退出码 0）。
+默认行为现与 **ipmitool 1.8.19 lanplus** 一致：请求仍使用 `rqSA=0x81`，但响应的请求者地址字节
+不参与关联。不仅特许 `0x20`，也不需要用户启用开关。校验和及其他既有检查全部保留。
+该行为同时适用于 `decode_response` 与已认证的 `Client`；底层解码器本身不提供认证。
 
-Evidence / 证据：
+### Source and tradeoff / 源码与取舍
 
 - [IPMI 2.0 rev1.1 E6 §13.8, Figure 13-4, printed pp.136–137](https://www.intel.de/content/dam/www/public/us/en/documents/product-specifications/ipmi-v2-rev1-1-spec-errata-6-markup.pdf#page=162)
-  defines the response's first field as the original requester's address; `0x20`
-  is the BMC address, not a universal remote-console address.
-- [go-ipmi response construction](https://github.com/bougou/go-ipmi/blob/d4fb9c6923cb22f7e3c982590e57f1f2c3b58ce6/pkg/protocol/ipmb.go#L18-L67)
-  does not preserve the incoming requester address.
+  describes the response's first field as the original requester's address.
+  Tolerance does not make a mismatched echo conforming to that layout.
 - [ipmitool 1.8.19 matching](https://github.com/ipmitool/ipmitool/blob/19d78782d795d0cf4ceefe655f616210c9143e62/src/plugins/lanplus/lanplus.c#L318-L328)
-  correlates the IPMI request using sequence/command, not requester address. It
-  still checks the session and MAC; this is **not** an unauthenticated bypass.
-- [Independent OpenBMC response construction](https://github.com/openbmc/phosphor-net-ipmid/blob/1d6c85f05a33ca91e8efabdb53b47fbb27b0eb27/message.hpp#L218-L224)
-  copies requester/responder addresses from the request.
+  looks up sequence/command, not requester address. Its receive path checks
+  [session identity and authentication before decryption](https://github.com/ipmitool/ipmitool/blob/19d78782d795d0cf4ceefe655f616210c9143e62/src/plugins/lanplus/lanplus.c#L658-L691).
+- [Pinned go-ipmi response construction](https://github.com/bougou/go-ipmi/blob/d4fb9c6923cb22f7e3c982590e57f1f2c3b58ce6/pkg/protocol/ipmb.go#L18-L67)
+  hardcodes `0x20` instead of preserving the incoming requester. This is one
+  reproducible compatibility case, not evidence of widespread hardware behaviour.
 
-规范字段语义、固定双方源码及 OpenBMC 实现均支持请求者地址应对应原请求。
-ipmitool 对该字段宽容，不代表错误响应符合规范；它仍检查会话与 MAC，并非无认证接受。
-我们没有把“遇到此错误必须终止”冒称为规范中的独立 MUST 条文，拒绝是本库的严格关联策略。
+The tradeoff is loss of one malformed/misrouted-response diagnostic. A response
+from the authenticated peer with the expected session/request identifiers is no
+longer rejected solely for that byte. An unauthenticated sender still cannot
+forge a valid HMAC. Peer filtering, RAKP, suite 17, HMAC-before-decryption, session
+identity, replay protection, responder address, LUN/netfn, sequence/command,
+checksums, bounds and padding checks are unchanged. Do not use address tolerance
+as a reason to trust an untrusted management network.
 
-Reproduce the permissive behaviour without changing the reference source:
+上述规范描述请求者字段含义，容忍错误回显不代表它符合该布局。固定 ipmitool 源码按序号/命令匹配，
+并在解密前验证会话与认证；固定 go-ipmi 服务端的 `0x20` 是可复现个例，不证明大量硬件都有此行为。
+取舍是减少一项畸形/错误路由响应的诊断：来自已认证对端且会话/请求标识匹配的响应，不再仅因该字节被拒绝。
+未认证发送者仍不能伪造有效 HMAC。对端过滤、RAKP、套件 17、先 HMAC 后解密、会话、防重放、响应者地址、
+LUN/netfn、序号/命令、校验和、长度及 padding 检查均不变，仍应使用可信管理网络。
 
-无需修改参考源码即可复现宽容行为：
+### Focused packet comparison / 聚焦报文对照
+
+`tools/address_check.py` uses the same suite-17 Python fixture for both clients,
+changing only authenticated Device ID responses. It verifies normal decoding,
+three non-echoed requester values, and eight negative controls: **24 comparisons**.
+Each field mutation except the intentional checksum case has repaired IPMI
+checksums; only the intentional MAC case lacks a valid HMAC. Unit tests additionally
+cover all 256 requester-byte values and retain tampering/session/replay tests.
+
+| Response / 响应 | moonipmi | ipmitool 1.8.19 |
+|---|---|---|
+| Normal requester `0x81` / 正常请求者 | Accept / 接受 | Accept / 接受 |
+| Requester `0x20`, `0x00`, `0xff` / 请求者不同 | Accept / 接受 | Accept / 接受 |
+| Wrong responder `0x22` / 响应者错误 | Reject / 拒绝 | Accept / 接受 |
+| Wrong netfn or either LUN / netfn 或任一 LUN 错误 | Reject / 拒绝 | Accept / 接受 |
+| Wrong command or request sequence / 命令或请求序号错误 | Reject / 拒绝 | Reject / 拒绝 |
+| Bad IPMI checksum, valid HMAC / 校验和错误但 HMAC 正确 | Reject / 拒绝 | Accept / 接受 |
+| Bad HMAC / HMAC 错误 | Reject / 拒绝 | Reject / 拒绝 |
+
+These remaining differences are intentional: requester compatibility does not
+copy every permissive ipmitool behaviour. Rejection timing/messages differ too:
+moonipmi fails closed immediately; ipmitool may discard a response and wait.
+The probe uses `-R 1` for one attempt; `-R 0` restores ipmitool's default retries.
+
+两客户端使用同一套件 17 模拟器，仅修改已认证的设备标识响应，共 24 项。
+除故意破坏校验和的用例外均重算校验和；仅故意破坏 MAC 的用例没有有效 HMAC。
+单元测试另覆盖全部 256 个请求者字节值，并保留篡改/会话/防重放测试。
+表中剩余差异是有意保留的边界，不为对齐请求者地址而照搬其他宽容行为。
+拒绝时机/信息也不同：moonipmi 立即失败关闭，ipmitool 可能丢弃后等待。
+探针用 `-R 1` 限定一次尝试；`-R 0` 实际恢复 ipmitool 默认重试次数。
+
+```sh
+python3 tools/address_check.py \
+  --moon-client _build/native/debug/build/examples/comparison/comparison.exe \
+  --output _build/address-comparison.json
+```
+
+### Unmodified go-ipmi BMC / 未修改的 go-ipmi BMC
+
+Against the pinned server, moonipmi and ipmitool now both read Device ID and Chassis
+Status. Both report **completion `0xc1`** for Get Sensor Reading: this reference
+BMC does not implement that command. Removing the requester rejection exposes
+that separate limitation; it does not make a full three-read exchange pass.
+The common Python fixture above remains the three-read comparison.
+
+固定服务端上，两客户端现均可读取设备标识和机箱状态；读取传感器均返回 **完成码 `0xc1`**，
+因为该参考 BMC 未实现此命令。去除请求者拒绝只是暴露后续限制，不表示完整三读交互成功。
+三项读取的共同对照目标仍是前文 Python 模拟器。
 
 ```sh
 go -C tools/go-reference build -mod=readonly -o ../../_build/reference-bmc .
+python3 tools/go_interop.py \
+  _build/native/debug/build/examples/comparison/comparison.exe \
+  _build/reference-bmc --compare-reads
 python3 tools/go_interop.py "$(command -v ipmitool)" _build/reference-bmc \
   --ipmitool-address-probe
 ```
 
-The probe reports only address fields and the synthetic outcome, not verbose
-cryptographic logs. No compatibility relaxation has been added to moonipmi.
-Real-BMC compatibility, full protocol coverage, performance and security auditing
-remain outside this small comparison. SDR/physical units, writes, other suites,
-IPMI 1.5 sessions, OEM/SOL and SEL/FRU traversal are **not applicable**, not failed cases.
+These checks passed locally on macOS with ipmitool 1.8.19; Linux CI runs them too.
+Reports contain synthetic results, not verbose cryptographic logs. This change
+is unreleased: Mooncakes 0.1.0 retains its prior requester check. No real BMC,
+full protocol coverage or security audit is claimed. SDR/physical units, writes,
+other suites, IPMI 1.5 sessions, OEM/SOL and SEL/FRU traversal remain outside scope.
 
-探针仅输出地址字段及合成结果，不输出完整密码学调试日志。moonipmi 没有增加放宽校验的兼容模式。
-本次不证明真实 BMC 兼容、完整协议覆盖、性能或安全审计。SDR/物理单位、写操作、其他套件、
-IPMI 1.5 会话、OEM/SOL、SEL/FRU 遍历均为“不适用”，不是失败用例。
+上述检查已在 macOS 本地以 ipmitool 1.8.19 通过，Linux CI 也执行这些检查。
+报告只含合成结果，不输出密码学调试日志。改动尚未发布，Mooncakes 0.1.0 仍使用旧请求者校验。
+不宣称真实 BMC、完整协议或安全审计；SDR/物理单位、写操作、其他套件、IPMI 1.5、OEM/SOL、SEL/FRU 不在范围内。

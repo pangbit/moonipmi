@@ -4,11 +4,46 @@ Only loopback and synthetic credentials are possible; no real BMC is contacted.
 """
 import argparse
 import json
+import os
 import re
 import selectors
+import shutil
 import subprocess
 import sys
 import tempfile
+
+from compare_clients import EXPECTED, ipmitool_command, normalize_ipmitool
+
+
+def compare_reads(client, port):
+    """Do not mistake the reference BMC's unsupported sensor command for success."""
+    ipmitool = shutil.which("ipmitool")
+    if not ipmitool or subprocess.check_output([ipmitool, "-V"], text=True).strip() != "ipmitool version 1.8.19":
+        raise RuntimeError("this read comparison requires ipmitool 1.8.19")
+    for case in ("device", "chassis", "sensor"):
+        for name, executable in (("moonipmi", client), ("ipmitool", ipmitool)):
+            command = (ipmitool_command(executable, port, case) if name == "ipmitool"
+                       else [executable, str(port), case])
+            if name == "ipmitool":
+                command[command.index("-R") + 1] = "1"
+            result = subprocess.run(command, capture_output=True, text=True, timeout=8,
+                                    env={**os.environ, "LC_ALL": "C"})
+            if case == "sensor":
+                marker = "rsp=0xc1" if name == "ipmitool" else "FAIL: Get Sensor Reading failed (completion code 193)"
+                if result.returncode <= 0 or marker not in result.stdout + result.stderr:
+                    raise RuntimeError(f"{name}: expected reference sensor completion 0xc1")
+                print(f"PASS: {name}/sensor: reference reports unsupported command 0xc1")
+            else:
+                if result.returncode:
+                    raise RuntimeError(f"{name}/{case}: reference read failed")
+                value = normalize_ipmitool(case, result.stdout) if name == "ipmitool" else json.loads(result.stdout)
+                expected = dict(EXPECTED[case])
+                if case == "device":
+                    expected["additional_device_support"] = 0
+                if value != expected:
+                    raise RuntimeError(f"{name}/{case}: unexpected reference data")
+                print(f"PASS: {name}/{case}: matched reference data")
+    print("LIMIT: the unmodified reference BMC does not implement Get Sensor Reading; no full three-read claim")
 
 
 def main():
@@ -16,8 +51,8 @@ def main():
     parser.add_argument("client")
     parser.add_argument("server")
     modes = parser.add_mutually_exclusive_group()
-    modes.add_argument("--expect-address-rejection", action="store_true",
-                       help="assert the pinned server's known response-address mismatch; not successful interoperability")
+    modes.add_argument("--compare-reads", action="store_true",
+                       help="compare the MoonBit comparison example and ipmitool, including the reference sensor limitation")
     modes.add_argument("--ipmitool-address-probe", action="store_true",
                        help="observe ipmitool's permissive address handling against the same unmodified server")
     args = parser.parse_args()
@@ -31,6 +66,11 @@ def main():
             port = json.loads(server.stdout.readline())["port"]
             if not isinstance(port, int) or not 1 <= port <= 65535:
                 raise RuntimeError("invalid loopback simulator port")
+            if args.compare_reads:
+                compare_reads(args.client, port)
+                if server.poll() is not None:
+                    raise RuntimeError("go-ipmi simulator exited before cleanup")
+                return
             command = [args.client, str(port)]
             if args.ipmitool_address_probe:
                 command = [args.client, "-vvv", "-I", "lanplus", "-C", "17", "-L", "USER",
@@ -49,11 +89,6 @@ def main():
                 print(subprocess.check_output([args.client, "-V"], text=True).strip())
                 print("OBSERVED: ipmitool accepted rqAddr 0x20 in responses to requester 0x81")
                 print("LIMIT: permissive client behaviour is not evidence of a conforming response address")
-            elif args.expect_address_rejection:
-                if client.returncode == 0 or client.stdout.strip() != "FAIL: IPMI response address mismatch":
-                    raise RuntimeError("expected the pinned server's address mismatch, got:\n" + client.stdout + client.stderr)
-                print("PASS: pinned go-ipmi response-address mismatch rejected after authenticated handshake")
-                print("LIMIT: full go-ipmi interoperability is NOT verified; no checks were relaxed")
             else:
                 if client.returncode:
                     raise RuntimeError(client.stdout + client.stderr)

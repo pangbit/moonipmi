@@ -31,7 +31,38 @@ PROFILES = {
 }
 
 
-def serve(server, stop, trace, profile="default"):
+WIRE_FAULTS = {
+    "requester-20", "requester-00", "requester-ff", "responder", "netfn",
+    "requester-lun", "responder-lun", "sequence", "command", "checksum", "mac",
+}
+
+
+def fault_response(payload, fault):
+    """Change one Device ID response field, preserving checksums except on purpose."""
+    out = bytearray(payload)
+    if fault and fault.startswith("requester-") and fault != "requester-lun":
+        out[0] = int(fault.split("-")[1], 16)
+    elif fault == "responder":
+        out[3] = 0x22
+    elif fault == "netfn":
+        out[1] ^= 8
+    elif fault == "requester-lun":
+        out[1] |= 1
+    elif fault == "responder-lun":
+        out[4] |= 1
+    elif fault == "sequence":
+        out[4] ^= 4
+    elif fault == "command":
+        out[5] ^= 1
+    out[2] = -sum(out[:2]) % 256
+    out[-1] = -sum(out[3:-1]) % 256
+    if fault == "checksum":
+        out[2] ^= 1
+    return bytes(out)
+
+
+def serve(server, stop, trace, profile="default", wire_fault=None):
+    assert wire_fault is None or wire_fault in WIRE_FAULTS, "unknown wire fault"
     values = PROFILES.get(profile, {})
     peer = None
     count = 0
@@ -127,7 +158,15 @@ def serve(server, stop, trace, profile="default"):
         trace["commands"].append({"netfn": netfn, "command": cmd, "request_data": data.hex(),
                                   "completion": completion, "response_data": reply.hex(),
                                   "requester_address": req[3]})
-        send(wire.protect(response(req, reply, completion), console, index + 1, k1, k2))
+        payload = response(req, reply, completion)
+        if (netfn, cmd) == (6, 1) and wire_fault:
+            payload = fault_response(payload, wire_fault)
+            trace["wire_fault"] = wire_fault
+            trace["response_requester"] = payload[0]
+        packet = wire.protect(payload, console, index + 1, k1, k2)
+        if (netfn, cmd) == (6, 1) and wire_fault == "mac":
+            packet = packet[:-1] + bytes([packet[-1] ^ 1])
+        send(packet)
         if (netfn, cmd) == (6, 0x3c):
             trace["closed"] = True
             return

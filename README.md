@@ -15,8 +15,9 @@ Use only on explicitly authorised systems and isolated management networks.
 
 - Cipher suite **17 only**: RAKP-HMAC-SHA256 / HMAC-SHA256-128 / AES-CBC-128.
 - User privilege; verified RAKP2 and RAKP4; no anonymous access or downgrade.
-- Authenticate each packet **before** decryption; strict session/request correlation,
-  checksums, lengths, padding and monotonically increasing receive sequences.
+- Authenticate each packet **before** decryption; validate session, responder,
+  LUN/netfn, command/sequence, checksums, lengths, padding and receive sequences.
+  Like ipmitool 1.8.19, do not require the response requester address to echo `0x81`.
 - A single connected UDP peer, one request in flight, per-exchange deadlines,
   no automatic retry, explicit close and immediate local abort.
   Use plain IPv4 rather than IPv4-mapped IPv6; mapped forms are rejected.
@@ -111,11 +112,16 @@ The auxiliary comparison implementation is [bougou/go-ipmi](https://github.com/b
 Apache-2.0, reviewed at
 [`d4fb9c6`](https://github.com/bougou/go-ipmi/tree/d4fb9c6923cb22f7e3c982590e57f1f2c3b58ce6).
 It is a reference, not a runtime dependency or endorsement. The pinned reference
-BMC was executed: authentication succeeds, but it hardcodes the first response's
-requester address to `0x20` instead of echoing our `0x81`. The client rejects that
-mismatch without weakening validation. [ipmitool](https://github.com/ipmitool/ipmitool)
-independently cross-checks our Python fixture; neither is a runtime dependency.
-**Full interoperability with that go-ipmi BMC has not passed.** Separately, the
-moonipmi/go-ipmi/ipmitool clients pass the same synthetic three-read matrix with status boundaries and two error classes. See [evidence and limitations](docs/STATUS.md) and [NOTICE](NOTICE).
+BMC hardcodes response requester address `0x20` rather than echoing `0x81`.
+moonipmi now tolerates that field like ipmitool, without a compatibility flag.
+Both clients read Device ID and Chassis Status; both receive completion `0xc1`
+for Get Sensor Reading from that reference. **Full three-read interoperability
+with that go-ipmi BMC remains unverified.** Separately, all three clients pass
+the common Python fixture's three-read matrix with status boundaries and two
+error classes. The address-only change does not copy ipmitool's tolerance of
+other malformed fields. See [policy, risks and comparison](docs/COMPARISON.md),
+[evidence and limitations](docs/STATUS.md) and [NOTICE](NOTICE).
+These are validation tools, not runtime dependencies. The change is unreleased;
+Mooncakes 0.1.0 retains its old requester-address check.
 
 Apache-2.0. Personally maintained; APIs may change before the first stable release.

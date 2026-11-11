@@ -96,7 +96,9 @@ pub extend Response with Eq::{equal, not_equal}
 pub extend Response with @debug.Debug::{to_repr}
 
 ///|
-/// Validate both checksums and correlate addresses, LUNs, netfn, command and sequence.
+/// Validate both checksums and correlate responder, LUNs, netfn, command and sequence.
+/// Like ipmitool 1.8.19 lanplus, tolerate a non-echoed requester address.
+/// This decoder alone does not authenticate packets; Client verifies them first.
 /// Nonzero completion codes remain structured protocol results.
 pub fn decode_response(
   data : Bytes,
@@ -125,9 +127,7 @@ pub fn decode_response(
     data[5].to_int() == command else {
     raise invalid("IPMI response does not match request")
   }
-  guard data[0] == 0x81 && data[3] == 0x20 else {
-    raise invalid("IPMI response address mismatch")
-  }
+  guard data[3] == 0x20 else { raise invalid("IPMI response address mismatch") }
   {
     completion_code: data[6].to_int(),
     data: slice(data, 7, data.length() - 1),
