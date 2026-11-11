@@ -234,14 +234,14 @@ overall deadlines and fail without partial results. Unsupported FRU encodings
 and internal-use/multirecord semantics, plus unsupported SEL sensor-specific/OEM
 meanings, remain uninterpreted with raw data retained. These reads are not atomic
 snapshots. Hardware controls, FRU writes, SEL mutations, automatic FRU discovery,
-other cipher suites, IPMI 1.5 sessions, OEM commands/SOL and bridging remain
+other cipher suites, IPMI 1.5 sessions, general OEM command families/SOL and bridging remain
 outside scope.
 
 当前未发布源码已单独实现 [SDR 子集](SDR.md)及[机箱、FRU 与 SEL 只读诊断](DIAGNOSTICS.md)：
 机箱能力/重启原因、经校验的基础 FRU 字节/字访问清单，以及带标准事件元数据的有界 SEL 枚举。
 FRU/SEL 限制总量和整体时长，失败不返回部分结果。不支持的 FRU 编码与内部区/多记录区语义，
 以及不支持的 SEL 传感器专有/OEM 含义均不作解释，保留原始数据。读取不是原子快照。
-硬件控制、FRU 写入、SEL 修改、FRU 自动发现、其他密码套件、IPMI 1.5 会话、OEM 命令/SOL
+硬件控制、FRU 写入、SEL 修改、FRU 自动发现、其他密码套件、IPMI 1.5 会话、通用 OEM 命令族/SOL
 及桥接仍不在范围内。
 
 The original diagnostic checker had 30 mixed executions/boundary cases. The

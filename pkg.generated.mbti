@@ -83,6 +83,7 @@ pub fn Client::abort(Self) -> Unit
 pub async fn Client::chassis_capabilities(Self) -> ChassisCapabilities
 pub async fn Client::close(Self) -> Unit
 pub async fn Client::connect(@socket.Addr, Bytes, Bytes, timeout_ms? : Int32) -> Self
+pub async fn Client::device_guid(Self) -> DeviceGuid
 pub async fn Client::fru_info(Self, Byte) -> FruInfo
 pub async fn Client::fru_inventory(Self, Byte, max_bytes? : Int32, timeout_ms? : Int32) -> FruInventory
 pub async fn Client::global_enables(Self) -> GlobalEnables
@@ -95,7 +96,30 @@ pub async fn Client::sdr_repository_info(Self) -> SdrRepositoryInfo
 pub async fn Client::sel_info(Self) -> SelInfo
 pub async fn Client::sel_records(Self, max_records? : Int32, timeout_ms? : Int32) -> Array[SelRecord]
 pub async fn Client::self_test(Self) -> SelfTestResult
+pub async fn Client::system_info(Self, SystemInfoParameter, max_bytes? : Int32, timeout_ms? : Int32) -> SystemInfoString
 pub async fn Client::watchdog_timer(Self) -> WatchdogTimer
+
+#derive(Eq, @debug.Debug)
+pub struct DecodedGuid {
+  encoding : GuidEncoding
+  value : String
+  raw_version : Int32?
+  version : Int32?
+  unix_seconds : Int64?
+}
+pub fn DecodedGuid::equal(Self, Self) -> Bool
+pub fn DecodedGuid::not_equal(Self, Self) -> Bool
+pub fn DecodedGuid::to_repr(Self) -> @debug.Repr
+
+#derive(Eq, @debug.Debug)
+pub struct DeviceGuid {
+  raw : Bytes
+}
+pub fn DeviceGuid::decode(Self, GuidEncoding) -> DecodedGuid raise ProtocolError
+pub fn DeviceGuid::detect(Self, Int32) -> DecodedGuid raise ProtocolError
+pub fn DeviceGuid::equal(Self, Self) -> Bool
+pub fn DeviceGuid::not_equal(Self, Self) -> Bool
+pub fn DeviceGuid::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
 pub struct DeviceId {
@@ -176,6 +200,17 @@ pub fn GlobalEnables::not_equal(Self, Self) -> Bool
 pub fn GlobalEnables::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
+pub(all) enum GuidEncoding {
+  Ipmi
+  Rfc4122
+  Smbios
+  Dump
+}
+pub fn GuidEncoding::equal(Self, Self) -> Bool
+pub fn GuidEncoding::not_equal(Self, Self) -> Bool
+pub fn GuidEncoding::to_repr(Self) -> @debug.Repr
+
+#derive(Eq, @debug.Debug)
 pub struct HandshakePacket {
   payload_type : Int32
   payload : Bytes
@@ -227,6 +262,7 @@ pub struct Response {
 }
 pub fn Response::chassis_capabilities(Self) -> ChassisCapabilities raise ProtocolError
 pub fn Response::chassis_status(Self) -> ChassisStatus raise ProtocolError
+pub fn Response::device_guid(Self) -> DeviceGuid raise ProtocolError
 pub fn Response::device_id(Self) -> DeviceId raise ProtocolError
 pub fn Response::equal(Self, Self) -> Bool
 pub fn Response::fru_info(Self) -> FruInfo raise ProtocolError
@@ -238,6 +274,7 @@ pub fn Response::sdr_repository_info(Self) -> SdrRepositoryInfo raise ProtocolEr
 pub fn Response::sel_info(Self) -> SelInfo raise ProtocolError
 pub fn Response::self_test(Self) -> SelfTestResult raise ProtocolError
 pub fn Response::sensor_reading(Self) -> SensorReading raise ProtocolError
+pub fn Response::system_info_block(Self) -> SystemInfoBlock raise ProtocolError
 pub fn Response::to_repr(Self) -> @debug.Repr
 pub fn Response::watchdog_timer(Self) -> WatchdogTimer raise ProtocolError
 
@@ -429,6 +466,44 @@ pub(all) enum SensorValue {
 pub fn SensorValue::equal(Self, Self) -> Bool
 pub fn SensorValue::not_equal(Self, Self) -> Bool
 pub fn SensorValue::to_repr(Self) -> @debug.Repr
+
+#derive(Eq, @debug.Debug)
+pub struct SystemInfoBlock {
+  revision : Int32
+  selector : Int32
+  data : Bytes
+}
+pub fn SystemInfoBlock::equal(Self, Self) -> Bool
+pub fn SystemInfoBlock::not_equal(Self, Self) -> Bool
+pub fn SystemInfoBlock::to_repr(Self) -> @debug.Repr
+
+#derive(Eq, @debug.Debug)
+pub(all) enum SystemInfoParameter {
+  FirmwareVersion
+  SystemName
+  PrimaryOsName
+  OsName
+  DellOsVersion
+  DellUrl
+}
+pub fn SystemInfoParameter::equal(Self, Self) -> Bool
+pub fn SystemInfoParameter::not_equal(Self, Self) -> Bool
+pub fn SystemInfoParameter::selector(Self) -> Byte
+pub fn SystemInfoParameter::to_repr(Self) -> @debug.Repr
+
+#derive(Eq, @debug.Debug)
+pub struct SystemInfoString {
+  parameter : SystemInfoParameter
+  revision : Int32
+  encoding_byte : Int32
+  encoding : Int32
+  data : Bytes
+  blocks : Array[SystemInfoBlock]
+}
+pub fn SystemInfoString::ascii_text(Self) -> String?
+pub fn SystemInfoString::equal(Self, Self) -> Bool
+pub fn SystemInfoString::not_equal(Self, Self) -> Bool
+pub fn SystemInfoString::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
 pub struct WatchdogTimer {

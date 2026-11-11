@@ -19,9 +19,7 @@ fn optional_text(value : String?) -> Json {
 async fn run_case() -> Unit {
   let args = @env.args()
   guard args.length() == 3 else {
-    fail(
-      "usage: diagnostics <local mock port> <chassis|fru|sel|sel-info|self-test|enables|watchdog|poh|fru-timeout|sel-timeout>",
-    )
+    fail("usage: diagnostics <local mock port> <read-only scenario>")
   }
   let port = @string.parse_int(args[1])
   guard port > 0 && port <= 65535 else { fail("invalid local port") }
@@ -204,7 +202,83 @@ async fn run_case() -> Unit {
         println(output.stringify())
       }
     }
-    _ => fail("unknown read-only scenario")
+    mode => {
+      let parts = mode.split(":").to_array()
+      if parts.length() == 3 && parts[0] == "guid" {
+        let guid = client.device_guid()
+        let decoded = match parts[1] {
+          "auto" => guid.detect(@string.parse_int(parts[2]))
+          "ipmi" => guid.decode(Ipmi)
+          "rfc" => guid.decode(Rfc4122)
+          "smbios" => guid.decode(Smbios)
+          "dump" => guid.decode(Dump)
+          _ => fail("unknown GUID encoding")
+        }
+        let encoding = match decoded.encoding {
+          Ipmi => "ipmi"
+          Rfc4122 => "rfc"
+          Smbios => "smbios"
+          Dump => "dump"
+        }
+        let timestamp = match decoded.unix_seconds {
+          Some(seconds) => Json::number(seconds.to_double())
+          None => Json::null()
+        }
+        let output : Json = {
+          "raw": Json::array(
+            guid.raw.to_array().map(b => Json::number(b.to_int().to_double())),
+          ),
+          "encoding": encoding,
+          "value": decoded.value,
+          "raw_version": optional_int(decoded.raw_version),
+          "version": optional_int(decoded.version),
+          "unix_seconds": timestamp,
+        }
+        println(output.stringify())
+      } else if parts.length() == 4 && parts[0] == "sysinfo" {
+        let parameter = match parts[1] {
+          "1" => @ipmi.SystemInfoParameter::FirmwareVersion
+          "2" => @ipmi.SystemInfoParameter::SystemName
+          "3" => @ipmi.SystemInfoParameter::PrimaryOsName
+          "4" => @ipmi.SystemInfoParameter::OsName
+          "228" => @ipmi.SystemInfoParameter::DellOsVersion
+          "222" => @ipmi.SystemInfoParameter::DellUrl
+          _ => fail("unknown system information parameter")
+        }
+        let info = client.system_info(
+          parameter,
+          max_bytes=@string.parse_int(parts[2]),
+          timeout_ms=@string.parse_int(parts[3]),
+        )
+        let output : Json = {
+          "parameter": parameter.selector().to_int(),
+          "revision": info.revision,
+          "encoding_byte": info.encoding_byte,
+          "encoding": info.encoding,
+          "data": Json::array(
+            info.data.to_array().map(b => Json::number(b.to_int().to_double())),
+          ),
+          "ascii_text": optional_text(info.ascii_text()),
+          "blocks": Json::array(
+            info.blocks.map(block => {
+              let value : Json = {
+                "revision": block.revision,
+                "selector": block.selector,
+                "data": Json::array(
+                  block.data
+                  .to_array()
+                  .map(b => Json::number(b.to_int().to_double())),
+                ),
+              }
+              value
+            }),
+          ),
+        }
+        println(output.stringify())
+      } else {
+        fail("unknown read-only scenario")
+      }
+    }
   }
   client.close()
 }

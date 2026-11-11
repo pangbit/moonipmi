@@ -43,7 +43,7 @@
 | C05 `chassis` [源码][chassis] | status/power/selftest/identify/poh/restart_cause/policy；bootparam get/set、bootdev、bootmbox | P/D：已有状态/能力/重启原因/自检/通电计数 API；计数显示精度有差异，其他读取、控制及 CLI 未完成 | 位字段和可选字段；每个 power 别名；启动参数/邮箱块/持久标志、identify 时长、策略、失败中断 | R/W、通用 BMC；P3/P4 |
 | C06 `power` [源码][chassis] | chassis power 快捷入口；status、on/up、off/down、cycle/reset/diag/soft/acpi | P：仅能通过 chassis API 得知状态，无此入口 | 与 C05 对应调用的输出/退出/实际命令一致；不能只复用成功返回 | R/W；P2/P4 |
 | C07 `event` [源码][event] | 预定义事件、sensor/event state、事件文件 | N | 所有发送模式、断言/撤销、文件语法、记录副作用、非法状态和重复发送 | W/F；P4 |
-| C08 `mc` [源码][mc] | info、guid（auto/ipmi/smbios/rfc/dump）、getenables/setenables、selftest、reset cold/warm、watchdog get/set/off/reset、getsysinfo/setsysinfo | P：已有 Device ID/自检/全局使能/看门狗读取 API；GUID/系统信息、控制及 CLI 缺失 | GUID 模式和手册别名差异、系统信息分块/编码、全局 enables、watchdog 状态机、复位后会话 | R/W；P3/P4 |
+| C08 `mc` [源码][mc] | info、guid（auto/ipmi/smbios/rfc/dump）、getenables/setenables、selftest、reset cold/warm、watchdog get/set/off/reset、getsysinfo/setsysinfo | P/D：已有 Device ID/自检/全局使能/看门狗/GUID 及六项系统信息读取；显示/校验有差异，控制及 CLI 缺失 | GUID 模式和手册别名差异、系统信息分块/编码、全局 enables、watchdog 状态机、复位后会话 | R/W；P3/P4 |
 | C09 `bmc` [源码][mc] | `mc` 的兼容别名 | N：库无命令别名 | C08 每个叶用例以别名重跑，比较错误文本与退出码 | R/W；P2/P4 |
 | C10 `sdr` [源码][sdr] | list/elist 的 all/full/compact/event/mcloc/fru/generic；type/entity/info/get/dump；fill sensors/nosat/file/range | P：仓库遍历、部分 Full/Compact；Device SDR、共享/桥接、完整编码/记录类型、CLI/cache/dump/fill 缺失 | 所有记录类型/路由/共享展开、动态保留与重试、缓存/文件、填充/仓库修改；分别覆盖单条/多条/空/变化 | R/W/F；P3/P4 |
 | C11 `sensor` [源码][sensor] | list/get/reading；thresh 单阈值与 lower/upper 组 | P：原始读数、部分线性工程值/状态；完整动态阈值读取、精度、非线性/动态因子与设置缺失 | 每个上游换算分支、单位/精度、不可用与离散值、SDR 查找、阈值 get/set 顺序/错误；支持范围按实际参考测定 | R/W；P3/P4 |
@@ -128,14 +128,14 @@
 | X01 | 已认证报文相关性与校验 | D：[既有 24 项对照](COMPARISON.md)已显示 responder/netfn/LUN/checksum 差异；扩展到其他接口/全部边界 | P1/P2；K03 |
 | X02 | RAKP/HMAC/AES、会话 ID/序号/重放/padding | P/U：已有正负测试不是完整差分；逐种算法/身份字段/随机关联/错误阶段与参考对照 | P2；K01/K03 |
 | X03 | deadline/retry/backoff/取消/close/abort、并发和会话复用 | D：无重试及本地 abort 与参考关闭/等待不同；故障注入每个 exchange/多块操作、资源回收及总用时 | P2/P5；K04 |
-| X04 | 完成码、失败退出、部分结果、缺失能力 | P/U：现有 typed 错误不等于 CLI 错误；逐命令比输出/退出/继续或中止，未知/OEM 完成码也覆盖 | P2–P6 |
-| X05 | 文本、数字、时间、二进制导出 | P/D：通电分钟精确 API 与参考 float 显示有差异；已有测试做字段归一化；扩展到编码、厂商名、单位/精度、排序、空记录与 locale/DST，保留差异不跳过 | P3；K08/K10 |
+| X04 | 完成码、失败退出、部分结果、缺失能力 | P/D：参考系统信息完成码错误仍零退出；现有 typed 错误不等于 CLI 错误；逐命令比输出/退出/继续或中止，未知/OEM 完成码也覆盖 | P2–P6 |
+| X05 | 文本、数字、时间、二进制导出 | P/D：GUID 时间及系统信息文本/长度有差异，通电分钟精确 API 与参考 float 显示有差异；扩展到编码、厂商名、单位/精度、排序、空记录与 locale/DST，保留差异不跳过 | P3；K08/K10 |
 | X06 | OEM 自动识别与 profiles [源码][oem] | N：supermicro/intelwv2/intelplus/icts/ibm/i82571spt/kontron/quanta；厂商/产品 ID 分支和 IBM 数据文件、PICMG/VITA 自动发现 | V；P2/P6 |
 | X07 | 配套文件/脚本与安装 [目录][contrib] | N：enterprise-numbers、OEM maps、manpages、ipmievd 服务、bmclanconf、bmc-snmp-proxy、exchange-bmc-os-info、collect/log/RRD/web 示例的调用契约；安装路径/权限/外部依赖 | F/R/W、shell/SNMP/RRD 隔离环境；P3–P7 |
 | X08 | 加密/驱动/运行依赖与构建变体 [配置][configure] | P/U：native/OpenSSL 3 不能代表 upstream 的 libcrypto/internal MD5、readline、FreeIPMI、libsystemd 组合；冻结支持/失败 profile | P1/P2/P7；K09 |
 | X09 | CLI 信号、TTY、流水线/重定向、批处理 | N：SIGINT/EOF、broken pipe、进程退出码、提示/历史/终端恢复和会话关闭 | T/F；P2/P5；K06 |
 | X10 | 文件读取安全/权限/符号链接/覆盖行为 | N：`ENABLE_FILE_SECURITY` 两种构建、缺失/不可读文件和长度/格式、缓存/脚本/镜像导入导出；上游缺陷另列阻塞 | F；P1/P3/P6；K09/K10 |
-| X11 | 分块、长度协商、仓库保留与变化 | P/D：现有 FRU 固定 16-byte、有界读取和 SEL 变化拒绝；验证参考自适应大小/重试/部分读取与总量行为 | P3；K04/K08 |
+| X11 | 分块、长度协商、仓库保留与变化 | P/D：系统信息边界/元数据检查有差异，现有 FRU 固定 16-byte、有界读取和 SEL 变化拒绝；验证参考自适应大小/重试/部分读取与总量行为 | P3；K04/K08 |
 | X12 | 平台/设备能力/角色组合 | U：目前仅两个平台的子集 CI；逐个 T 行与计划资源表实证，记录设备型号/固件/channel/角色；无资源不能 PASS | P7 |
 | X13 | 手册/help/源码差异与不稳定行为 | U：例如套件默认选择、HPM download、GUID 拼写、未展示子命令；P1 保存实际参考输出，逐个裁决，不把猜测写成能力 | P1；K10 |
 
@@ -146,6 +146,10 @@
 ## 已实现的管理状态读取
 
 [四个实际客户端 API](MANAGEMENT.md)补齐自检结果、全局使能、看门狗状态和累计通电计数。报告在 127 次执行中记录 56 项输出映射、8 项完成码错误映射、11 项仅 moonipmi 的长度检查及 1 项显示精度差异。`C05.poh.unit-1-count-16777217` 保留准确原始/API 分钟值，参考显示少一分钟（K10 待决定）；自检映射保留 MC/机箱的不同输出与退出码。C05/C08 仍为部分实现，不宣称完整 CLI、默认值、权限或硬件一致。
+
+## 已实现的 GUID 与系统信息读取
+
+[另外两个客户端 API](IDENTITY.md)覆盖 GUID 模式及六项命名字符串。本地 180 次执行形成 94 个叶项：62 项输出映射、5 项拒绝映射、8 项本库边界及 19 项明确差异。报告保留 GUID uint32/SEL 时间显示、系统信息 char 符号性/编码/零字节/填充、坏块接受、完成码错误零退出及部分输出差异。C08 和 X04/X05/X11 仍为部分实现/有差异，K08/K10 待裁决；现有 POH 精度及认证默认值不变。
 
 ## 后续叶用例示例 / Reviewable test records
 

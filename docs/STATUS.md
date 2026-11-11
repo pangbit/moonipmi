@@ -31,15 +31,30 @@ validation or publication is claimed.
 ## Management reads / 管理状态读取
 
 The current source also implements `self_test`, `global_enables`, `watchdog_timer`
-and `power_on_hours`. Local native tests now total 46 groups. The new checker
+and `power_on_hours`. That batch passed 46 native test groups. The new checker
 records 56 output projections, eight completion-error projections, 11 moon-only
 length boundaries and one POH display-precision difference across 127 executions.
 See [API semantics and evidence](MANAGEMENT.md). These actual read-only APIs do
 not add a compatible CLI, controls or real-device evidence.
 
-当前源码还实现四个管理状态读取 API；本地原生测试增至 46 组。新检查在 127 次执行中记录
+当前源码还实现四个管理状态读取 API；该批次通过 46 组原生测试。新检查在 127 次执行中记录
 56 项输出映射、8 项完成码错误映射、11 项仅 moonipmi 的长度边界及 1 项通电计数显示精度差异。
 语义与证据见 [管理状态读取](MANAGEMENT.md)；尚无兼容 CLI、控制功能或实机证据。
+
+## GUID and System Info reads / GUID 与系统信息读取
+
+The next batch implements `device_guid` and `system_info` for six named strings.
+Local native tests total 50 groups; 180 actual-client executions record 94 leaves:
+62 output projections, 5 rejection projections, 8 moon-only boundaries and 19
+retained differences. See [identity API semantics and evidence](IDENTITY.md).
+GUID time display and System Info length/text/validation/error-exit behavior
+remain divergent. Authentication defaults and exact POH values are unchanged;
+CLI policy remains open. No full-family parity or real-device evidence is claimed.
+
+本批新增 GUID 与六项系统信息实际客户端读取，原生测试共 50 组；180 次实际客户端执行记录
+94 个叶项：62 项输出映射、5 项拒绝映射、8 项本库边界及 19 项保留差异。
+详见[身份信息 API 与证据](IDENTITY.md)。GUID 时间显示和系统信息长度/文本/校验/错误退出
+仍有差异；认证默认值及通电计数精度不变，CLI 规则待统一裁决，不宣称完整功能族或实机一致。
 
 ## Full-parity work / 完整对齐工作
 

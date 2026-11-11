@@ -85,8 +85,8 @@ Local checks passed 46 native test groups. The new independent synthetic fixture
 
 本地通过 46 组原生测试。新独立模拟器让两个实际客户端分别读取相同初始输入。**127 次执行**记录 **56 项成功输出映射、8 项完成码错误映射、11 项仅 moonipmi 的长度边界、1 项保留的显示差异**。覆盖自检全部标准错误位和参考结果类别、使能各位、看门狗全部用途/动作/中断值及状态/计数边界、通电倍率/无符号数及精度差异。
 
-The report records binary/profile identities, exact argv/stdout/stderr/exit codes, typed values and request/response traces. It requires one requested read per invocation and an allowlist that excludes control commands. Both CI platforms run the checker and retain its report. These are typed API/output projections; neither a family-level PASS nor a compatible CLI is claimed. GUID/system-info reads and management controls are still missing from the MC family.
+The report records binary/profile identities, exact argv/stdout/stderr/exit codes, typed values and request/response traces. It requires one requested read per invocation and an allowlist that excludes control commands. Both CI platforms run the checker and retain its report. These are typed API/output projections; neither a family-level PASS nor a compatible CLI is claimed. The subsequent [identity-read batch](IDENTITY.md) adds GUID and six System Info strings with retained differences; management controls and the full CLI are still missing.
 
-报告保留构建身份、完整调用/输出/退出码、类型化值和请求/响应 trace，并断言每次只发一次目标读取、禁止控制命令。两个 CI 平台均执行并保留报告。这些是类型化 API/输出映射，不是完整功能族或 CLI 一致证明；MC 的 GUID、系统信息读取及控制功能仍缺失。
+报告保留构建身份、完整调用/输出/退出码、类型化值和请求/响应 trace，并断言每次只发一次目标读取、禁止控制命令。两个 CI 平台均执行并保留报告。这些是类型化 API/输出映射，不是完整功能族或 CLI 一致证明；后续[身份信息批次](IDENTITY.md)已新增 GUID 和六项系统信息读取并保留差异，控制及完整 CLI 仍缺失。
 
 Pinned sources: [MC reads](https://github.com/ipmitool/ipmitool/blob/19d78782d795d0cf4ceefe655f616210c9143e62/lib/ipmi_mc.c), [wire definitions](https://github.com/ipmitool/ipmitool/blob/19d78782d795d0cf4ceefe655f616210c9143e62/include/ipmitool/ipmi_mc.h), [chassis self-test/POH](https://github.com/ipmitool/ipmitool/blob/19d78782d795d0cf4ceefe655f616210c9143e62/lib/ipmi_chassis.c).

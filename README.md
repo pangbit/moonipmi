@@ -24,13 +24,15 @@ Use only on explicitly authorised systems and isolated management networks.
 - Typed Device ID, Chassis Status and raw Sensor Reading commands.
 - Stored self-test results, global enables, watchdog status and the power-on counter,
   with exact countdown/counter units. See [management reads](docs/MANAGEMENT.md).
+- Device GUID with explicit/automatic encoding and bounded reads of six System Info strings.
+  Raw data and known reference differences are retained; see [identity reads](docs/IDENTITY.md).
 - Chassis capabilities/restart cause, bounded basic FRU inventory and SEL records,
   SEL info accepts reference version bytes `0x51` and `0x02`; known restart descriptions match ipmitool 1.8.19.
   Reads have total size/count and whole-operation deadlines. See [diagnostics](docs/DIAGNOSTICS.md).
 - Bounded SDR repository traversal, Full/Compact Sensor records, common linear
   engineering values, threshold/discrete states and units. See [SDR support](docs/SDR.md).
 
-No hardware-control writes, generic network command API, OEM/SOL, FRU writes or SEL mutation,
+No hardware-control writes, generic network command API, general OEM command families/SOL, FRU writes or SEL mutation,
 Device SDRs, bridging, IPMI 1.5, cipher negotiation, Kg override or automatic
 reconnection. Session housekeeping and SDR reservations do not change hardware
 configuration. Nonlinear/OEM conversion and shared Compact expansion are explicitly
